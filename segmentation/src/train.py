@@ -41,9 +41,10 @@ def parse_args():
     return args
 
 def main():
+    # set config =======================================================================================================
     args = parse_args()
 
-    config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640.py'
+    config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     amp = True
     if args.cfg_options is None:
         cfg_options = {'load_from': '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth',
@@ -71,6 +72,55 @@ def main():
             cfg.optim_wrapper.type = 'AmpOptimWrapper'
             cfg.optim_wrapper.loss_scale = 'dynamic'
 
+    # ================================================================================================================
+
+    # set crop-size/model-size =================================================================================
+    height = 512
+    width = 512
+    new_crop_size = (height, width)
+    cfg.crop_size = new_crop_size 
+    cfg.data_preprocessor.size = new_crop_size
+    cfg.model.data_preprocessor = cfg.data_preprocessor
+    if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
+        for pipeline in cfg.train_pipeline:
+            if pipeline.get('type') == 'RandomCrop':
+                pipeline['crop_size'] = tuple(new_crop_size)
+
+    if 'val_pipeline' in cfg and isinstance(cfg.val_pipeline, list):
+        for pipeline in cfg.val_pipeline:
+            if pipeline.get('type') == 'RandomCrop':
+                pipeline['crop_size'] = tuple(new_crop_size)
+    # =============================================================================================================
+    
+    num_classes = 150
+    # set num_classes =================================================================================
+    cfg.num_classes = num_classes 
+    if 'model' in cfg:
+        if cfg.model.get('type') == 'EncoderDecoder':
+            if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                cfg.model.decode_head.num_classes = num_classes
+            if 'loss_cls' in cfg.model and 'num_classes' in cfg.model.loss_dict:
+                cfg.model.loss_dict.loss_weight = [1.0] * num_classes + [0.1]
+    # =============================================================================================================
+    
+    max_iters = 160 
+    val_interval = 50
+    checkpoint_interval = 50
+    # set num_classes =================================================================================
+    if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
+        cfg.train_cfg.max_iters = max_iters
+        cfg.train_cfg.val_interval = val_interval
+        
+    if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
+        for scheduler in cfg.param_scheduler:
+            if scheduler.get('type') == 'PolyLR':
+                scheduler['end'] = max_iters
+        
+    
+    if 'checkpoint' in cfg.default_hooks:
+        cfg.default_hooks.checkpoint.interval = checkpoint_interval
+    # =============================================================================================================
+    
     if 'runner_type' not in cfg:
         # build the default runner
         runner = Runner.from_cfg(cfg)
