@@ -8,6 +8,7 @@ from mmengine.logging import print_log
 from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
+from segmentation.src.datasets.mask_dataset import MaskDataset
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -44,13 +45,14 @@ def main():
     # set config =======================================================================================================
     args = parse_args()
 
+    output_dir = '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
     config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     amp = True
     if args.cfg_options is None:
         cfg_options = {'load_from': '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth',
                    'launcher': args.launcher, 
                    'resume': False,
-                   'work_dir': '/HDD/datasets/projects/LX/24.12.12/outputs/mm'
+                   'work_dir': output_dir
             }
     else:
         cfg_options = args.cfg_options
@@ -75,8 +77,8 @@ def main():
     # ================================================================================================================
 
     # set crop-size/model-size =================================================================================
-    height = 512
-    width = 512
+    height = 640
+    width = 640
     new_crop_size = (height, width)
     cfg.crop_size = new_crop_size 
     cfg.data_preprocessor.size = new_crop_size
@@ -85,28 +87,39 @@ def main():
         for pipeline in cfg.train_pipeline:
             if pipeline.get('type') == 'RandomCrop':
                 pipeline['crop_size'] = tuple(new_crop_size)
+                
+                
+            if cfg.dataset_type == 'MaskDataset':
+                if pipeline.get('type') == 'LoadAnnotations':
+                    pipeline['reduce_zero_label'] = True
 
-    if 'val_pipeline' in cfg and isinstance(cfg.val_pipeline, list):
-        for pipeline in cfg.val_pipeline:
+    if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
+        for pipeline in cfg.test_pipeline:
             if pipeline.get('type') == 'RandomCrop':
                 pipeline['crop_size'] = tuple(new_crop_size)
+                
+            if cfg.dataset_type == 'MaskDataset':
+                if pipeline.get('type') == 'LoadAnnotations':
+                    pipeline['reduce_zero_label'] = True
+
+    cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
+    cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline
     # =============================================================================================================
     
-    num_classes = 150
+    num_classes = 2
     # set num_classes =================================================================================
     cfg.num_classes = num_classes 
     if 'model' in cfg:
         if cfg.model.get('type') == 'EncoderDecoder':
             if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
                 cfg.model.decode_head.num_classes = num_classes
-            if 'loss_cls' in cfg.model and 'num_classes' in cfg.model.loss_dict:
-                cfg.model.loss_dict.loss_weight = [1.0] * num_classes + [0.1]
+                cfg.model.decode_head.loss_cls.class_weight = [1.0] * num_classes + [0.1]
     # =============================================================================================================
     
-    max_iters = 160 
-    val_interval = 50
-    checkpoint_interval = 50
-    # set num_classes =================================================================================
+    max_iters = 40000
+    val_interval = 500
+    checkpoint_interval = 500
+    # set interval =================================================================================
     if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
         cfg.train_cfg.max_iters = max_iters
         cfg.train_cfg.val_interval = val_interval
@@ -120,6 +133,28 @@ def main():
     if 'checkpoint' in cfg.default_hooks:
         cfg.default_hooks.checkpoint.interval = checkpoint_interval
     # =============================================================================================================
+    
+    data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
+    img_suffix='.png'
+    seg_map_suffix='.png'
+    # classes=('background', 'timber', 'screw')
+    classes=('timber', 'screw')
+    batch_size = 1
+    # set dataset ====================================================================================================
+    cfg.train_dataloader.batch_size = batch_size
+    cfg.train_dataloader.dataset['data_root'] = data_root
+    cfg.train_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
+    cfg.train_dataloader.dataset['classes'] = classes
+    cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+    
+    cfg.val_dataloader.batch_size = batch_size
+    cfg.val_dataloader.dataset['data_root'] = data_root
+    cfg.val_dataloader.dataset['classes'] = classes
+    cfg.val_dataloader.dataset['img_suffix'] = img_suffix
+    cfg.val_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
+    
+    
+    # ================================================================================================================
     
     if 'runner_type' not in cfg:
         # build the default runner

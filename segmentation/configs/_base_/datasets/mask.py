@@ -1,12 +1,12 @@
 # dataset settings
 dataset_type = "MaskDataset"
-data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
+data_root = None
 
 width = 640
 height = 640
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', reduce_zero_label=False),
+    dict(type='LoadAnnotations', reduce_zero_label=True),
     dict(
         type='RandomResize',
         scale=(2048, 512),
@@ -22,7 +22,7 @@ test_pipeline = [
     dict(type='Resize', scale=(height, width), keep_ratio=True),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
-    dict(type='LoadAnnotations', reduce_zero_label=False),
+    dict(type='LoadAnnotations', reduce_zero_label=True),
     dict(type='PackSegInputs')
 ]
 # img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
@@ -48,9 +48,9 @@ train_dataloader = dict(
     sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type=dataset_type,
-        data_root=data_root,
+        data_root=None,
         data_prefix=dict(img_path='train/images', seg_map_path='train/masks'),
-        classes=('background', 'timber', 'screw'),
+        classes=None,
         img_suffix='.png',
         seg_map_suffix='.png',
         pipeline=train_pipeline))
@@ -61,9 +61,9 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
-        data_root=data_root,
+        data_root=None,
         data_prefix=dict(img_path='val/images', seg_map_path='val/masks'),
-        classes=('background', 'timber', 'screw'),
+        classes=None,
         img_suffix='.png',
         seg_map_suffix='.png',
         pipeline=test_pipeline))

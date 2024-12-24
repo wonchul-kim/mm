@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/default_runtime.py', '../../_base_/datasets/ade20k_640x640.py'
+    '../../_base_/default_runtime.py', '../../_base_/datasets/mask.py'
 ]
 
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_base_patch4_window12_384_20220317-55b0104a.pth'  # noqa
