@@ -57,7 +57,6 @@ def main():
     cfg = Config.fromfile(config_file)
     cfg.merge_from_dict(cfg_options)
     
-    # enable automatic-mixed-precision training
     if amp is True:
         optim_wrapper = cfg.optim_wrapper.type
         if optim_wrapper == 'AmpOptimWrapper':
