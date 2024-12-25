@@ -1,4 +1,17 @@
-_palette=[[120, 120, 120], [180, 120, 120], [6, 230, 230], [80, 50, 50],
+from mmseg.registry import DATASETS
+from mmseg.datasets.basesegdataset import BaseSegDataset
+
+
+@DATASETS.register_module()
+class LabelmeDataset(BaseSegDataset):
+    """
+    In segmentation map annotation for MaskDataset, 0 stands for background, which
+    is not included in defined categories. ``reduce_zero_label`` is fixed to True.
+    The ``img_suffix`` is fixed to '.jpg' and ``seg_map_suffix`` is fixed to
+    '.png'.
+    """
+    METAINFO = dict()
+    _palette=[[120, 120, 120], [180, 120, 120], [6, 230, 230], [80, 50, 50],
                  [4, 200, 3], [120, 120, 80], [140, 140, 140], [204, 5, 255],
                  [230, 230, 230], [4, 250, 7], [224, 5, 255], [235, 255, 7],
                  [150, 5, 61], [120, 120, 70], [8, 255, 51], [255, 6, 82],
@@ -36,3 +49,20 @@ _palette=[[120, 120, 120], [180, 120, 120], [6, 230, 230], [80, 50, 50],
                  [71, 0, 255], [122, 0, 255], [0, 255, 184], [0, 92, 255],
                  [184, 255, 0], [0, 133, 255], [255, 214, 0], [25, 194, 194],
                  [102, 255, 0], [92, 0, 255]]
+
+    def __init__(self,
+                 classes, 
+                 img_suffix='.bmp',
+                 seg_map_suffix='.bmp',
+                 reduce_zero_label=True,
+                 **kwargs) -> None:
+        
+        self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
+        self.CLASSES = tuple(classes)
+        self.PALETTE = self._palette[:len(tuple(classes))]
+        
+        super().__init__(
+            img_suffix=img_suffix,
+            seg_map_suffix=seg_map_suffix,
+            reduce_zero_label=reduce_zero_label,
+            **kwargs)

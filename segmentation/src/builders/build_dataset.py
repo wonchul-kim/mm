@@ -1,0 +1,30 @@
+
+from mmengine.config import Config
+from mmseg.registry import DATASETS
+import segmentation.src
+
+
+if __name__ == '__main__':
+    from pathlib import Path 
+    FILE = Path(__file__).resolve()
+    ROOT = FILE.parents[2]
+
+    cfg = Config.fromfile(ROOT / 'configs/_base_/datasets/labelme.py')
+    
+    
+    data_root = "/HDD/datasets/projects/interojo/split_datasets"
+    img_suffix='.png'
+    classes=('BUBBLE', 'DUST', 'DAMAGE', 'EDGE', 'OVERLAP', 'RING', 'LINE')
+    batch_size = 1
+    # set dataset ====================================================================================================
+    cfg.train_dataloader.batch_size = batch_size
+    cfg.train_dataloader.dataset['data_root'] = data_root
+    cfg.train_dataloader.dataset['classes'] = classes
+    cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+    
+    cfg.val_dataloader.batch_size = batch_size
+    cfg.val_dataloader.dataset['data_root'] = data_root
+    cfg.val_dataloader.dataset['classes'] = classes
+    cfg.val_dataloader.dataset['img_suffix'] = img_suffix
+
+    dataset = DATASETS.build(cfg.train_dataloader.dataset)
