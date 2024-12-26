@@ -57,7 +57,7 @@ class LabelmeDataset(BaseSegDataset):
     def __init__(self,
                  classes, 
                  img_suffix='.bmp',
-                 seg_map_suffix='.bmp',
+                 seg_map_suffix='.json',
                  reduce_zero_label=True,
                  **kwargs) -> None:
         
@@ -70,6 +70,7 @@ class LabelmeDataset(BaseSegDataset):
             seg_map_suffix=seg_map_suffix,
             reduce_zero_label=reduce_zero_label,
             **kwargs)
+        
         
     def load_data_list(self) -> List[dict]:
         """Load annotation from directory or annotation file.
@@ -172,16 +173,8 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
 @TRANSFORMS.register_module()
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
-        """Private function to load semantic segmentation annotations.
 
-        Args:
-            results (dict): Result dict from :obj:``mmcv.BaseDataset``.
-
-        Returns:
-            dict: The dict contains loaded semantic segmentation annotations.
-        """
-
-        gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], width=1024, height=1024, format='opencv',
+        gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], width=results['ori_shape'][1], height=results['ori_shape'][0], format='opencv',
                                     class2label={key: val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
