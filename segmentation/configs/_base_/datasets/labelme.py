@@ -5,7 +5,8 @@ width = 640
 height = 640
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', reduce_zero_label=True),
+    # dict(type='LoadAnnotations', reduce_zero_label=True),
+    dict(type='LoadLabelmeAnnotations', reduce_zero_label=True),
     dict(
         type='RandomResize',
         scale=(2048, 512),
@@ -21,7 +22,8 @@ test_pipeline = [
     dict(type='Resize', scale=(height, width), keep_ratio=True),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
-    dict(type='LoadAnnotations', reduce_zero_label=True),
+    # dict(type='LoadAnnotations', reduce_zero_label=True),
+    dict(type='LoadLabelmeAnnotations', reduce_zero_label=True),
     dict(type='PackSegInputs')
 ]
 # img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
@@ -48,7 +50,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=None,
-        data_prefix=dict(img_path='train/images', seg_map_path='train/masks'),
+        data_prefix=dict(img_path='train', seg_map_path='train'),
         classes=None,
         img_suffix='.png',
         seg_map_suffix='.png',
@@ -61,7 +63,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=None,
-        data_prefix=dict(img_path='val/images', seg_map_path='val/masks'),
+        data_prefix=dict(img_path='val', seg_map_path='val'),
         classes=None,
         img_suffix='.png',
         seg_map_suffix='.png',

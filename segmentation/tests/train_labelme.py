@@ -55,7 +55,7 @@ def add_params_to_args(args, params_file):
 def main():
     # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/mask.yaml')
+    add_params_to_args(args, ROOT / 'params/labelme.yaml')
 
     config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     config_manager = ConfigManager()

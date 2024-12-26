@@ -1,8 +1,8 @@
-output_dir: '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
-amp: True
-load_from: '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth'
-resume: False
 config_file: ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+amp: True
+resume: False
+output_dir: '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
+load_from: '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth'
 
 # set crop-size/model-size =================================================================================
 height: 640
