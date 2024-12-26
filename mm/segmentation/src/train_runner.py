@@ -2,20 +2,19 @@ import argparse
 import logging
 import os
 import os.path as osp
-import yaml
 
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
-from segmentation.src.datasets.mask_dataset import MaskDataset
-from segmentation.utils.config import ConfigManager
-from segmentation.src.runners import RunnerV1
+from mm.segmentation.src.datasets.mask_dataset import MaskDataset
+from mm.segmentation.utils.config import ConfigManager
+from mm.segmentation.src.runners import RunnerV1
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parent
+ROOT = FILE.parents[2]
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
@@ -44,35 +43,53 @@ def parse_args():
 
     return args
 
-def add_params_to_args(args, params_file):
-    with open(params_file) as yf:
-        params = yaml.load(yf, Loader=yaml.FullLoader)
-
-    for key, value in params.items():
-        setattr(args, key, value)
-
-
 def main():
     # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/mask.yaml')
 
-    config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+    args.output_dir = '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
+    args.amp = True
+    args.load_from = '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth'
+    args.resume = False
+    config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     config_manager = ConfigManager()
     config_manager.build(args, config_file)
-    config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
-    cfg = config_manager.cfg
 
+    # set crop-size/model-size =================================================================================
+    height = 640
+    width = 640
+    new_crop_size = (height, width)
+    num_classes = 2
+    max_iters = 40000
+    val_interval = 100
+    checkpoint_interval = 500
+    data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
+    img_suffix='.png'
+    seg_map_suffix='.png'
+    classes = ('timber', 'screw')
+    batch_size = 1
+    config_manager.manage_model_config(num_classes, new_crop_size)
+    config_manager.manage_schedule_config(max_iters, val_interval, checkpoint_interval)
+    config_manager.manage_dataset_config(data_root, img_suffix, seg_map_suffix, classes, batch_size, new_crop_size)
+    
+    
+    cfg = config_manager.cfg
     # ================================================================================================================
     if 'runner_type' not in cfg:
+        # build the default runner
+        # runner = Runner.from_cfg(cfg)
         runner = RunnerV1.from_cfg(cfg)
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    # vis_dataloader = True
+    # if vis_dataloader:
+    #     from mm.segmentation.utils.visualizers import vis_dataloader
+    #     dataloader = runner.build_dataloader(cfg.train_dataloader)
+    #     vis_dataloader(dataloader)
+    
     # start training
     runner.train()
 

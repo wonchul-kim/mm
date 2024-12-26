@@ -15,7 +15,7 @@ class RunnerV1(Runner):
         
         vis_dataloader = True
         if vis_dataloader:
-            from segmentation.utils.visualizers import vis_dataloader
+            from mm.segmentation.utils.visualizers import vis_dataloader
             
             if 'train' in dataloader.dataset.data_prefix['img_path']:
                 mode = 'train'

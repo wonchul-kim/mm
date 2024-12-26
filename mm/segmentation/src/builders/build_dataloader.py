@@ -3,7 +3,7 @@ from mmengine.config import Config
 from torch.utils.data import DataLoader
 import copy
 from mmseg.registry import DATASETS
-import segmentation.src
+import mm.segmentation.src
 
 def build_dataloader(dataloader):
     if isinstance(dataloader, DataLoader):

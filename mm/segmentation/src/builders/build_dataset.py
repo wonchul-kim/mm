@@ -1,7 +1,7 @@
 
 from mmengine.config import Config
 from mmseg.registry import DATASETS
-import segmentation.src
+import mm.segmentation.src
 
 
 if __name__ == '__main__':

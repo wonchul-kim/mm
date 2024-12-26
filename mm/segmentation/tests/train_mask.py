@@ -9,9 +9,9 @@ from mmengine.logging import print_log
 from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
-from segmentation.src.datasets.mask_dataset import MaskDataset
-from segmentation.utils.config import ConfigManager
-from segmentation.src.runners import RunnerV1
+from mm.segmentation.src.datasets.mask_dataset import MaskDataset
+from mm.segmentation.utils.config import ConfigManager
+from mm.segmentation.src.runners import RunnerV1
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -55,7 +55,7 @@ def add_params_to_args(args, params_file):
 def main():
     # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/labelme.yaml')
+    add_params_to_args(args, ROOT / 'params/mask.yaml')
 
     config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     config_manager = ConfigManager()
