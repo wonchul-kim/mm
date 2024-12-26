@@ -182,7 +182,7 @@ class LoadLabelmeAnnotations(LoadAnnotations):
         """
 
         gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], width=1024, height=1024, format='opencv',
-                                                class2label={key: val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
+                                    class2label={key: val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
             self.reduce_zero_label = results['reduce_zero_label']
