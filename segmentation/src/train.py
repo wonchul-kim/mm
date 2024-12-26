@@ -9,6 +9,7 @@ from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
 from segmentation.src.datasets.mask_dataset import MaskDataset
+from segmentation.utils.config import ConfigManager
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -80,82 +81,22 @@ def main():
     height = 640
     width = 640
     new_crop_size = (height, width)
-    cfg.crop_size = new_crop_size 
-    cfg.data_preprocessor.size = new_crop_size
-    cfg.model.data_preprocessor = cfg.data_preprocessor
-    if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
-        for pipeline in cfg.train_pipeline:
-            if pipeline.get('type') == 'RandomCrop':
-                pipeline['crop_size'] = tuple(new_crop_size)
-                
-                
-            if cfg.dataset_type == 'MaskDataset':
-                if pipeline.get('type') == 'LoadAnnotations':
-                    pipeline['reduce_zero_label'] = True
-
-    if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
-        for pipeline in cfg.test_pipeline:
-            if pipeline.get('type') == 'RandomCrop':
-                pipeline['crop_size'] = tuple(new_crop_size)
-                
-            if cfg.dataset_type == 'MaskDataset':
-                if pipeline.get('type') == 'LoadAnnotations':
-                    pipeline['reduce_zero_label'] = True
-
-    cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
-    cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline
-    # =============================================================================================================
-    
     num_classes = 2
-    # set num_classes =================================================================================
-    cfg.num_classes = num_classes 
-    if 'model' in cfg:
-        if cfg.model.get('type') == 'EncoderDecoder':
-            if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
-                cfg.model.decode_head.num_classes = num_classes
-                cfg.model.decode_head.loss_cls.class_weight = [1.0] * num_classes + [0.1]
-    # =============================================================================================================
-    
     max_iters = 40000
     val_interval = 500
     checkpoint_interval = 500
-    # set interval =================================================================================
-    if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
-        cfg.train_cfg.max_iters = max_iters
-        cfg.train_cfg.val_interval = val_interval
-        
-    if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
-        for scheduler in cfg.param_scheduler:
-            if scheduler.get('type') == 'PolyLR':
-                scheduler['end'] = max_iters
-        
-    
-    if 'checkpoint' in cfg.default_hooks:
-        cfg.default_hooks.checkpoint.interval = checkpoint_interval
-    # =============================================================================================================
-    
     data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
     img_suffix='.png'
     seg_map_suffix='.png'
-    # classes=('background', 'timber', 'screw')
-    classes=('timber', 'screw')
+    classes = ('timber', 'screw')
     batch_size = 1
-    # set dataset ====================================================================================================
-    cfg.train_dataloader.batch_size = batch_size
-    cfg.train_dataloader.dataset['data_root'] = data_root
-    cfg.train_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
-    cfg.train_dataloader.dataset['classes'] = classes
-    cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+    config_manager = ConfigManager(cfg)
+    config_manager.manage_model_config(num_classes, new_crop_size)
+    config_manager.manage_schedule_config(max_iters, val_interval, checkpoint_interval)
+    config_manager.manage_dataset_config(data_root, img_suffix, seg_map_suffix, classes, batch_size, new_crop_size)
     
-    cfg.val_dataloader.batch_size = batch_size
-    cfg.val_dataloader.dataset['data_root'] = data_root
-    cfg.val_dataloader.dataset['classes'] = classes
-    cfg.val_dataloader.dataset['img_suffix'] = img_suffix
-    cfg.val_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
-    
-    
+    # cfg = config_manager.cfg
     # ================================================================================================================
-    
     if 'runner_type' not in cfg:
         # build the default runner
         runner = Runner.from_cfg(cfg)
@@ -164,6 +105,17 @@ def main():
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
+    # vis_dataloader = True
+    # if vis_dataloader:
+    #     from segmentation.utils.visualizers import vis_dataloader
+    #     dataloader = runner.build_dataloader(cfg.train_dataloader)
+    #     vis_dataloader(dataloader)
+    
+    # from segmentation.src.builders.build_dataloader import build_dataloader
+    # dataloader = build_dataloader(cfg.train_dataloader)
+    # vis_dataloader(dataloader)
+    
+    
     # start training
     runner.train()
 
