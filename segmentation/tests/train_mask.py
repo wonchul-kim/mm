@@ -60,14 +60,11 @@ def main():
     config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     config_manager = ConfigManager()
     config_manager.build(args, config_file)
-
-    # set crop-size/model-size =================================================================================
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
     config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
-    
-    
     cfg = config_manager.cfg
+
     # ================================================================================================================
     if 'runner_type' not in cfg:
         runner = RunnerV1.from_cfg(cfg)
