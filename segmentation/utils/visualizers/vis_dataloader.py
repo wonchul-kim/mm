@@ -1,12 +1,18 @@
 import cv2
 import numpy as np
 import imgviz
+import os
 import os.path as osp
 
 
-def vis_dataloader(dataloader, output_dir='/HDD/etc/outputs/mm'):
+def vis_dataloader(dataloader, mode, output_dir='/HDD/etc/outputs/mm'):
     color_map = imgviz.label_colormap(50)
     cnt, done = 0, False
+    
+    output_dir = osp.join(output_dir, mode)
+    if not osp.exists(output_dir):
+        os.mkdir(output_dir)
+    
     for batch in dataloader:
         inputs = batch['inputs'] # list of tensors
         batch_size = len(inputs)
@@ -31,6 +37,10 @@ def vis_dataloader(dataloader, output_dir='/HDD/etc/outputs/mm'):
             
             vis_img = np.zeros((height, width*2, channel))
             vis_img[:, :width, :] = _input 
+            
+            if _input.shape[:2] != gt_sem_seg.shape[:2]:
+                gt_sem_seg = cv2.resize(gt_sem_seg.astype(np.uint8), _input.shape[:2])
+            
             vis_img[:, width:, :] = cv2.addWeighted(_input, 0.4, color_map[gt_sem_seg], 0.6, 0)
             cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
             

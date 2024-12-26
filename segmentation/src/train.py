@@ -10,6 +10,7 @@ from mmengine.runner import Runner
 from mmseg.registry import RUNNERS
 from segmentation.src.datasets.mask_dataset import MaskDataset
 from segmentation.utils.config import ConfigManager
+from segmentation.src.runners import RunnerV1
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -83,7 +84,7 @@ def main():
     new_crop_size = (height, width)
     num_classes = 2
     max_iters = 40000
-    val_interval = 500
+    val_interval = 100
     checkpoint_interval = 500
     data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
     img_suffix='.png'
@@ -95,11 +96,11 @@ def main():
     config_manager.manage_schedule_config(max_iters, val_interval, checkpoint_interval)
     config_manager.manage_dataset_config(data_root, img_suffix, seg_map_suffix, classes, batch_size, new_crop_size)
     
-    # cfg = config_manager.cfg
     # ================================================================================================================
     if 'runner_type' not in cfg:
         # build the default runner
-        runner = Runner.from_cfg(cfg)
+        # runner = Runner.from_cfg(cfg)
+        runner = RunnerV1.from_cfg(cfg)
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
@@ -110,11 +111,6 @@ def main():
     #     from segmentation.utils.visualizers import vis_dataloader
     #     dataloader = runner.build_dataloader(cfg.train_dataloader)
     #     vis_dataloader(dataloader)
-    
-    # from segmentation.src.builders.build_dataloader import build_dataloader
-    # dataloader = build_dataloader(cfg.train_dataloader)
-    # vis_dataloader(dataloader)
-    
     
     # start training
     runner.train()
