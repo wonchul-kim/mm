@@ -1,5 +1,6 @@
 
 from mmengine.config import Config
+import os.path as osp
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -117,8 +118,8 @@ class TrainConfigManager:
                         
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
                 for pipeline in cfg.test_pipeline:
-                    if pipeline.get('type') == 'RandomCrop':
-                        pipeline['crop_size'] = tuple(new_crop_size)
+                    if pipeline.get('type') == 'Resize':
+                        pipeline['scale'] = tuple(new_crop_size)
                         
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
@@ -150,3 +151,17 @@ class TrainConfigManager:
 
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
+        
+        
+    # set dataloader ==================================================================================
+    def manage_dataloader_config(self, vis_dataloader_ratio):
+        def _manage_train_dataloader(cfg):
+            cfg.train_dataloader.vis_dataloader_ratio = vis_dataloader_ratio
+            cfg.train_dataloader.vis_dir = osp.join(cfg.work_dir, 'dataloader')
+        
+        def _manage_val_dataloader(cfg):
+            cfg.val_dataloader.vis_dataloader_ratio = vis_dataloader_ratio
+            cfg.val_dataloader.vis_dir = osp.join(cfg.work_dir, 'dataloader')
+        
+        _manage_train_dataloader(self._cfg)
+        _manage_val_dataloader(self._cfg)

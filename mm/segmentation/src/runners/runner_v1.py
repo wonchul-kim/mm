@@ -10,11 +10,13 @@ class RunnerV1(Runner):
                          seed: Optional[int] = None,
                          diff_rank_seed: bool = False) -> DataLoader:
         
+        vis_dataloader_ratio = dataloader.vis_dataloader_ratio
+        vis_dir = dataloader.vis_dir 
+        del dataloader.vis_dataloader_ratio
+        del dataloader.vis_dir
+        
         data_loader = super().build_dataloader(dataloader, seed, diff_rank_seed)
-        
-        
-        vis_dataloader = True
-        if vis_dataloader:
+        if vis_dataloader_ratio:
             from mm.segmentation.utils.visualizers import vis_dataloader
             
             if 'train' in dataloader.dataset.data_prefix['img_path']:
@@ -27,6 +29,7 @@ class RunnerV1(Runner):
                 raise NotImplementedError(f'CANNOT tell model b/t train, val and test')
             
             # FIXME: any other way not to build ???
-            vis_dataloader(super().build_dataloader(dataloader, seed, diff_rank_seed), mode)
+            vis_dataloader(super().build_dataloader(dataloader, seed, diff_rank_seed), mode,
+                           ratio=vis_dataloader_ratio, output_dir=vis_dir)
         
         return data_loader

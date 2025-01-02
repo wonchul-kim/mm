@@ -106,3 +106,4 @@ class TestConfigManager:
 
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
+        
