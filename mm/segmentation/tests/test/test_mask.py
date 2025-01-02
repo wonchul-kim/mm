@@ -8,6 +8,8 @@ from mmengine.runner import Runner
 
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.config import TestConfigManager
+from mm.segmentation.utils.functions import add_params_to_args
+
 from pathlib import Path 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[2]
@@ -63,13 +65,6 @@ def trigger_visualization_hook(cfg, args):
 
     return cfg
 
-def add_params_to_args(args, params_file):
-    import yaml
-    with open(params_file) as yf:
-        params = yaml.load(yf, Loader=yaml.FullLoader)
-
-    for key, value in params.items():
-        setattr(args, key, value)
 
 def main():
     args = parse_args()

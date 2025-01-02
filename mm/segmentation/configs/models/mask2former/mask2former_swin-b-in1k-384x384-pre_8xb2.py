@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/default_runtime.py', '../../_base_/datasets/mask.py'
+    '../../_base_/default_runtime.py', '../../_base_/datasets/labelme.py'
 ]
 
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_base_patch4_window12_384_20220317-55b0104a.pth'  # noqa
@@ -152,8 +152,8 @@ model = dict(
 # dataset config
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', reduce_zero_label=True),
-    # dict(type='LoadLabelmeAnnotations', reduce_zero_label=True),
+    # dict(type='LoadAnnotations', reduce_zero_label=True),
+    dict(type='LoadLabelmeAnnotations', reduce_zero_label=True),
     dict(
         type='RandomChoiceResize',
         scales=[int(x * 0.1 * min(crop_size)) for x in range(5, 21)],

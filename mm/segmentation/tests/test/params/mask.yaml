@@ -20,4 +20,4 @@ batch_size: 1
 tta: False
 
 wait_time: 2
-show: True
+show: False
