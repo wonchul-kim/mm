@@ -1,5 +1,25 @@
+
 from mmengine.config import Config
 
+def create_custom_dataset(dataset_type):
+    import importlib.util
+    import os
+    
+    module_name = "mm"
+    spec = importlib.util.find_spec(module_name)
+
+    if spec is not None:
+        module_path = spec.origin
+        package_path = os.path.dirname(module_path)
+        print(f"The 'mm' package is installed at: {package_path}")
+    else:
+        print(f"The 'mm' package is not installed.")
+        
+    dataset_path = os.path.join(package_path, f'segmentation/configs/_base_/datasets/{dataset_type}.py')
+        
+    content = f"_base_ = ['{dataset_path}']"
+    with open('/tmp/custom_dataset.py', "w") as file:
+        file.write(content)
 
 class TrainConfigManager:
     _cls = None 
@@ -16,6 +36,10 @@ class TrainConfigManager:
     
     @classmethod
     def build_config(cls, args, config_file):
+        
+        if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
+            create_custom_dataset(args.dataset_type)
+        
         if args.cfg_options is None:
             cfg_options = {'load_from': args.load_from,
                     'launcher': args.launcher, 
@@ -85,11 +109,21 @@ class TrainConfigManager:
                     if pipeline.get('type') == 'RandomCrop':
                         pipeline['crop_size'] = tuple(new_crop_size)
                         
+                    
+                if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
+                    cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
+                else:
+                    cfg.train_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=True))
                         
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
                 for pipeline in cfg.test_pipeline:
                     if pipeline.get('type') == 'RandomCrop':
                         pipeline['crop_size'] = tuple(new_crop_size)
+                        
+                if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
+                    cfg.test_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
+                else:
+                    cfg.test_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=True))
                     
             cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
             cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline

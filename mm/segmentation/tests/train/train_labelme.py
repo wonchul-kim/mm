@@ -9,7 +9,7 @@ from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.config import ConfigManager
+from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
 from mm.segmentation.utils.functions import add_params_to_args
 
@@ -49,8 +49,8 @@ def main():
     args = parse_args()
     add_params_to_args(args, ROOT / 'params/labelme.yaml')
 
-    config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    config_manager = ConfigManager()
+    config_file = ROOT / '../../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+    config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
     config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)

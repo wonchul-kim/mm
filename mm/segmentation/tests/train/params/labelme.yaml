@@ -1,3 +1,4 @@
+dataset_type: labelme
 config_file: ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
 amp: True
 resume: False
@@ -11,7 +12,7 @@ num_classes: 3
 max_iters: 40000
 val_interval: 100
 checkpoint_interval: 500
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_patch_dataset_wo_pos
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_dataset_unit
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 # classes: 
