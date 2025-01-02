@@ -1,7 +1,7 @@
 from mmengine.config import Config
 
 
-class ConfigManager:
+class TrainConfigManager:
     _cls = None 
     
     def __init__(self, cfg=None):

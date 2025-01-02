@@ -1,24 +1,22 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
-import logging
 import os
 import os.path as osp
-import yaml
 
 from mmengine.config import Config, DictAction
-from mmengine.logging import print_log
 from mmengine.runner import Runner
 
-from mmseg.registry import RUNNERS
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.config import ConfigManager
-from mm.segmentation.src.runners import RunnerV1
-
+from mm.segmentation.utils.config import TestConfigManager
 from pathlib import Path 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parent
+ROOT = FILE.parents[2]
 
+
+# TODO: support fuse_conv_bn, visualization, and format_only
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train a segmentor')
+    parser = argparse.ArgumentParser(
+        description='MMSeg test (and eval) a model')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -44,37 +42,67 @@ def parse_args():
 
     return args
 
+
+def trigger_visualization_hook(cfg, args):
+    default_hooks = cfg.default_hooks
+    if 'visualization' in default_hooks:
+        visualization_hook = default_hooks['visualization']
+        # Turn on visualization
+        visualization_hook['draw'] = True
+        if args.show:
+            visualization_hook['show'] = True
+            visualization_hook['wait_time'] = args.wait_time
+        if cfg.show_dir:
+            visualizer = cfg.visualizer
+            visualizer['save_dir'] = cfg.show_dir
+    else:
+        raise RuntimeError(
+            'VisualizationHook must be included in default_hooks.'
+            'refer to usage '
+            '"visualization=dict(type=\'VisualizationHook\')"')
+
+    return cfg
+
 def add_params_to_args(args, params_file):
+    import yaml
     with open(params_file) as yf:
         params = yaml.load(yf, Loader=yaml.FullLoader)
 
     for key, value in params.items():
         setattr(args, key, value)
 
-
 def main():
-    # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/mask.yaml')
+    add_params_to_args(args, ROOT / 'tests/test/params/mask.yaml')
 
-    config_file = ROOT / '../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    config_manager = ConfigManager()
+    config_file = ROOT / 'configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+    config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+
     cfg = config_manager.cfg
 
-    # ================================================================================================================
-    if 'runner_type' not in cfg:
-        runner = RunnerV1.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
+    if args.show or cfg.show_dir:
+        cfg = trigger_visualization_hook(cfg, args)
 
-    # start training
-    runner.train()
+    if args.tta:
+        cfg.test_dataloader.dataset.pipeline = cfg.tta_pipeline
+        cfg.tta_model.module = cfg.model
+        cfg.model = cfg.tta_model
+
+    # add output_dir in metric
+    if args.out is not None:
+        cfg.test_evaluator['output_dir'] = args.out
+        cfg.test_evaluator['keep_results'] = True
+        
+    # build the runner from config
+    runner = Runner.from_cfg(cfg)
+
+    runner.model.to('cuda:1')
+
+    # start testing
+    runner.test()
 
 
 if __name__ == '__main__':

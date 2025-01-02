@@ -19,7 +19,7 @@ class TestConfigManager:
         if args.cfg_options is None:
             cfg_options = {'load_from': args.load_from,
                     'launcher': args.launcher, 
-                    'resume': args.resume,
+                    # 'resume': args.resume,
                     'work_dir': args.output_dir,
                     'show_dir': args.show_dir, 
                     'tta': args.tta,

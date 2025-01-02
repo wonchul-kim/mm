@@ -1,0 +1,23 @@
+config_file: ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+amp: True
+output_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/test
+show_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/test
+load_from: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k/best_mIoU_iter_300.pth
+
+# set crop-size/model-size =================================================================================
+height: 640
+width: 640
+num_classes: 2
+data_root: "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
+out: /HDD/datasets/projects/LX/24.12.12/outputs/mm/test_
+img_suffix: '.png'
+seg_map_suffix: '.png'
+classes: 
+  - timber
+  - screw
+batch_size: 1
+
+tta: False
+
+wait_time: 2
+show: True
