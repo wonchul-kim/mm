@@ -2,6 +2,8 @@ from mmengine.runner import Runner
 import copy 
 from typing import Callable, Dict, List, Optional, Sequence, Union
 from torch.utils.data import DataLoader
+from threading import Thread
+
 
 class RunnerV1(Runner):
     
@@ -29,7 +31,9 @@ class RunnerV1(Runner):
                 raise NotImplementedError(f'CANNOT tell model b/t train, val and test')
             
             # FIXME: any other way not to build ???
-            vis_dataloader(super().build_dataloader(dataloader, seed, diff_rank_seed), mode,
-                           ratio=vis_dataloader_ratio, output_dir=vis_dir)
+            # vis_dataloader(super().build_dataloader(dataloader, seed, diff_rank_seed), mode,
+            #                ratio=vis_dataloader_ratio, output_dir=vis_dir)
+            Thread(target=vis_dataloader, args=(super().build_dataloader(dataloader, seed, diff_rank_seed), mode,
+                                                vis_dataloader_ratio, vis_dir), daemon=True).start()
         
         return data_loader
