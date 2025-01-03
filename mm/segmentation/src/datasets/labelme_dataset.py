@@ -139,8 +139,7 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
     for label_idx in range(0, len(class2label.keys())):
         for shapes in anns['shapes']:
             shape_type = shapes['shape_type'].lower()
-            label = shapes['label']
-            # if label == list(class2label.keys())[label_idx] or label.upper() == list(class2label.keys())[label_idx] or label.lower() == list(class2label.keys())[label_idx]:
+            label = shapes['label'].lower()
             if label == list(class2label.keys())[label_idx]:
                 _points = shapes['points']
                 if shape_type == 'circle':
@@ -181,7 +180,7 @@ class LoadLabelmeAnnotations(LoadAnnotations):
                                                 width=results['ori_shape'][1], 
                                                 height=results['ori_shape'][0], 
                                                 format='opencv',
-                                    class2label={key: val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
+                                    class2label={key.lower(): val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
             self.reduce_zero_label = results['reduce_zero_label']
