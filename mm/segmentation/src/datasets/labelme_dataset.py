@@ -140,7 +140,8 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
         for shapes in anns['shapes']:
             shape_type = shapes['shape_type'].lower()
             label = shapes['label']
-            if label == list(class2label.keys())[label_idx] or label.upper() == list(class2label.keys())[label_idx] or label.lower() == list(class2label.keys())[label_idx]:
+            # if label == list(class2label.keys())[label_idx] or label.upper() == list(class2label.keys())[label_idx] or label.lower() == list(class2label.keys())[label_idx]:
+            if label == list(class2label.keys())[label_idx]:
                 _points = shapes['points']
                 if shape_type == 'circle':
                     cx, cy = _points[0][0], _points[0][1]
