@@ -44,7 +44,7 @@ def vis_dataloader(dataloader, mode, ratio=0.5, output_dir='/HDD/etc/outputs/mm'
                 vis_img[:, :width, :] = _input 
                 
                 if _input.shape[:2] != gt_sem_seg.shape[:2]:
-                    gt_sem_seg = cv2.resize(gt_sem_seg.astype(np.uint8), _input.shape[:2])
+                    gt_sem_seg = cv2.resize(gt_sem_seg.astype(np.uint8), (_input.shape[1], _input.shape[0]))
                 
                 vis_img[:, width:, :] = cv2.addWeighted(_input, 0.4, color_map[gt_sem_seg], 0.6, 0)
                 cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
