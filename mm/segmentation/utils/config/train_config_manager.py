@@ -131,6 +131,10 @@ class TrainConfigManager:
             
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
+        if hasattr(self._cfg, 'height'):
+            self._cfg.height = height
+        if hasattr(self._cfg, 'width'):
+            self._cfg.width = width
         _manage_crop_size(self._cfg, (width, height))
         
     # set num_classes =================================================================================
