@@ -1,9 +1,9 @@
+dataset_type: labelme
 config_file: ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
 amp: True
 resume: False
 output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test'
-load_from: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/mask2former_swin-l-in22k/iter_40000.pth
-
+load_from: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/train/iter_1000.pth
 show_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test'
 
 
@@ -11,7 +11,7 @@ show_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test
 height: 832
 width: 1104
 num_classes: 3
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_patch_dataset_wo_pos
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_dataset
 out: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test_
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
@@ -27,4 +27,4 @@ batch_size: 1
 tta: False
 
 wait_time: 2
-show: True
+show: False
