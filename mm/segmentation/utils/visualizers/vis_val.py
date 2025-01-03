@@ -17,7 +17,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
         os.mkdir(output_dir)
         
     for output in outputs:
-        if random.random() <= self.ratio:
+        if random.random() <= ratio:
             img_path = output.img_path 
             filename = osp.split(osp.splitext(img_path)[0])[-1]
             img = cv2.imread(img_path)
@@ -41,7 +41,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
                 
             vis_img[:, :width, :] = cv2.addWeighted(img, 0.4, color_map[gt_sem_seg], 0.6, 0)
             vis_img[:, width:, :] = cv2.addWeighted(img, 0.4, color_map[pred_sem_seg], 0.6, 0)
-            cv2.imwrite(osp.join(self.output_dir, filename + '.png'), vis_img)
+            cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
             
             
         
