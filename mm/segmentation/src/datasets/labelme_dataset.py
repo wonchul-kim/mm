@@ -1,8 +1,10 @@
+import math
+import os.path as osp
+from typing import List
+
 from mmseg.registry import DATASETS, TRANSFORMS
 from mmseg.datasets.transforms import LoadAnnotations
 from mmseg.datasets.basesegdataset import BaseSegDataset
-from typing import List
-import os.path as osp
 import mmengine.fileio as fileio
 
 
@@ -137,8 +139,8 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
     for label_idx in range(0, len(class2label.keys())):
         for shapes in anns['shapes']:
             shape_type = shapes['shape_type'].lower()
-            label = shapes['label'].lower()
-            if label == list(class2label.keys())[label_idx]:
+            label = shapes['label']
+            if label == list(class2label.keys())[label_idx] or label.upper() == list(class2label.keys())[label_idx] or label.lower() == list(class2label.keys())[label_idx]:
                 _points = shapes['points']
                 if shape_type == 'circle':
                     cx, cy = _points[0][0], _points[0][1]
@@ -174,7 +176,10 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
 
-        gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], width=results['ori_shape'][1], height=results['ori_shape'][0], format='opencv',
+        gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], 
+                                                width=results['ori_shape'][1], 
+                                                height=results['ori_shape'][0], 
+                                                format='opencv',
                                     class2label={key: val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
