@@ -82,11 +82,11 @@ class BaseConfigManager:
             cfg.test_dataloader.dataset['classes'] = classes
             cfg.test_dataloader.dataset['img_suffix'] = img_suffix
         
-        def _manage_crop_size(cfg, new_crop_size):
+        def _manage_crop_size(cfg, width, height):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
                 for pipeline in cfg.train_pipeline:
                     if pipeline.get('type') == 'RandomCrop':
-                        pipeline['crop_size'] = tuple(new_crop_size)
+                        pipeline['crop_size'] = (height, width)
                         
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
@@ -97,13 +97,13 @@ class BaseConfigManager:
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
                 for pipeline in cfg.test_pipeline:
                     if pipeline.get('type') == 'Resize':
-                        pipeline['scale'] = tuple(new_crop_size)
+                        pipeline['scale'] = (width, height)
                     
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
-                    cfg.test_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
+                    cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
                 else:
-                    cfg.test_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=True))
+                    cfg.test_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=True))
                     
             cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
             cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline
@@ -117,7 +117,7 @@ class BaseConfigManager:
         if hasattr(self._cfg, 'width'):
             self._cfg.width = width
 
-        _manage_crop_size(self._cfg, (height, width))
+        _manage_crop_size(self._cfg, width, height)
 
         
     # set num_classes =================================================================================
