@@ -1,25 +1,24 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
-import logging
 import os
 import os.path as osp
 
 from mmengine.config import Config, DictAction
-from mmengine.logging import print_log
 from mmengine.runner import Runner
 
-from mmseg.registry import RUNNERS
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.hooks import VisualizeVal
-from mm.segmentation.utils.config import TrainConfigManager
-from mm.segmentation.src.runners import RunnerV1
-from mm.segmentation.utils.functions import add_params_to_args
+from mm.segmentation.utils.config import TestConfigManager
+from mm.segmentation.utils.functions import add_params_to_args, trigger_visualization_hook
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parent
+ROOT = FILE.parents[2]
 
+
+# TODO: support fuse_conv_bn, visualization, and format_only
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train a segmentor')
+    parser = argparse.ArgumentParser(
+        description='MMSeg test (and eval) a model')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -45,31 +44,24 @@ def parse_args():
 
     return args
 
-def main():
-    # set config =======================================================================================================
-    args = parse_args()
-    add_params_to_args(args, ROOT / 'params/labelme.yaml')
 
-    config_file = ROOT / '../../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    config_manager = TrainConfigManager()
+def main():
+    args = parse_args()
+    add_params_to_args(args, ROOT / 'tests/export/params/param.yaml')
+
+    config_file = ROOT / 'configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
+    config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
-    config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
-    # config_manager.manage_custom_hooks_config(args.custom_hooks)
+
     cfg = config_manager.cfg
 
-    # ================================================================================================================
-    if 'runner_type' not in cfg:
-        runner = RunnerV1.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
+    runner = Runner.from_cfg(cfg)
 
-    # start training
-    runner.train()
+    runner.model.to('cuda')
+
+    runner.test()
 
 
 if __name__ == '__main__':

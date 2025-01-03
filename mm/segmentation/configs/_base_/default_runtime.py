@@ -12,3 +12,8 @@ log_level = 'INFO'
 load_from = None
 resume = False
 tta_model = dict(type='SegTTAModel')
+
+
+custom_hooks = [
+    dict(type='VisualizeVal', freq_epoch=1, ratio=0.5, output_dir='/HDD/etc/outputs/mm')
+]

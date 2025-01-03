@@ -73,7 +73,7 @@ def main():
     # build the runner from config
     runner = Runner.from_cfg(cfg)
 
-    runner.model.to('cuda:1')
+    runner.model.to('cuda')
 
     # start testing
     runner.test()

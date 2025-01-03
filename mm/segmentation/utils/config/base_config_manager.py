@@ -152,3 +152,7 @@ class BaseConfigManager:
         
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
+
+    # def manage_custom_hooks(self, custom_hooks):
+    #     custom_hooks = {}
+    #     dict(type='VisualizeVal', freq_epoch=1, ratio=0.5, output_dir='/HDD/etc/mm')
