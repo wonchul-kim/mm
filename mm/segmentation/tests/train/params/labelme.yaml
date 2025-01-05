@@ -6,13 +6,13 @@ output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/tr
 load_from: '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth'
 
 # set crop-size/model-size =================================================================================
-height: 256
-width: 512
-# height: 832
-# width: 1104
+# height: 256
+# width: 512
+height: 832
+width: 1104
 num_classes: 3
 max_iters: 10000
-val_interval: 50
+val_interval: 500
 checkpoint_interval: 1000
 data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_dataset
 img_suffix: '.bmp'

@@ -152,12 +152,12 @@ model = dict(
 # dataset config
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomChoiceResize',
-        scales=[int(x * 0.1 * min(crop_size)) for x in range(5, 21)],
-        resize_type='ResizeShortestEdge',
-        max_size=2560),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+    # dict(
+    #     type='RandomChoiceResize',
+    #     scales=[int(x * 0.1 * min(crop_size)) for x in range(5, 21)],
+    #     resize_type='ResizeShortestEdge',
+    #     max_size=2560),
+    # dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs')

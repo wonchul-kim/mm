@@ -15,7 +15,7 @@ def vis_dataloader(dataloader, mode, ratio=0.5, output_dir='/HDD/etc/outputs/mm'
     
     output_dir = osp.join(output_dir, mode)
     if not osp.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
     
     for batch in dataloader:
         if random.random() <= ratio:
@@ -31,7 +31,7 @@ def vis_dataloader(dataloader, mode, ratio=0.5, output_dir='/HDD/etc/outputs/mm'
                 reduce_zero_label = data_sample.reduce_zero_label
                 filename = osp.split(osp.splitext(img_path)[0])[-1]
                 seg_map_path = data_sample.seg_map_path 
-                scale_factor = data_sample.scale_factor 
+                # scale_factor = data_sample.scale_factor 
                 img_shape = data_sample.img_shape 
                 ori_shape = data_sample.ori_shape 
                 gt_sem_seg = data_sample.gt_sem_seg.data.squeeze(0).cpu().detach().numpy()

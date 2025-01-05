@@ -14,7 +14,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
         
     output_dir = osp.join(output_dir, str(current_epoch))
     if not osp.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
         
     for output in outputs:
         if random.random() <= ratio:

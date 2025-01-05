@@ -5,12 +5,12 @@ width = 640
 height = 640
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomResize',
-        scale=(2048, 512),
-        ratio_range=(0.5, 2.0),
-        keep_ratio=True),
-    dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
+    # dict(
+    #     type='RandomResize',
+    #     scale=(2048, 512),
+    #     ratio_range=(0.5, 2.0),
+    #     keep_ratio=True),
+    # dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.3),
     dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs')
