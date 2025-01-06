@@ -90,9 +90,9 @@ class BaseConfigManager:
                         
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
-                    cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
+                    cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
-                    cfg.train_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=True))
+                    cfg.train_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
                 for pipeline in cfg.test_pipeline:
@@ -101,9 +101,9 @@ class BaseConfigManager:
                     
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
-                    cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=True))
+                    cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
-                    cfg.test_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=True))
+                    cfg.test_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
             cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline

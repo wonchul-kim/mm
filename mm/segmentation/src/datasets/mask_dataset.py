@@ -61,8 +61,7 @@ class MaskDataset(BaseSegDataset):
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
         
-        super().__init__(
-            img_suffix=img_suffix,
-            seg_map_suffix=seg_map_suffix,
-            reduce_zero_label=reduce_zero_label,
-            **kwargs)
+        super().__init__(img_suffix=img_suffix,
+                 seg_map_suffix=seg_map_suffix,
+                 reduce_zero_label=reduce_zero_label,
+                 **kwargs)

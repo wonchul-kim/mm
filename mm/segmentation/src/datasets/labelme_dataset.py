@@ -60,18 +60,17 @@ class LabelmeDataset(BaseSegDataset):
                  classes, 
                  img_suffix='.bmp',
                  seg_map_suffix='.json',
-                 reduce_zero_label=True,
+                 reduce_zero_label=False,
                  **kwargs) -> None:
         
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
         
-        super().__init__(
-            img_suffix=img_suffix,
-            seg_map_suffix=seg_map_suffix,
-            reduce_zero_label=reduce_zero_label,
-            **kwargs)
+        super().__init__(img_suffix=img_suffix,
+                 seg_map_suffix=seg_map_suffix,
+                 reduce_zero_label=reduce_zero_label,
+                 **kwargs)
         
         
     def load_data_list(self) -> List[dict]:
@@ -180,7 +179,7 @@ class LoadLabelmeAnnotations(LoadAnnotations):
                                                 width=results['ori_shape'][1], 
                                                 height=results['ori_shape'][0], 
                                                 format='opencv',
-                                    class2label={key.lower(): val + 1 for val, key in enumerate(results['classes'])}).astype(np.uint8)
+                                    class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
             self.reduce_zero_label = results['reduce_zero_label']
