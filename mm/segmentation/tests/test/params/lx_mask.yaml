@@ -1,0 +1,26 @@
+dataset_type: mask
+output_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/mask/test_num_classes_3
+show_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/mask/test_num_classes_3
+load_from: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/mask/train/best_mIoU_iter_50.pth
+data_root: /HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset
+out: null
+
+# data ==================================================================================
+classes: 
+  - background
+  - timber
+  - screw
+num_classes: 3
+img_suffix: '.png'
+seg_map_suffix: '.png'
+
+# set crop-size/model-size =================================================================================
+height: 640
+width: 640
+
+# train ==========================================
+batch_size: 1
+amp: True
+tta: False
+wait_time: 2
+show: False
