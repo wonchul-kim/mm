@@ -52,9 +52,9 @@ class MaskDataset(BaseSegDataset):
 
     def __init__(self,
                  classes, 
-                 img_suffix='.bmp',
-                 seg_map_suffix='.bmp',
-                 reduce_zero_label=True,
+                 img_suffix='.png',
+                 seg_map_suffix='.png',
+                 reduce_zero_label=False,
                  **kwargs) -> None:
         
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})

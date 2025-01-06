@@ -45,10 +45,11 @@ def parse_args():
 
     return args
 
+
 def main():
     # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/labelme.yaml')
+    add_params_to_args(args, ROOT / 'params/lx_mask.yaml')
 
     config_file = ROOT / '../../configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
     config_manager = TrainConfigManager()
@@ -57,7 +58,6 @@ def main():
     config_manager.manage_schedule_config(args.max_iters, args.val_interval, args.checkpoint_interval)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
     config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
-    # config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
 
     # ================================================================================================================
