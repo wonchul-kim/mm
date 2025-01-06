@@ -1,0 +1,26 @@
+dataset_type: labelme
+output_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/labelme/test
+show_dir: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/labelme/test
+load_from: /HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin_l/mask/train/best_mIoU_iter_50.pth
+data_root: /HDD/datasets/projects/LX/24.12.12/split_labelme_patch_dataset
+out: null
+
+# data ==================================================================================
+classes: 
+  - background
+  - timber
+  - screw
+num_classes: 3
+img_suffix: '.png'
+seg_map_suffix: '.json'
+
+# set crop-size/model-size =================================================================================
+height: 256
+width: 512
+
+# train ==========================================
+batch_size: 1
+amp: True
+tta: False
+wait_time: 2
+show: False
