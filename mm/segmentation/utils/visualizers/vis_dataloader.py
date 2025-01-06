@@ -11,7 +11,7 @@ def vis_dataloader(dataloader, mode, ratio=0.5, output_dir='/HDD/etc/outputs/mm'
     cnt, done = 0, False
     
     if not osp.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
     
     output_dir = osp.join(output_dir, mode)
     if not osp.exists(output_dir):

@@ -10,7 +10,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
     
     color_map = imgviz.label_colormap(50)
     if not osp.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makdirs(output_dir, exist_ok=True)
         
     output_dir = osp.join(output_dir, str(current_epoch))
     if not osp.exists(output_dir):
