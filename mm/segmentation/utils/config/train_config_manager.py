@@ -22,7 +22,7 @@ class TrainConfigManager(BaseConfigManager):
         cfg = Config.fromfile(config_file)
         cfg.merge_from_dict(cfg_options)
     
-        if args.amp is True:
+        if args.amp is True and hasattr(cfg, 'optim_wrapper'):
             optim_wrapper = cfg.optim_wrapper.type
             if optim_wrapper == 'AmpOptimWrapper':
                 print_log(
