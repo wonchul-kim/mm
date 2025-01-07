@@ -1,0 +1,39 @@
+dataset_type: labelme
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/m2f_swin_b/train
+load_from: /HDD/weights/mmseg/mask2former/mask2former_swin-b-in1k-384x384-pre_8xb2-160k_ade20k-640x640_20221129_125118-a4a086d2.pth
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset
+# data_root: /storage/projects/Tenneco/Metalbearing/outer/split_patch_dataset
+
+# data =========================
+classes: 
+  - background
+  - line
+  - stabbed
+num_classes: 3
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+vis_dataloader_ratio: 0.1
+
+# set crop-size/model-size =================================================================================
+model: 'mask2former'
+backbone: 'swin_b'
+height: 768
+width: 1120
+# height: 256
+# width: 512
+
+# train ================================
+batch_size: 1
+amp: True
+max_iters: 20000
+val_interval: 1000
+# val_interval: 50
+checkpoint_interval: 1000
+
+# val ==============================
+# vis_val_ratio: 0.3
+# vis_val_freq_epoch: 10
+# vis_val_output_dir: /HDD/etc/outputs/mm
+
+# etc.
+resume: False
