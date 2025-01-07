@@ -101,6 +101,17 @@ class BaseConfigManager:
                     cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
                     cfg.train_pipeline.insert(1, dict(type='LoadAnnotations', reduce_zero_label=False))
+
+            if 'val_pipeline' in cfg and isinstance(cfg.val_pipeline, list):
+                for pipeline in cfg.val_pipeline:
+                    if pipeline.get('type') == 'Resize':
+                        pipeline['scale'] = (width, height)
+                    
+                    
+                if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.val_pipeline):
+                    cfg.val_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
+                else:
+                    cfg.val_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
                 for pipeline in cfg.test_pipeline:
@@ -114,7 +125,7 @@ class BaseConfigManager:
                     cfg.test_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
-            cfg.val_dataloader.dataset.pipeline = cfg.test_pipeline
+            cfg.val_dataloader.dataset.pipeline = cfg.val_pipeline
             cfg.test_dataloader.dataset.pipeline = cfg.test_pipeline
 
         _manage_train_dataloader(self._cfg)

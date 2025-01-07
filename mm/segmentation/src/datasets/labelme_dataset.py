@@ -58,6 +58,7 @@ class LabelmeDataset(BaseSegDataset):
 
     def __init__(self,
                  classes, 
+                 mode,
                  img_suffix='.bmp',
                  seg_map_suffix='.json',
                  reduce_zero_label=False,
@@ -66,12 +67,16 @@ class LabelmeDataset(BaseSegDataset):
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
+        self._mode = mode 
         
         super().__init__(img_suffix=img_suffix,
                  seg_map_suffix=seg_map_suffix,
                  reduce_zero_label=reduce_zero_label,
                  **kwargs)
         
+    @property 
+    def mode(self):
+        return self._mode
         
     def load_data_list(self) -> List[dict]:
         """Load annotation from directory or annotation file.
@@ -97,6 +102,7 @@ class LabelmeDataset(BaseSegDataset):
                 data_info['label_map'] = self.label_map
                 data_info['reduce_zero_label'] = self.reduce_zero_label
                 data_info['seg_fields'] = []
+                data_info['mode'] = self._mode
                 data_list.append(data_info)
         else:
             _suffix_len = len(self.img_suffix)
@@ -114,6 +120,7 @@ class LabelmeDataset(BaseSegDataset):
                 data_info['reduce_zero_label'] = self.reduce_zero_label
                 data_info['seg_fields'] = []
                 data_info['classes'] = self.CLASSES
+                data_info['mode'] = self._mode
                 data_list.append(data_info)
             data_list = sorted(data_list, key=lambda x: x['img_path'])
         return data_list
@@ -122,45 +129,88 @@ import numpy as np
 import json
 import cv2 
 
-def get_mask_from_labelme(json_file, class2label, width=None, height=None, format='pil', metis=None):
-
-    if metis is None:
-        with open(json_file) as f:
-            anns = json.load(f)
-    else:
-        anns = {"shapes": metis}
+def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None, format='pil', metis=None):
+    if mode in ['train', 'val']:
         
-    if height is None:
-        height = anns['imageHeight']
-    if width is None:
-        width = anns['imageWidth']
-    mask = np.zeros((height, width))
-    for label_idx in range(0, len(class2label.keys())):
-        for shapes in anns['shapes']:
-            shape_type = shapes['shape_type'].lower()
-            label = shapes['label'].lower()
-            if label == list(class2label.keys())[label_idx]:
-                _points = shapes['points']
-                if shape_type == 'circle':
-                    cx, cy = _points[0][0], _points[0][1]
-                    radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
-                    cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
-                elif shape_type in ['rectangle']:
-                    if len(_points) == 2:
-                        arr = np.array(_points, dtype=np.int32)
+        assert osp.exists(json_file), ValueError(f"There is no annotation file: {json_file} to {mode}")
+        if metis is None:
+            with open(json_file) as f:
+                anns = json.load(f)
+        else:
+            anns = {"shapes": metis}
+            
+        if height is None:
+            height = anns['imageHeight']
+        if width is None:
+            width = anns['imageWidth']
+        mask = np.zeros((height, width))
+        for label_idx in range(0, len(class2label.keys())):
+            for shapes in anns['shapes']:
+                shape_type = shapes['shape_type'].lower()
+                label = shapes['label'].lower()
+                if label == list(class2label.keys())[label_idx]:
+                    _points = shapes['points']
+                    if shape_type == 'circle':
+                        cx, cy = _points[0][0], _points[0][1]
+                        radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
+                        cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
+                    elif shape_type in ['rectangle']:
+                        if len(_points) == 2:
+                            arr = np.array(_points, dtype=np.int32)
+                        else:
+                            RuntimeError(f"Rectangle labeling should have 2 points")
+                        cv2.fillPoly(mask, [arr], color=(class2label[label]))
+                    elif shape_type in ['polygon', 'watershed']:
+                        if len(_points) > 2:  # handle cases for 1 point or 2 points
+                            arr = np.array(_points, dtype=np.int32)
+                        else:
+                            continue
+                        cv2.fillPoly(mask, [arr], color=(class2label[label]))
+                    elif shape_type in ['point']:
+                        pass
                     else:
-                        RuntimeError(f"Rectangle labeling should have 2 points")
-                    cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                elif shape_type in ['polygon', 'watershed']:
-                    if len(_points) > 2:  # handle cases for 1 point or 2 points
-                        arr = np.array(_points, dtype=np.int32)
-                    else:
-                        continue
-                    cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                elif shape_type in ['point']:
-                    pass
-                else:
-                    raise ValueError(f"There is no such shape-type: {shape_type}")
+                        raise ValueError(f"There is no such shape-type: {shape_type}")
+    elif mode == 'test':
+        if osp.exists(json_file):
+            if metis is None:
+                with open(json_file) as f:
+                    anns = json.load(f)
+            else:
+                anns = {"shapes": metis}
+                
+            if height is None:
+                height = anns['imageHeight']
+            if width is None:
+                width = anns['imageWidth']
+            mask = np.zeros((height, width))
+            for label_idx in range(0, len(class2label.keys())):
+                for shapes in anns['shapes']:
+                    shape_type = shapes['shape_type'].lower()
+                    label = shapes['label'].lower()
+                    if label == list(class2label.keys())[label_idx]:
+                        _points = shapes['points']
+                        if shape_type == 'circle':
+                            cx, cy = _points[0][0], _points[0][1]
+                            radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
+                            cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
+                        elif shape_type in ['rectangle']:
+                            if len(_points) == 2:
+                                arr = np.array(_points, dtype=np.int32)
+                            else:
+                                RuntimeError(f"Rectangle labeling should have 2 points")
+                            cv2.fillPoly(mask, [arr], color=(class2label[label]))
+                        elif shape_type in ['polygon', 'watershed']:
+                            if len(_points) > 2:  # handle cases for 1 point or 2 points
+                                arr = np.array(_points, dtype=np.int32)
+                            else:
+                                continue
+                            cv2.fillPoly(mask, [arr], color=(class2label[label]))
+                        elif shape_type in ['point']:
+                            pass
+                        else:
+                            raise ValueError(f"There is no such shape-type: {shape_type}")
+        else:
+            mask = np.zeros((height, width))
 
     if format == 'pil':
         from PIL import Image
@@ -175,7 +225,7 @@ def get_mask_from_labelme(json_file, class2label, width=None, height=None, forma
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
 
-        gt_semantic_seg = get_mask_from_labelme(results['seg_map_path'], 
+        gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
                                                 width=results['ori_shape'][1], 
                                                 height=results['ori_shape'][0], 
                                                 format='opencv',

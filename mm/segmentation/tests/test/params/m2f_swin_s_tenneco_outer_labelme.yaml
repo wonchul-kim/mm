@@ -1,0 +1,32 @@
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/m2f_swin_s/test_last_ng_patch
+show_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/m2f_swin_s/test_last_ng_patch
+load_from: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/m2f_swin_s/train/best_mIoU_iter_19000.pth
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/testimg/250102/ng_patch
+
+# data =======================================================
+dataset_type: labelme
+classes: 
+  - background
+  - line
+  - stabbed
+num_classes: 3
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+
+
+# model ======================================================
+model: 'mask2former'
+backbone: 'swin_s'
+height: 768
+width: 1120
+
+# test =================================================================================
+amp: True
+resume: False
+out: null
+batch_size: 1
+
+# etc. ===================================================
+tta: False
+wait_time: 2
+show: False

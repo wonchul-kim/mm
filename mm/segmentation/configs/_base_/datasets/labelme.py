@@ -15,6 +15,14 @@ train_pipeline = [
     dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs')
 ]
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=(width, height), keep_ratio=False),
+    # add loading annotation after ``Resize`` because ground truth
+    # does not need to do resize data transform
+    # dict(type='LoadAnnotations', reduce_zero_label=True),
+    dict(type='PackSegInputs')
+]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(width, height), keep_ratio=False),
@@ -46,6 +54,7 @@ train_dataloader = dict(
     sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type=dataset_type,
+        mode='train',
         data_root=None,
         data_prefix=dict(img_path='train', seg_map_path='train'),
         classes=None,
@@ -59,14 +68,27 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
+        mode='val',
         data_root=None,
         data_prefix=dict(img_path='val', seg_map_path='val'),
         classes=None,
         img_suffix='.png',
         seg_map_suffix='.png',
-        pipeline=test_pipeline))
-test_dataloader = val_dataloader
+        pipeline=val_pipeline))
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        mode='test',
+        data_root=None,
+        data_prefix=dict(img_path='./', seg_map_path='./'),
+        classes=None,
+        img_suffix='.png',
+        seg_map_suffix='.png',
+        pipeline=val_pipeline))
 
 val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
 test_evaluator = val_evaluator
-
