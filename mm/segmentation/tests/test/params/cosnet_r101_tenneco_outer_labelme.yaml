@@ -1,0 +1,32 @@
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/testimg/250102/ok_json_patch
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test/test_last_ok_json_patch
+show_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test/test_last_ok_json_patch
+load_from: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/train/best_mIoU_iter_9500.pth
+
+# data =======================================================
+dataset_type: labelme
+classes: 
+  - background
+  - line
+  - stabbed
+num_classes: 3
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+
+
+# model ======================================================
+model: 'cosnet'
+backbone: 'r101'
+height: 768
+width: 1120
+
+# test =================================================================================
+amp: True
+resume: False
+out: null
+batch_size: 1
+
+# etc. ===================================================
+tta: False
+wait_time: 2
+show: False

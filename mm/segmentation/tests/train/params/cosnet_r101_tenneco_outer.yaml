@@ -1,30 +1,30 @@
 dataset_type: labelme
-output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/cosnet/train
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/train
 load_from: /HDD/weights/cosnet/cosnet_ade20k_iter_160000.pth
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_dataset
+# data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset
+data_root: /storage/projects/Tenneco/Metalbearing/outer/split_patch_dataset
 
 # data =========================
 classes: 
   - background
+  - line
   - stabbed
-  - stabbed_c
-  - stabbed_p 
-num_classes: 4
+num_classes: 3
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
-vis_dataloader_ratio: 0
+vis_dataloader_ratio: 0.1
 
 # set crop-size/model-size =================================================================================
 model: 'cosnet'
 backbone: 'resnet101'
-height: 832
-width: 1104
+height: 768
+width: 1120
 
 # train ================================
 batch_size: 2
-amp: True # check!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-max_iters: 1000
-val_interval: 100
+amp: False
+max_iters: 20000
+val_interval: 1000
 checkpoint_interval: 1000
 
 # val ==============================
