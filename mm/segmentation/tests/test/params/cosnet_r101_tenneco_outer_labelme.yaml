@@ -1,7 +1,7 @@
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/testimg/250102/ok_json_patch
-output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test/test_last_ok_json_patch
-show_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test/test_last_ok_json_patch
-load_from: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/train/best_mIoU_iter_9500.pth
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/testimg/250102/ok_patch
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test2/test_last_ok_patch
+show_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/test2/test_last_ok_patch
+load_from: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/outputs/cosnet/train/best_mIoU_iter_20000.pth
 
 # data =======================================================
 dataset_type: labelme
