@@ -1,0 +1,38 @@
+dataset_type: labelme
+data_root: /DeepLearning/_athena_tests/datasets/polygon1/split_dataset_unit
+output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f/outputs
+load_from: null
+
+# data =========================
+classes: 
+  - background
+  - line
+  - stabbed
+num_classes: 3
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+vis_dataloader_ratio: 0.1
+
+# set crop-size/model-size =================================================================================
+model: 'mask2former'
+backbone: 'swin-s'
+height: 768
+width: 1120
+# height: 256
+# width: 512
+
+# train ================================
+batch_size: 1
+amp: True
+max_iters: 20000
+val_interval: 1000
+# val_interval: 50
+checkpoint_interval: 1000
+
+# val ==============================
+# vis_val_ratio: 0.3
+# vis_val_freq_epoch: 10
+# vis_val_output_dir: /HDD/etc/outputs/mm
+
+# etc.
+resume: False
