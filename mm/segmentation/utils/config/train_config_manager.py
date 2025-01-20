@@ -36,5 +36,5 @@ class TrainConfigManager(BaseConfigManager):
                 cfg.optim_wrapper.type = 'AmpOptimWrapper'
                 cfg.optim_wrapper.loss_scale = 'dynamic'
                 
-        return cfg
+        return cfg, args
                 

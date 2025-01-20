@@ -90,5 +90,6 @@ test_dataloader = dict(
         seg_map_suffix='.png',
         pipeline=val_pipeline))
 
-val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
+val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore'],
+                     keep_results=True, classwise=True)
 test_evaluator = val_evaluator

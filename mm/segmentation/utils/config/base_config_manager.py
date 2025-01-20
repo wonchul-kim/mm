@@ -28,18 +28,23 @@ class BaseConfigManager:
     
     def __init__(self, cfg=None):
         self._cfg = cfg 
+        self._args = None
         self.manage_model_config = None
         
     @property
     def cfg(self):
         return self._cfg 
             
+    @property
+    def args(self):
+        return self._args 
+    
     def build(self, args, config_file):
                 
         if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
             create_custom_dataset(args.dataset_type)
             
-        self._cfg = self.build_config(args, config_file)
+        self._cfg, self._args = self.build_config(args, config_file)
         
         if args.model == 'mask2former':
             self.manage_model_config = self.manage_m2f_config
@@ -48,7 +53,7 @@ class BaseConfigManager:
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
     
-    def manage_schedule_config(self, max_iters, val_interval, checkpoint_interval):
+    def manage_schedule_config(self, max_iters, val_interval):
         def _manage_train_loop(cfg):
             if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
                 cfg.train_cfg.max_iters = max_iters
@@ -59,13 +64,23 @@ class BaseConfigManager:
                     if scheduler.get('type') == 'PolyLR':
                         scheduler['end'] = max_iters
                         
-        def _manage_checkpoint_interval(cfg):
-            if 'checkpoint' in cfg.default_hooks:
-                cfg.default_hooks.checkpoint.interval = checkpoint_interval
                 
         _manage_train_loop(self._cfg)
         _manage_param_scheduler(self._cfg)
-        _manage_checkpoint_interval(self._cfg)
+        
+    def manage_default_hooks_config(self, default_hooks):
+        for key, val in default_hooks.items():
+            if key == 'checkpoint':
+                self._cfg.default_hooks.checkpoint.interval = val['interval']
+                self._cfg.default_hooks.checkpoint.by_epoch = val['by_epoch']
+                self._cfg.default_hooks.checkpoint.save_best = val['save_best']
+                
+                if 'output_dir' not in val.keys() or val['output_dir'] ==None:
+                    out_dir = osp.join(self._cfg.work_dir, 'weights')
+                else:
+                    out_dir = val['output_dir']                
+                
+                self._cfg.default_hooks.checkpoint.out_dir = out_dir
             
     # set dataset ====================================================================================================
     def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, classes, batch_size, width, height):
@@ -190,6 +205,19 @@ class BaseConfigManager:
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
 
-    # def manage_custom_hooks(self, custom_hooks):
-    #     custom_hooks = {}
-    #     dict(type='VisualizeVal', freq_epoch=1, ratio=0.5, output_dir='/HDD/etc/mm')
+    def manage_custom_hooks_config(self, custom_hooks):
+        _custom_hooks = []
+        for key, val in custom_hooks.items():
+            if key == 'visualize_val':
+                if 'output_dir' not in val.keys() or val['output_dir'] ==None:
+                    output_dir = osp.join(self._cfg.work_dir, 'val')
+                else:
+                    output_dir = val['output_dir']
+                _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val['freq_epoch'], 
+                                                   ratio=val['freq_epoch'], output_dir=output_dir))
+        
+        if len(_custom_hooks) != 0:
+            if not hasattr(self._cfg, 'custom_hooks'):
+                self._cfg.custom_hooks = _custom_hooks
+            else:
+                self._cfg.custom_hooks += _custom_hooks

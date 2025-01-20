@@ -1,6 +1,6 @@
 dataset_type: labelme
-data_root: /DeepLearning/_athena_tests/datasets/polygon1/split_dataset_unit
-output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f/outputs
+data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset_unit
+output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset_unit/outputs
 load_from: null
 
 # data =========================
@@ -16,23 +16,32 @@ vis_dataloader_ratio: 0.1
 # set crop-size/model-size =================================================================================
 model: 'mask2former'
 backbone: 'swin-s'
-height: 768
-width: 1120
-# height: 256
-# width: 512
+# height: 768
+# width: 1120
+height: 256
+width: 512
 
 # train ================================
 batch_size: 1
 amp: True
 max_iters: 20000
-val_interval: 1000
-# val_interval: 50
-checkpoint_interval: 1000
+# val_interval: 1000
+val_interval: 50
 
-# val ==============================
-# vis_val_ratio: 0.3
-# vis_val_freq_epoch: 10
-# vis_val_output_dir: /HDD/etc/outputs/mm
+default_hooks:
+  checkpoint:
+    interval: 1000
+    by_epoch: false 
+    save_best: 'mIoU'
+    out_dir: null
 
 # etc.
 resume: False
+
+
+# custom hooks ==========================
+custom_hooks:
+  visualize_val:
+    freq_epoch: 1
+    ratio: 0.5
+    output_dir: null
