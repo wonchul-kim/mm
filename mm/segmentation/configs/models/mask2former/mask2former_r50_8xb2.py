@@ -6,7 +6,6 @@ custom_imports = dict(imports='mmdet.models', allow_failed_imports=False)
 
 crop_size = (512, 512)
 num_classes = 150
-max_iters = 160000 
 val_interval = 5000
 checkpoint_interval = 5000
 data_preprocessor = dict(
@@ -183,10 +182,7 @@ param_scheduler = [
         by_epoch=False)
 ]
 
-train_cfg = dict(
-    type='IterBasedTrainLoop', max_iters=max_iters, val_interval=val_interval)
-val_cfg = dict(type='ValLoop')
-test_cfg = dict(type='TestLoop')
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=val_interval, log_metric_by_epoch=False),
