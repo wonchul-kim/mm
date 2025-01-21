@@ -69,18 +69,19 @@ class BaseConfigManager:
         _manage_param_scheduler(self._cfg)
         
     def manage_default_hooks_config(self, default_hooks):
-        for key, val in default_hooks.items():
-            if key == 'checkpoint':
-                self._cfg.default_hooks.checkpoint.interval = val['interval']
-                self._cfg.default_hooks.checkpoint.by_epoch = val['by_epoch']
-                self._cfg.default_hooks.checkpoint.save_best = val['save_best']
-                
-                if 'output_dir' not in val.keys() or val['output_dir'] ==None:
-                    out_dir = osp.join(self._cfg.work_dir, 'weights')
-                else:
-                    out_dir = val['output_dir']                
-                
-                self._cfg.default_hooks.checkpoint.out_dir = out_dir
+        def _manage_checkpoint(cfg, checkpoint_hook):
+            self._cfg.default_hooks.checkpoint.interval = checkpoint_hook['interval']
+            self._cfg.default_hooks.checkpoint.by_epoch = checkpoint_hook['by_epoch']
+            self._cfg.default_hooks.checkpoint.save_best = checkpoint_hook['save_best']
+            
+            if 'output_dir' not in checkpoint_hook.keys() or checkpoint_hook['output_dir'] ==None:
+                out_dir = osp.join(self._cfg.work_dir, 'weights')
+            else:
+                out_dir = checkpoint_hook['output_dir']                
+            
+            self._cfg.default_hooks.checkpoint.out_dir = out_dir
+            
+        _manage_checkpoint(self._cfg, default_hooks['checkpoint'])
             
     # set dataset ====================================================================================================
     def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, classes, batch_size, width, height):
@@ -205,6 +206,7 @@ class BaseConfigManager:
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
 
+    # set custom_hooks ================================================================================
     def manage_custom_hooks_config(self, custom_hooks):
         _custom_hooks = []
         for key, val in custom_hooks.items():
@@ -215,6 +217,11 @@ class BaseConfigManager:
                     output_dir = val['output_dir']
                 _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val['freq_epoch'], 
                                                    ratio=val['freq_epoch'], output_dir=output_dir))
+            
+            elif key == 'after_train_epoch':
+                _custom_hooks.append(dict(type='HookAfterTrainIter'))
+            elif key == 'after_val_epoch':
+                _custom_hooks.append(dict(type='HookAfterValEpoch'))
         
         if len(_custom_hooks) != 0:
             if not hasattr(self._cfg, 'custom_hooks'):
