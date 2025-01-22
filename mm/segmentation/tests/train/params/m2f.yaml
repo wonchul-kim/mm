@@ -28,11 +28,7 @@ max_iters: 20000
 val_interval: 50
 
 default_hooks:
-  checkpoint:
-    interval: 1000
-    by_epoch: false 
-    save_best: 'mIoU'
-    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/weights
+  
 
 # etc.
 resume: False
@@ -65,4 +61,8 @@ custom_hooks:
         monitor_figs: true 
         monitor_freq: 1
 
-
+  checkpoint:
+    interval: 1000
+    by_epoch: false 
+    save_best: 'mIoU'
+    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/weights

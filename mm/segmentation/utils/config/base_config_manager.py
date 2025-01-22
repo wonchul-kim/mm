@@ -194,19 +194,19 @@ class BaseConfigManager:
 
     # set defulat_hooks ===============================================================================
     def manage_default_hooks_config(self, default_hooks):
-        def _manage_checkpoint(cfg, checkpoint_hook):
-            self._cfg.default_hooks.checkpoint.interval = checkpoint_hook['interval']
-            self._cfg.default_hooks.checkpoint.by_epoch = checkpoint_hook['by_epoch']
-            self._cfg.default_hooks.checkpoint.save_best = checkpoint_hook['save_best']
-            self._cfg.default_hooks.checkpoint.out_dir = checkpoint_hook.get('output_dir', osp.join(self._cfg.work_dir, 'weights'))
-            
-        _manage_checkpoint(self._cfg, default_hooks['checkpoint'])
+        pass
 
     # set custom_hooks ================================================================================
     def manage_custom_hooks_config(self, custom_hooks):
         _custom_hooks = []
         for key, val in custom_hooks.items():
-            if key == 'visualize_val':
+            if key == 'checkpoint':
+                _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
+                                        by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
+                                        out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
+                                    )
+            
+            elif key == 'visualize_val':
                 if 'output_dir' not in val.keys() or val['output_dir'] == None:
                     output_dir = osp.join(self._cfg.work_dir, 'val')
                 else:
