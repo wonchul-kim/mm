@@ -64,8 +64,8 @@ def main():
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
     config_manager.manage_schedule_config(args.max_iters, args.val_interval)
-    config_manager.manage_default_hooks_config(args.default_hooks)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_default_hooks_config(args.default_hooks)
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg

@@ -1,6 +1,6 @@
 dataset_type: labelme
 data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset_unit
-output_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset_unit/outputs
+output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train
 load_from: null
 
 # data =========================
@@ -32,7 +32,7 @@ default_hooks:
     interval: 1000
     by_epoch: false 
     save_best: 'mIoU'
-    out_dir: null
+    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/weights
 
 # etc.
 resume: False
@@ -43,13 +43,12 @@ custom_hooks:
   visualize_val:
     freq_epoch: 1
     ratio: 0.5
-    output_dir: null
+    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/val
 
   before_train:
     debug_dataloader:
       ratio: 0.5
-      debug_dir: /HDD/etc/etc/debug
-
+      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/debug
 
   after_train_epoch:
 
@@ -58,11 +57,7 @@ custom_hooks:
   aiv:
     use: true
     logging: 
-      output_dir: /HDD/etc/etc
-      logs_dir: /HDD/etc/etc/logs
-      weights_dir: /HDD/etc/etc/weights
-      configs_dir: /HDD/etc/etc/configs
-      val_dir: /HDD/etc/etc/val
+      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/logs
 
       monitor: 
         use: true 
