@@ -3,21 +3,30 @@ import logging
 import os
 import os.path as osp
 
+import os
+
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
+from mm.utils.weights import get_weights_from_nexus
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.config import ConfigManager
+from mm.segmentation.utils.hooks import VisualizeVal
+from mm.segmentation.utils.metrics import IoUMetricV2
+from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
+from mm.segmentation.utils.functions import add_params_to_args
+from mm.segmentation.src.models.mask2former import backbone_weights_map
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[2]
+ROOT = FILE.parent
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
+    parser.add_argument('--args-filename')
+    
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -43,75 +52,34 @@ def parse_args():
 
     return args
 
+
 def main():
     # set config =======================================================================================================
     args = parse_args()
+    add_params_to_args(args, args.args_filename)
 
-    output_dir = '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
-    config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    amp = True
-    if args.cfg_options is None:
-        cfg_options = {'load_from': '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth',
-                   'launcher': args.launcher, 
-                   'resume': False,
-                   'work_dir': output_dir
-            }
-    else:
-        cfg_options = args.cfg_options
-        
-    cfg = Config.fromfile(config_file)
-    cfg.merge_from_dict(cfg_options)
-    
-    if amp is True:
-        optim_wrapper = cfg.optim_wrapper.type
-        if optim_wrapper == 'AmpOptimWrapper':
-            print_log(
-                'AMP training is already enabled in your config.',
-                logger='current',
-                level=logging.WARNING)
-        else:
-            assert optim_wrapper == 'OptimWrapper', (
-                '`--amp` is only supported when the optimizer wrapper type is '
-                f'`OptimWrapper` but got {optim_wrapper}.')
-            cfg.optim_wrapper.type = 'AmpOptimWrapper'
-            cfg.optim_wrapper.loss_scale = 'dynamic'
+    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
 
-    # ================================================================================================================
+    config_file = ROOT / f'../configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
+    config_manager = TrainConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_schedule_config(args.max_iters, args.val_interval)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_default_hooks_config(args.default_hooks)
+    # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
+    config_manager.manage_custom_hooks_config(args.custom_hooks)
+    cfg = config_manager.cfg
 
-    # set crop-size/model-size =================================================================================
-    height = 640
-    width = 640
-    new_crop_size = (height, width)
-    num_classes = 2
-    max_iters = 40000
-    val_interval = 100
-    checkpoint_interval = 500
-    data_root = "/HDD/datasets/projects/LX/24.12.12/split_mask_patch_dataset"
-    img_suffix='.png'
-    seg_map_suffix='.png'
-    classes = ('timber', 'screw')
-    batch_size = 1
-    config_manager = ConfigManager(cfg)
-    config_manager.manage_model_config(num_classes, new_crop_size)
-    config_manager.manage_schedule_config(max_iters, val_interval, checkpoint_interval)
-    config_manager.manage_dataset_config(data_root, img_suffix, seg_map_suffix, classes, batch_size, new_crop_size)
-    
     # ================================================================================================================
     if 'runner_type' not in cfg:
-        # build the default runner
-        # runner = Runner.from_cfg(cfg)
-        runner = RunnerV1.from_cfg(cfg)
+        # runner = RunnerV1.from_cfg(cfg)
+        runner = Runner.from_cfg(cfg)
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
-    # vis_dataloader = True
-    # if vis_dataloader:
-    #     from mm.segmentation.utils.visualizers import vis_dataloader
-    #     dataloader = runner.build_dataloader(cfg.train_dataloader)
-    #     vis_dataloader(dataloader)
-    
     # start training
     runner.train()
 

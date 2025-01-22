@@ -47,13 +47,36 @@ def main():
     # set config =======================================================================================================
     args = parse_args()
 
-    args.output_dir = '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
-    args.amp = True
-    args.load_from = '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth'
-    args.resume = False
+    output_dir = '/HDD/datasets/projects/LX/24.12.12/outputs/mm/mask2former_swin-l-in22k'
     config_file = ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    config_manager = ConfigManager()
-    config_manager.build(args, config_file)
+    amp = True
+    if args.cfg_options is None:
+        cfg_options = {'load_from': '/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth',
+                   'launcher': args.launcher, 
+                   'resume': False,
+                   'work_dir': output_dir
+            }
+    else:
+        cfg_options = args.cfg_options
+        
+    cfg = Config.fromfile(config_file)
+    cfg.merge_from_dict(cfg_options)
+    
+    if amp is True:
+        optim_wrapper = cfg.optim_wrapper.type
+        if optim_wrapper == 'AmpOptimWrapper':
+            print_log(
+                'AMP training is already enabled in your config.',
+                logger='current',
+                level=logging.WARNING)
+        else:
+            assert optim_wrapper == 'OptimWrapper', (
+                '`--amp` is only supported when the optimizer wrapper type is '
+                f'`OptimWrapper` but got {optim_wrapper}.')
+            cfg.optim_wrapper.type = 'AmpOptimWrapper'
+            cfg.optim_wrapper.loss_scale = 'dynamic'
+
+    # ================================================================================================================
 
     # set crop-size/model-size =================================================================================
     height = 640
@@ -68,12 +91,11 @@ def main():
     seg_map_suffix='.png'
     classes = ('timber', 'screw')
     batch_size = 1
+    config_manager = ConfigManager(cfg)
     config_manager.manage_model_config(num_classes, new_crop_size)
     config_manager.manage_schedule_config(max_iters, val_interval, checkpoint_interval)
     config_manager.manage_dataset_config(data_root, img_suffix, seg_map_suffix, classes, batch_size, new_crop_size)
     
-    
-    cfg = config_manager.cfg
     # ================================================================================================================
     if 'runner_type' not in cfg:
         # build the default runner
