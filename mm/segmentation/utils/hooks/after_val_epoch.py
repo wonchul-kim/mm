@@ -19,10 +19,10 @@ class HookAfterValEpoch(Hook):
             if isinstance(val, (float, int)):
                 val_log[key] = val
             elif isinstance(val, (np.ndarray, list)):
-                _val_log = {}
                 for _val, _class in zip(val, classes):
-                    _val_log[f'{key}_{_class}'] = _val
-                    
-                val_log[key] = _val_log
+                    val_log[f'{key}_{_class}'] = _val
                     
         runner.val_log = val_log
+        if hasattr(runner, 'aiv_val_monitor'):
+            runner.aiv_val_monitor.log(val_log)
+            runner.aiv_val_monitor.save()

@@ -238,8 +238,8 @@ class BaseConfigManager:
                                 if key3 == 'monitor' and val3.get('use', False):
                                     _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
                                             monitor=True,
-                                            monitor_csv=val2.get('monitor_csv', False), monitor_figs=val2.get('monitor_figs', False),
-                                            monitor_freq=val2.get('monitor_freq', 1), logs_dir=logs_dir))
+                                            monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
+                                            monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
                 
         
         if len(_custom_hooks) != 0:

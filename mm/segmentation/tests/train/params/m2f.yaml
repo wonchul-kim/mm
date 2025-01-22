@@ -53,11 +53,17 @@ custom_hooks:
   aiv:
     use: true
     logging: 
-      logs_dir: /HDD/etc/etc
+      output_dir: /HDD/etc/etc
+      logs_dir: /HDD/etc/etc/logs
+      weights_dir: /HDD/etc/etc/weights
+      configs_dir: /HDD/etc/etc/configs
+      debug_dir: /HDD/etc/etc/debug
+      val_dir: /HDD/etc/etc/val
 
       monitor: 
         use: true 
         monitor_csv: true 
         monitor_figs: true 
         monitor_freq: 1
+
 

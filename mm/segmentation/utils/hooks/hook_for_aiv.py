@@ -11,15 +11,13 @@ class HookForAiv(Hook):
     def __init__(self, aiv, **kwargs):
         self.aiv = aiv
         self.monitor = kwargs['monitor']
-        self.monitor_csv = kwargs['monitor_figs']
+        self.monitor_csv = kwargs['monitor_csv']
         self.monitor_figs = kwargs['monitor_figs']
         self.monitor_freq = kwargs['monitor_freq']
         self.logs_dir = kwargs['logs_dir']
                 
         
     def before_run(self, runner) -> None:
-
-            
         ## set custom logger, monitor
         if self.aiv:
             # set logs =================================================================
@@ -27,10 +25,11 @@ class HookForAiv(Hook):
             for runner_attribute in runner_attributes:
                 setattr(runner, runner_attribute, None)
             
+            
+            # set monitor =================================================================
             from aivcommon.loggings import Monitor
             import os.path as osp
             
-            # set monitor =================================================================
             setattr(runner, 'aiv_train_monitor', Monitor())
             setattr(runner, 'aiv_val_monitor', Monitor())
             runner.aiv_train_monitor.set(

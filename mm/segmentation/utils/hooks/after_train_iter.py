@@ -1,7 +1,7 @@
 
 
 from typing import Optional, Sequence, Union
-
+import numpy as np
 from mmseg.registry import HOOKS
 from mmengine.hooks import Hook
 from mmengine.runner.loops import _parse_losses, _update_losses
@@ -21,6 +21,7 @@ class HookAfterTrainIter(Hook):
         
         
         ## evaluate
+        metrics = {}
         if runner.train_loop.evaluator:
             runner.train_loop.run_eval_iter(data_batch)
 
@@ -42,9 +43,21 @@ class HookAfterTrainIter(Hook):
                 train_log[f'lr_{idx}'] = base_lr
             
             runner.train_log = train_log
-            
-        # TODO: metrics for train dataset
-            
+            if hasattr(runner, 'aiv_train_monitor'):
+                
+                if len(metrics) != 0:
+                    classes = metrics['Class']
+                    for key, val in metrics.items():
+                        if isinstance(val, (float, int)):
+                            train_log[key] = val
+                        elif isinstance(val, (np.ndarray, list)):
+                            for _val, _class in zip(val, classes):
+                                train_log[f'{key}_{_class}'] = _val
+                
+                runner.aiv_train_monitor.log(train_log)
+                runner.aiv_train_monitor.save()
+                
+                
             
             
             
