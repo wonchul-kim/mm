@@ -220,6 +220,12 @@ class BaseConfigManager:
                                                    ratio=val.get('ratio', 0.25), 
                                                    output_dir=output_dir))
             
+            elif key == 'before_train':
+                for key2, val2 in val.items():
+                    if key2 == 'debug_dataloader':
+                        _custom_hooks.append(dict(type='HookBeforeTrain', ratio=val2.get('ratio', 0.25),
+                                                                    debug_dir=val2.get('debug_dir', None)))
+
             elif key == 'after_train_epoch':
                 _custom_hooks.append(dict(type='HookAfterTrainIter'))
             elif key == 'after_val_epoch':

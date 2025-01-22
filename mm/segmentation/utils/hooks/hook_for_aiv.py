@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import os.path as osp
 from typing import Optional, Sequence, Union
 
 from mmseg.registry import HOOKS
@@ -32,6 +34,12 @@ class HookForAiv(Hook):
             
             setattr(runner, 'aiv_train_monitor', Monitor())
             setattr(runner, 'aiv_val_monitor', Monitor())
+            
+            if not osp.exists(osp.join(self.logs_dir, "train")):
+                os.makedirs(osp.join(self.logs_dir, "train"), exist_ok=True)
+            if not osp.exists(osp.join(self.logs_dir, "val")):
+                os.makedirs(osp.join(self.logs_dir, "val"), exist_ok=True)
+                
             runner.aiv_train_monitor.set(
                 output_dir=osp.join(self.logs_dir, "train"),
                 fn="train",
