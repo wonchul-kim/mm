@@ -1,0 +1,4 @@
+python-dotenv
+ftfy
+regex
+timm
