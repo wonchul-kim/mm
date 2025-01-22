@@ -50,3 +50,14 @@ custom_hooks:
 
   after_val_epoch:
   
+  aiv:
+    use: true
+    logging: 
+      logs_dir: /HDD/etc/etc
+
+      monitor: 
+        use: true 
+        monitor_csv: true 
+        monitor_figs: true 
+        monitor_freq: 1
+

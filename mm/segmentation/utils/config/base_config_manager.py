@@ -2,6 +2,7 @@
 import os.path as osp
 
 from mmengine.config import Config
+import warnings
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -211,17 +212,35 @@ class BaseConfigManager:
         _custom_hooks = []
         for key, val in custom_hooks.items():
             if key == 'visualize_val':
-                if 'output_dir' not in val.keys() or val['output_dir'] ==None:
+                if 'output_dir' not in val.keys() or val['output_dir'] == None:
                     output_dir = osp.join(self._cfg.work_dir, 'val')
                 else:
                     output_dir = val['output_dir']
-                _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val['freq_epoch'], 
-                                                   ratio=val['freq_epoch'], output_dir=output_dir))
+                _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
+                                                   ratio=val.get('ratio', 0.25), 
+                                                   output_dir=output_dir))
             
             elif key == 'after_train_epoch':
                 _custom_hooks.append(dict(type='HookAfterTrainIter'))
             elif key == 'after_val_epoch':
                 _custom_hooks.append(dict(type='HookAfterValEpoch'))
+                
+            elif key == 'aiv':
+                if val.get('use', False):
+                    aiv = True
+                    for key2, val2 in val.items():
+                        if key2 == 'logging':
+                            logs_dir = val2.get('logs_dir', None)
+                            if logs_dir is None:
+                                warnings.warn(f"logs_dir is None when using aiv")
+                            
+                            for key3, val3 in val2.items():
+                                if key3 == 'monitor' and val3.get('use', False):
+                                    _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
+                                            monitor=True,
+                                            monitor_csv=val2.get('monitor_csv', False), monitor_figs=val2.get('monitor_figs', False),
+                                            monitor_freq=val2.get('monitor_freq', 1), logs_dir=logs_dir))
+                
         
         if len(_custom_hooks) != 0:
             if not hasattr(self._cfg, 'custom_hooks'):

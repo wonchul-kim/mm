@@ -78,10 +78,6 @@ def main():
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
 
-    runner_attributes = ['train_log', 'val_log']
-    for runner_attribute in runner_attributes:
-        setattr(runner, runner_attribute, None)
-
     # start training
     runner.train()
 
