@@ -1,0 +1,66 @@
+dataset_type: labelme
+data_root: null
+output_dir: null
+load_from: null
+
+# data =========================
+classes: null
+num_classes: 0
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+
+# set crop-size/model-size =================================================================================
+model: 'mask2former'
+backbone: 'swin-s'
+# height: 768
+# width: 1120
+height: 256
+width: 512
+
+# train ================================
+batch_size: 1
+amp: True
+epochs: 0
+max_iters: 0
+
+# val_interval: 1000
+val_interval: 50
+
+default_hooks:
+
+# etc.
+resume: False
+
+
+# custom hooks ==========================
+custom_hooks:
+  visualize_val:
+    freq_epoch: 1
+    ratio: 0.5
+    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/val
+
+  before_train:
+    debug_dataloader:
+      ratio: 0.5
+      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/debug
+
+  after_train_epoch:
+
+  after_val_epoch:
+  
+  aiv:
+    use: true
+    logging: 
+      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/logs
+
+      monitor: 
+        use: true 
+        monitor_csv: true 
+        monitor_figs: true 
+        monitor_freq: 1
+
+  checkpoint:
+    interval: 1000
+    by_epoch: false 
+    save_best: 'mIoU'
+    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/weights
