@@ -4,8 +4,10 @@ from .after_val_epoch import HookAfterValEpoch
 from .hook_for_aiv import HookForAiv
 from .before_train import HookBeforeTrain
 from .checkpoint_hook import CustomCheckpointHook
+from .visualize_test import VisualizeTest
 
 
 __all__ = ['VisualizeVal', 'CustomCheckpointHook', 'HookForAiv',
            'HookBeforeTrain', 'HookAfterTrainIter', 'HookAfterValEpoch'
+           'VisualizeTest',
 ]
