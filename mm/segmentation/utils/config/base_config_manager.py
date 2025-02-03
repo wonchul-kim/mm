@@ -246,3 +246,35 @@ class BaseConfigManager:
                 self._cfg.custom_hooks = _custom_hooks
             else:
                 self._cfg.custom_hooks += _custom_hooks
+                
+    # set custom_hooks ================================================================================
+    def manage_custom_test_hooks_config(self, custom_hooks):
+        _custom_hooks = []
+        for key, val in custom_hooks.items():
+            if key == 'visualize_test':
+                if 'output_dir' not in val.keys() or val['output_dir'] == None:
+                    raise RuntimeError(f"Output directory must be defined")
+                else:
+                    output_dir = val['output_dir']
+                _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir))
+            
+            elif key == 'aiv':
+                if val.get('use', False):
+                    aiv = True
+                    for key2, val2 in val.items():
+                        if key2 == 'logging':
+                            logs_dir = val2.get('output_dir', osp.join(self._cfg.work_dir, 'logs_dir'))
+                            
+                            for key3, val3 in val2.items():
+                                if key3 == 'monitor' and val3.get('use', False):
+                                    _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
+                                            monitor=True,
+                                            monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
+                                            monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
+                
+        
+        if len(_custom_hooks) != 0:
+            if not hasattr(self._cfg, 'custom_hooks'):
+                self._cfg.custom_hooks = _custom_hooks
+            else:
+                self._cfg.custom_hooks += _custom_hooks

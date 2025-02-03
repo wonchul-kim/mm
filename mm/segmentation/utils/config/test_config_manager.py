@@ -13,7 +13,7 @@ class TestConfigManager(BaseConfigManager):
                     'launcher': args.launcher, 
                     # 'resume': args.resume,
                     'work_dir': args.output_dir,
-                    'show_dir': args.show_dir, 
+                    # 'show_dir': args.show_dir, 
                     'tta': args.tta,
                     'wait_time': 2,
                     'out': args.out, 
@@ -25,6 +25,6 @@ class TestConfigManager(BaseConfigManager):
         cfg = Config.fromfile(config_file)
         cfg.merge_from_dict(cfg_options)
     
-        return cfg
+        return cfg, args
                 
 

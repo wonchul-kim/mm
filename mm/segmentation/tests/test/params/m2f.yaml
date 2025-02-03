@@ -1,0 +1,38 @@
+output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/test/m2f/exp
+# show_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/test/m2f/vis
+load_from: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/train/weights/best_mIoU_iter_58050.pth
+data_root: /DeepLearning/_athena_tests/datasets/polygon2/split_patch_dataset/val
+
+# data =======================================================
+dataset_type: labelme
+classes: 
+  - background
+  - mark
+  - chamfer_mark
+  - line
+num_classes: 4
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+
+
+# model ======================================================
+model: 'mask2former'
+backbone: 'swin_s'
+height: 768
+width: 1120
+
+# test =================================================================================
+amp: True
+resume: False
+out: null
+batch_size: 1
+
+# etc. ===================================================
+tta: False
+wait_time: 2
+show: False
+
+# custom hooks ==========================
+custom_hooks:
+  visualize_test:
+    output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/test/m2f/exp/vis
