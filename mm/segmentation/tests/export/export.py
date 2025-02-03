@@ -1,67 +1,93 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
+import logging
 import os
 import os.path as osp
 
-from mmengine.config import Config, DictAction
-from mmengine.runner import Runner
-
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.config import TestConfigManager
-from mm.segmentation.utils.functions import add_params_to_args, trigger_visualization_hook
+from mm.segmentation.utils.hooks import VisualizeVal
+from mm.segmentation.utils.metrics import IoUMetricV2
+from mm.segmentation.utils.config import TrainConfigManager
+from mm.segmentation.src.runners import RunnerV1
+
+from mmdeploy.utils import (get_ir_config, load_config)
+from mm.segmentation.utils.functions import add_params_to_args
+from mm.segmentation.utils.export.torch2onnx import torch2onnx
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[2]
+ROOT = FILE.parents[1]
 
-
-# TODO: support fuse_conv_bn, visualization, and format_only
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='MMSeg test (and eval) a model')
-    parser.add_argument(
-        '--cfg-options',
-        nargs='+',
-        action=DictAction,
-        help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
-    parser.add_argument(
-        '--launcher',
-        choices=['none', 'pytorch', 'slurm', 'mpi'],
-        default='none',
-        help='job launcher')
-    # When using PyTorch version >= 2.0.0, the `torch.distributed.launch`
-    # will pass the `--local-rank` parameter to `tools/train.py` instead
-    # of `--local_rank`.
-    parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
-    args = parser.parse_args()
-    if 'LOCAL_RANK' not in os.environ:
-        os.environ['LOCAL_RANK'] = str(args.local_rank)
-
-    return args
+def to_list(s):
+    if isinstance(s, int):  # If s is already an integer
+        return [s]
+    elif isinstance(s, str):  # If s is a string
+        return [int(x.strip()) for x in s.split(',')]
+    else:
+        raise ValueError("Input must be an integer or a comma-separated string")
 
 
 def main():
-    args = parse_args()
-    add_params_to_args(args, ROOT / 'tests/export/params/param.yaml')
+    parser = argparse.ArgumentParser(description='MMSeg export a model')
+    args = parser.parse_args()
+    add_params_to_args(args, ROOT / 'export/params/param.yaml')
 
-    config_file = ROOT / 'configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-    config_manager = TestConfigManager()
-    config_manager.build(args, config_file)
-    config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    # args.batch_size = to_list(args.batch_size)
+    # args.width = to_list(args.width)
+    # args.height = to_list(args.height)
+    
+    # assert len(args.batch_size) == len(args.height), ValueError(f"[ERROR] the number of batch-size({len(args.batch_size)}) must be same to the number of height({len(args.height)})")
+    # assert len(args.batch_size) == len(args.width), ValueError(f"[ERROR] the number of batch-size({len(args.batch_size)}) must be same to the number of width({len(args.width)})")
+            
+    deploy_cfg = load_config(args.deploy_cfg)[0]
+    for key, val in args.codebase_config.items():
+        deploy_cfg['codebase_config'][key] = val
+    
+    for key, val in args.onnx_config.items():
+        deploy_cfg['onnx_config'][key] = val
+        
+    deploy_cfg['onnx_config']['input_shape'] = [args.width, args.height]
+    deploy_cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model_name}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}')
+        
+    for key, val in args.backend_config.items():
+        deploy_cfg['backend_config'][key] = val
+        
+    for idx in range(len(deploy_cfg['onnx_config']['output_names'])):
+        deploy_cfg['backend_config']['model_inputs'][idx] = dict(
+                input_shapes=dict(
+                    input=dict(
+                        min_shape=[args.batch_size, 3, args.height, args.width],
+                        opt_shape=[args.batch_size, 3, args.height, args.width],
+                        max_shape=[args.batch_size, 3, args.height, args.width])))
+        # if len(args.batch_size) == 1:
+        #     deploy_cfg['backend_config']['model_inputs'][idx] = dict(
+        #         input_shapes=dict(
+        #             input=dict(
+        #                 min_shape=[args.batch_size[0], 3, args.height[0], args.width[0]],
+        #                 opt_shape=[args.batch_size[0], 3, args.height[0], args.width[0]],
+        #                 max_shape=[args.batch_size[0], 3, args.height[0], args.width[0]])))
+        # else:
+        #     assert len(args.batch_size) == len(deploy_cfg['onnx_config']['output_names']), ValueError(f"[ERROR] the number of batch-size({len(args.batch_size)}) must be same to the number of output names({len(deploy_cfg['onnx_config']['output_names'])})")
+        #     deploy_cfg['backend_config']['model_inputs'][idx] = dict(
+        #         input_shapes=dict(
+        #             input=dict(
+        #                 min_shape=[args.batch_size[idx], 3, args.height[idx], args.width[idx]],
+        #                 opt_shape=[args.batch_size[idx], 3, args.height[idx], args.width[idx]],
+        #                 max_shape=[args.batch_size[idx], 3, args.height[idx], args.width[idx]])))
+        
+    save_file = get_ir_config(deploy_cfg)['save_file']
 
-    cfg = config_manager.cfg
+    import torch
+    model_inputs = torch.zeros(args.batch_size, 3, args.height, args.width)
 
-    runner = Runner.from_cfg(cfg)
-
-    runner.model.to('cuda')
-
-    runner.test()
+    torch2onnx(
+        model_inputs,
+        args.work_dir,
+        save_file,
+        deploy_cfg=deploy_cfg,
+        model_cfg=args.model_cfg,
+        model_checkpoint=args.checkpoint,
+        device=args.device)
 
 
 if __name__ == '__main__':

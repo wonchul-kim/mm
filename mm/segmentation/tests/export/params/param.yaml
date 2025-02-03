@@ -1,30 +1,30 @@
-dataset_type: labelme
-config_file: ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2.py'
-amp: True
-resume: False
-output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test'
-load_from: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/train/iter_5000.pth
-show_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test'
 
+# export ===========================================
+device: 'cuda'
+deploy_cfg: '/HDD/_projects/github/mm/mm/segmentation/configs/_base_/onnx_config.py'
+model_cfg: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/outputs/SEGMENTATION/2025_01_24_01_10_49/train/mask2former_swin-s_8xb2.py'
+checkpoint: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth'
+img: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset/val/556_124062813415203_2_Outer.bmp'
+    
+work_dir: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/export'
 
-# set crop-size/model-size =================================================================================
-height: 832
-width: 1104
-num_classes: 3
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/split_dataset
-out: /HDD/datasets/projects/Tenneco/Metalbearing/inner/241216/outputs/test_
-img_suffix: '.bmp'
-seg_map_suffix: '.json'
-# classes: 
-#   - STABBED
-#   - STABBED_C
-#   - STABBED_P
-classes: 
-  - stabbed
-  - stabbed_c
-  - stabbed_p 
 batch_size: 1
-tta: False
+width: 1120
+height: 768
 
-wait_time: 2
-show: False
+model_name: 'mmseg_mask2former'
+backbone: 'swin-s'
+
+
+# mmdeploy config ===================================
+codebase_config: 
+  with_argmax: true 
+
+onnx_config: 
+  save_file: 'ONNX.onnx'
+  input_names: ['data']
+  output_names: ['output']
+  opset_version: 13
+
+backend_config:
+  fp16_mode: false
