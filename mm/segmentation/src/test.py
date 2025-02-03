@@ -6,37 +6,22 @@ import os.path as osp
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
 
+from mm.segmentation.src.datasets.mask_dataset import MaskDataset
+from mm.segmentation.utils.hooks import VisualizeTest
+from mm.segmentation.utils.metrics import IoUMetricV2
+from mm.segmentation.utils.config import TestConfigManager
+from mm.segmentation.utils.functions import add_params_to_args, trigger_visualization_hook
+
 from pathlib import Path 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[2]
+
 
 # TODO: support fuse_conv_bn, visualization, and format_only
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMSeg test (and eval) a model')
-    # parser.add_argument('config', help='train config file path')
-    # parser.add_argument('checkpoint', help='checkpoint file')
-    parser.add_argument('--config', default=ROOT / 'segmentation/configs/models/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640.py')
-    parser.add_argument('--checkpoint', default='/HDD/weights/mmseg/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-160k_ade20k-640x640_20221203_235933-7120c214.pth')
-
-    parser.add_argument(
-        '--work-dir',
-        help=('if specified, the evaluation metric results will be dumped'
-              'into the directory as json'))
-    parser.add_argument(
-        '--out',
-        type=str,
-        help='The directory to save output prediction for offline evaluation')
-    parser.add_argument(
-        '--show', action='store_true', help='show prediction results')
-    parser.add_argument('--show-dir', default='/HDD/datasets/projects/LX/24.12.12/outputs/mm', help='the dir to save logs and models')
-    # parser.add_argument(
-    #     '--show-dir',
-    #     help='directory where painted images will be saved. '
-    #     'If specified, it will be automatically saved '
-    #     'to the work_dir/timestamp/show_dir')
-    parser.add_argument(
-        '--wait-time', type=float, default=2, help='the interval of show (s)')
+    parser.add_argument('--args-filename')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -52,8 +37,6 @@ def parse_args():
         choices=['none', 'pytorch', 'slurm', 'mpi'],
         default='none',
         help='job launcher')
-    parser.add_argument(
-        '--tta', action='store_true', help='Test time augmentation')
     # When using PyTorch version >= 2.0.0, the `torch.distributed.launch`
     # will pass the `--local-rank` parameter to `tools/train.py` instead
     # of `--local_rank`.
@@ -65,66 +48,27 @@ def parse_args():
     return args
 
 
-def trigger_visualization_hook(cfg, args):
-    default_hooks = cfg.default_hooks
-    if 'visualization' in default_hooks:
-        visualization_hook = default_hooks['visualization']
-        # Turn on visualization
-        visualization_hook['draw'] = True
-        if args.show:
-            visualization_hook['show'] = True
-            visualization_hook['wait_time'] = args.wait_time
-        if args.show_dir:
-            visualizer = cfg.visualizer
-            visualizer['save_dir'] = args.show_dir
-    else:
-        raise RuntimeError(
-            'VisualizationHook must be included in default_hooks.'
-            'refer to usage '
-            '"visualization=dict(type=\'VisualizationHook\')"')
-
-    return cfg
-
-
 def main():
+    
     args = parse_args()
+    add_params_to_args(args, args.args_filename)
 
-    # load config
-    cfg = Config.fromfile(args.config)
-    cfg.launcher = args.launcher
-    if args.cfg_options is not None:
-        cfg.merge_from_dict(args.cfg_options)
+    config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
+    config_manager = TestConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_custom_test_hooks_config(args.custom_hooks)
 
-    # work_dir is determined in this priority: CLI > segment in file > filename
-    if args.work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
-        cfg.work_dir = args.work_dir
-    elif cfg.get('work_dir', None) is None:
-        # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
-
-    cfg.load_from = args.checkpoint
-
-    if args.show or args.show_dir:
-        cfg = trigger_visualization_hook(cfg, args)
+    cfg = config_manager.cfg
 
     if args.tta:
         cfg.test_dataloader.dataset.pipeline = cfg.tta_pipeline
         cfg.tta_model.module = cfg.model
         cfg.model = cfg.tta_model
 
-    # add output_dir in metric
-    if args.out is not None:
-        cfg.test_evaluator['output_dir'] = args.out
-        cfg.test_evaluator['keep_results'] = True
-
-    # build the runner from config
     runner = Runner.from_cfg(cfg)
-
-    # start testing
     runner.test()
-
 
 if __name__ == '__main__':
     main()

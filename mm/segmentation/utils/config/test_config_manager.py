@@ -15,9 +15,9 @@ class TestConfigManager(BaseConfigManager):
                     'work_dir': args.output_dir,
                     # 'show_dir': args.show_dir, 
                     'tta': args.tta,
-                    'wait_time': 2,
-                    'out': args.out, 
-                    'show': args.show,
+                    # 'wait_time': 2,
+                    # 'out': args.out, 
+                    # 'show': args.show,
                 }
         else:
             cfg_options = args.cfg_options

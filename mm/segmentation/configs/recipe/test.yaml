@@ -1,16 +1,11 @@
-output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/test/exp
-# show_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/test/m2f/vis
-load_from: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth
-data_root: /DeepLearning/_athena_tests/datasets/polygon2/split_patch_dataset/val
+output_dir: null
+load_from: null
+data_root: null
 
 # data =======================================================
 dataset_type: labelme
-classes: 
-  - background
-  - MARK
-  - CHAMFER_MARK
-  - LINE
-num_classes: 4
+classes: null
+num_classes: null
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
