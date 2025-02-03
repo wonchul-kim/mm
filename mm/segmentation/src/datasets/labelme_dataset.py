@@ -225,16 +225,11 @@ def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None,
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
 
-
-        results['mode'] = 'train'
-        results['seg_map_path'] = '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/split_dataset_/train/531_1374_124071616001025_11_Outer.json'
-        results['classes'] = ["background", 'mark', 'chamfer_mark', 'line']
-        results['reduce_zero_label'] = False
         gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
                                                 width=results['ori_shape'][1], 
                                                 height=results['ori_shape'][0], 
                                                 format='opencv',
-                class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
+                                    class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
 
         if self.reduce_zero_label is None:
             self.reduce_zero_label = results['reduce_zero_label']
@@ -256,6 +251,6 @@ class LoadLabelmeAnnotations(LoadAnnotations):
             for old_id, new_id in results['label_map'].items():
                 gt_semantic_seg[gt_semantic_seg_copy == old_id] = new_id
         results['gt_seg_map'] = gt_semantic_seg
-        # results['seg_fields'].append('gt_seg_map')
+        results['seg_fields'].append('gt_seg_map')
 
 

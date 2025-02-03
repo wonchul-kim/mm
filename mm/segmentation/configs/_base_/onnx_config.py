@@ -29,7 +29,7 @@
 
 # codebase_config = dict(with_argmax=False)
 
-codebase_config = dict(type='mmseg', task='Segmentation', with_argmax=True)
+codebase_config = dict(type='mmseg', task='Segmentation', with_argmax=False)
 
 onnx_config = dict(
     type='onnx',

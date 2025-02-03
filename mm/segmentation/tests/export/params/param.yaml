@@ -18,7 +18,7 @@ backbone: 'swin-s'
 
 # mmdeploy config ===================================
 codebase_config: 
-  with_argmax: true 
+  with_argmax: false 
 
 onnx_config: 
   save_file: 'ONNX.onnx'
