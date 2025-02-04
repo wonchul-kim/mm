@@ -12,36 +12,6 @@ def torch2onnx(model_inputs: torch.Tensor,
                model_cfg: Union[str, mmengine.Config],
                model_checkpoint: Optional[str] = None,
                device: str = 'cuda:0'):
-    """Convert PyTorch model to ONNX model.
-
-    Examples:
-        >>> from mmdeploy.apis import torch2onnx
-        >>> img = 'demo.jpg'
-        >>> work_dir = 'work_dir'
-        >>> save_file = 'fcos.onnx'
-        >>> deploy_cfg = ('configs/mmdet/detection/'
-                          'detection_onnxruntime_dynamic.py')
-        >>> model_cfg = ('mmdetection/configs/fcos/'
-                         'fcos_r50_caffe_fpn_gn-head_1x_coco.py')
-        >>> model_checkpoint = ('checkpoints/'
-                                'fcos_r50_caffe_fpn_gn-head_1x_coco-821213aa.pth')
-        >>> device = 'cpu'
-        >>> torch2onnx(img, work_dir, save_file, deploy_cfg, \
-            model_cfg, model_checkpoint, device)
-
-    Args:
-        img (str | np.ndarray | torch.Tensor): Input image used to assist
-            converting model.
-        work_dir (str): A working directory to save files.
-        save_file (str): Filename to save onnx model.
-        deploy_cfg (str | mmengine.Config): Deployment config file or
-            Config object.
-        model_cfg (str | mmengine.Config): Model config file or Config object.
-        model_checkpoint (str): A checkpoint path of PyTorch model,
-            defaults to `None`.
-        device (str): A string specifying device type, defaults to 'cuda:0'.
-    """
-
     from mmdeploy.apis.core.pipeline_manager import no_mp
     from mmdeploy.utils import (Backend, get_backend, get_dynamic_axes,
                                 get_input_shape, get_onnx_config, load_config)

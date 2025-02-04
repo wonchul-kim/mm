@@ -1,0 +1,27 @@
+
+# export ===========================================
+model_cfg: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/outputs/SEGMENTATION/2025_01_24_01_10_49/train/mask2former_swin-s_8xb2.py'
+checkpoint: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth'
+work_dir: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/export'
+
+device: 'cuda'
+batch_size: null
+width: null
+height: null
+
+model_name: null
+backbone: null
+
+
+# mmdeploy config ===================================
+codebase_config: 
+  with_argmax: false 
+
+onnx_config: 
+  save_file: 'ONNX.onnx'
+  input_names: ['data']
+  output_names: ['output']
+  opset_version: 13
+
+backend_config:
+  fp16_mode: false

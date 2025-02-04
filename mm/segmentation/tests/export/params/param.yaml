@@ -1,7 +1,6 @@
 
 # export ===========================================
 device: 'cuda'
-deploy_cfg: '/HDD/_projects/github/mm/mm/segmentation/configs/_base_/onnx_config.py'
 model_cfg: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/outputs/SEGMENTATION/2025_01_24_01_10_49/train/mask2former_swin-s_8xb2.py'
 checkpoint: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth'
 img: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset/val/556_124062813415203_2_Outer.bmp'
