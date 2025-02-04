@@ -4,12 +4,12 @@ model_cfg: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/outputs/SEG
 checkpoint: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth'
 work_dir: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/export'
 
-device: 'cuda'
+device: null
 batch_size: null
 width: null
 height: null
 
-model_name: null
+model: null
 backbone: null
 
 

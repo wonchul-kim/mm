@@ -27,7 +27,7 @@ class ExportConfigManager(BaseConfigManager):
             self._cfg['onnx_config'][key] = val
             
         self._cfg['onnx_config']['input_shape'] = [args.width, args.height]
-        self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model_name}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}')
+        self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}')
             
         for key, val in args.backend_config.items():
             self._cfg['backend_config'][key] = val
