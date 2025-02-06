@@ -114,7 +114,7 @@ def main2():
     args.height = 256
     args.width = 512
     
-    args.custom_hooks['visualize_test']['output_dir'] = output_dir
+    args.custom_hooks['visualize_test']['output_dir'] = osp.join(output_dir, 'vis')
 
     config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
     config_manager = TestConfigManager()
