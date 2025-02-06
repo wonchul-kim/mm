@@ -4,49 +4,28 @@ data_root = None
 width = 640
 height = 640
 train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    # dict(
-    #     type='RandomResize',
-    #     scale=(2048, 512),
-    #     ratio_range=(0.5, 2.0),
-    #     keep_ratio=True),
-    # dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
+    dict(type='LoadImageFromFileWithRoi'),
     dict(type='RandomFlip', prob=0.3),
     dict(type='PhotoMetricDistortion'),
-    dict(type='PackSegInputs')
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
 ]
+
 val_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(type='LoadImageFromFileWithRoi'),
     dict(type='Resize', scale=(width, height), keep_ratio=False),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs')
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
 ]
 test_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(type='LoadImageFromFileWithRoi'),
     dict(type='Resize', scale=(width, height), keep_ratio=False),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs')
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
 ]
-# img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
-# tta_pipeline = [
-#     dict(type='LoadImageFromFile', backend_args=None),
-#     dict(
-#         type='TestTimeAug',
-#         transforms=[
-#             [
-#                 dict(type='Resize', scale_factor=r, keep_ratio=True)
-#                 for r in img_ratios
-#             ],
-#             [
-#                 dict(type='RandomFlip', prob=0., direction='horizontal'),
-#                 dict(type='RandomFlip', prob=1., direction='horizontal')
-#             ], [dict(type='LoadAnnotations')], [dict(type='PackSegInputs')]
-#         ])
-# ]
 train_dataloader = dict(
     batch_size=1,
     num_workers=4,
@@ -58,6 +37,7 @@ train_dataloader = dict(
         data_root=None,
         data_prefix=dict(img_path='train', seg_map_path='train'),
         classes=None,
+        rois=None,
         img_suffix='.png',
         seg_map_suffix='.png',
         pipeline=train_pipeline))
@@ -72,6 +52,7 @@ val_dataloader = dict(
         data_root=None,
         data_prefix=dict(img_path='val', seg_map_path='val'),
         classes=None,
+        rois=None,
         img_suffix='.png',
         seg_map_suffix='.png',
         pipeline=val_pipeline))
@@ -86,6 +67,7 @@ test_dataloader = dict(
         data_root=None,
         data_prefix=dict(img_path='./', seg_map_path='./'),
         classes=None,
+        rois=None,
         img_suffix='.png',
         seg_map_suffix='.png',
         pipeline=val_pipeline))

@@ -1,9 +1,8 @@
-import math
-import os.path as osp
 from typing import List
+import os.path as osp
 
-from mmseg.registry import DATASETS, TRANSFORMS
-from mmseg.datasets.transforms import LoadAnnotations
+import mmengine
+from mmseg.registry import DATASETS
 from mmseg.datasets.basesegdataset import BaseSegDataset
 import mmengine.fileio as fileio
 
@@ -59,15 +58,16 @@ class LabelmeDataset(BaseSegDataset):
     def __init__(self,
                  classes, 
                  mode,
+                 rois=None,
                  img_suffix='.bmp',
                  seg_map_suffix='.json',
                  reduce_zero_label=False,
                  **kwargs) -> None:
-        
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
         self._mode = mode 
+        self._rois = rois
         
         super().__init__(img_suffix=img_suffix,
                  seg_map_suffix=seg_map_suffix,
@@ -77,6 +77,10 @@ class LabelmeDataset(BaseSegDataset):
     @property 
     def mode(self):
         return self._mode
+        
+    @property 
+    def rois(self):
+        return self._rois
         
     def load_data_list(self) -> List[dict]:
         """Load annotation from directory or annotation file.
@@ -99,11 +103,13 @@ class LabelmeDataset(BaseSegDataset):
                 if ann_dir is not None:
                     seg_map = img_name + self.seg_map_suffix
                     data_info['seg_map_path'] = osp.join(ann_dir, seg_map)
-                data_info['label_map'] = self.label_map
-                data_info['reduce_zero_label'] = self.reduce_zero_label
-                data_info['seg_fields'] = []
-                data_info['mode'] = self._mode
-                data_list.append(data_info)
+                for roi in self.rois:
+                    data_info['label_map'] = self.label_map
+                    data_info['reduce_zero_label'] = self.reduce_zero_label
+                    data_info['seg_fields'] = []
+                    data_info['mode'] = self._mode
+                    data_info['roi'] = roi
+                    data_list.append(data_info)
         else:
             _suffix_len = len(self.img_suffix)
             for img in fileio.list_dir_or_file(
@@ -116,141 +122,14 @@ class LabelmeDataset(BaseSegDataset):
                 if ann_dir is not None:
                     seg_map = img[:-_suffix_len] + self.seg_map_suffix
                     data_info['seg_map_path'] = osp.join(ann_dir, seg_map)
-                data_info['label_map'] = self.label_map
-                data_info['reduce_zero_label'] = self.reduce_zero_label
-                data_info['seg_fields'] = []
-                data_info['classes'] = self.CLASSES
-                data_info['mode'] = self._mode
-                data_list.append(data_info)
+                for roi in self.rois:
+                    data_info['label_map'] = self.label_map
+                    data_info['reduce_zero_label'] = self.reduce_zero_label
+                    data_info['seg_fields'] = []
+                    data_info['classes'] = self.CLASSES
+                    data_info['mode'] = self._mode
+                    data_info['roi'] = roi
+                    data_list.append(data_info)
             data_list = sorted(data_list, key=lambda x: x['img_path'])
         return data_list
-
-import numpy as np
-import json
-import cv2 
-
-def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None, format='pil', metis=None):
-    if mode in ['train', 'val']:
-        
-        assert osp.exists(json_file), ValueError(f"There is no annotation file: {json_file} to {mode}")
-        if metis is None:
-            with open(json_file) as f:
-                anns = json.load(f)
-        else:
-            anns = {"shapes": metis}
-            
-        if height is None:
-            height = anns['imageHeight']
-        if width is None:
-            width = anns['imageWidth']
-        mask = np.zeros((height, width))
-        for label_idx in range(0, len(class2label.keys())):
-            for shapes in anns['shapes']:
-                shape_type = shapes['shape_type'].lower()
-                label = shapes['label'].lower()
-                if label == list(class2label.keys())[label_idx]:
-                    _points = shapes['points']
-                    if shape_type == 'circle':
-                        cx, cy = _points[0][0], _points[0][1]
-                        radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
-                        cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
-                    elif shape_type in ['rectangle']:
-                        if len(_points) == 2:
-                            arr = np.array(_points, dtype=np.int32)
-                        else:
-                            RuntimeError(f"Rectangle labeling should have 2 points")
-                        cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                    elif shape_type in ['polygon', 'watershed']:
-                        if len(_points) > 2:  # handle cases for 1 point or 2 points
-                            arr = np.array(_points, dtype=np.int32)
-                        else:
-                            continue
-                        cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                    elif shape_type in ['point']:
-                        pass
-                    else:
-                        raise ValueError(f"There is no such shape-type: {shape_type}")
-    elif mode == 'test':
-        if osp.exists(json_file):
-            if metis is None:
-                with open(json_file) as f:
-                    anns = json.load(f)
-            else:
-                anns = {"shapes": metis}
-                
-            if height is None:
-                height = anns['imageHeight']
-            if width is None:
-                width = anns['imageWidth']
-            mask = np.zeros((height, width))
-            for label_idx in range(0, len(class2label.keys())):
-                for shapes in anns['shapes']:
-                    shape_type = shapes['shape_type'].lower()
-                    label = shapes['label'].lower()
-                    if label == list(class2label.keys())[label_idx]:
-                        _points = shapes['points']
-                        if shape_type == 'circle':
-                            cx, cy = _points[0][0], _points[0][1]
-                            radius = int(math.sqrt((cx - _points[1][0]) ** 2 + (cy - _points[1][1]) ** 2))
-                            cv2.circle(mask, (int(cx), int(cy)), int(radius), True, -1)
-                        elif shape_type in ['rectangle']:
-                            if len(_points) == 2:
-                                arr = np.array(_points, dtype=np.int32)
-                            else:
-                                RuntimeError(f"Rectangle labeling should have 2 points")
-                            cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                        elif shape_type in ['polygon', 'watershed']:
-                            if len(_points) > 2:  # handle cases for 1 point or 2 points
-                                arr = np.array(_points, dtype=np.int32)
-                            else:
-                                continue
-                            cv2.fillPoly(mask, [arr], color=(class2label[label]))
-                        elif shape_type in ['point']:
-                            pass
-                        else:
-                            raise ValueError(f"There is no such shape-type: {shape_type}")
-        else:
-            mask = np.zeros((height, width))
-
-    if format == 'pil':
-        from PIL import Image
-        
-        return Image.fromarray(mask)
-    elif format == 'opencv':
-        return mask
-    else:
-        NotImplementedError(f'There is no such case for {format}')
-
-@TRANSFORMS.register_module()
-class LoadLabelmeAnnotations(LoadAnnotations):
-    def _load_seg_map(self, results: dict) -> None:
-
-        gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
-                                                width=results['ori_shape'][1], 
-                                                height=results['ori_shape'][0], 
-                                                format='opencv',
-                                    class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
-
-        if self.reduce_zero_label is None:
-            self.reduce_zero_label = results['reduce_zero_label']
-        assert self.reduce_zero_label == results['reduce_zero_label'], \
-            'Initialize dataset with `reduce_zero_label` as ' \
-            f'{results["reduce_zero_label"]} but when load annotation ' \
-            f'the `reduce_zero_label` is {self.reduce_zero_label}'
-        if self.reduce_zero_label:
-            # avoid using underflow conversion
-            gt_semantic_seg[gt_semantic_seg == 0] = 255
-            gt_semantic_seg = gt_semantic_seg - 1
-            gt_semantic_seg[gt_semantic_seg == 254] = 255
-        # modify if custom classes
-        if results.get('label_map', None) is not None:
-            # Add deep copy to solve bug of repeatedly
-            # replace `gt_semantic_seg`, which is reported in
-            # https://github.com/open-mmlab/mmsegmentation/pull/1445/
-            gt_semantic_seg_copy = gt_semantic_seg.copy()
-            for old_id, new_id in results['label_map'].items():
-                gt_semantic_seg[gt_semantic_seg_copy == old_id] = new_id
-        results['gt_seg_map'] = gt_semantic_seg
-        results['seg_fields'].append('gt_seg_map')
-
 

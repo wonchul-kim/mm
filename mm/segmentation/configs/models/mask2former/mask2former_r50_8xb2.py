@@ -1,5 +1,7 @@
 _base_ = [
-        '../../_base_/default_runtime.py', '/tmp/custom_dataset.py'
+        '../../_base_/default_runtime.py', 
+        '../../_base_/datasets/labelme.py'
+        # '/tmp/custom_dataset.py'
 ]
 
 custom_imports = dict(imports='mmdet.models', allow_failed_imports=False)
@@ -139,22 +141,6 @@ model = dict(
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 
-# dataset config
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    # dict(type='LoadAnnotations', reduce_zero_label=True),
-    # dict(
-    #     type='RandomChoiceResize',
-    #     scales=[int(512 * x * 0.1) for x in range(5, 21)],
-    #     resize_type='ResizeShortestEdge',
-    #     max_size=2048),
-    # dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
-    dict(type='RandomFlip', prob=0.5),
-    dict(type='PhotoMetricDistortion'),
-    dict(type='PackSegInputs')
-]
-train_dataloader = dict(batch_size=2, dataset=dict(pipeline=train_pipeline))
-
 # optimizer
 embed_multi = dict(lr_mult=1.0, decay_mult=0.0)
 optimizer = dict(
@@ -181,7 +167,6 @@ param_scheduler = [
         end=160000,
         by_epoch=False)
 ]
-
 
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),

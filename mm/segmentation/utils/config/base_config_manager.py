@@ -1,9 +1,6 @@
 
 import os.path as osp
 
-from mmengine.config import Config
-import warnings
-
 def create_custom_dataset(dataset_type):
     import importlib.util
     import os
@@ -42,8 +39,8 @@ class BaseConfigManager:
     
     def build(self, args, config_file):
                 
-        if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
-            create_custom_dataset(args.dataset_type)
+        # if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
+        #     create_custom_dataset(args.dataset_type)
             
         self._cfg, self._args = self.build_config(args, config_file)
         
@@ -70,13 +67,14 @@ class BaseConfigManager:
         _manage_param_scheduler(self._cfg)
                    
     # set dataset ====================================================================================================
-    def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, classes, batch_size, width, height):
+    def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, classes, batch_size, width, height, rois):
         def _manage_train_dataloader(cfg):
             cfg.train_dataloader.batch_size = batch_size
             cfg.train_dataloader.dataset['data_root'] = data_root
             cfg.train_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
             cfg.train_dataloader.dataset['classes'] = classes
             cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.train_dataloader.dataset['rois'] = rois
             
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
@@ -84,6 +82,7 @@ class BaseConfigManager:
             cfg.val_dataloader.dataset['classes'] = classes
             cfg.val_dataloader.dataset['img_suffix'] = img_suffix
             cfg.val_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
+            cfg.val_dataloader.dataset['rois'] = rois
             
         def _manage_test_dataloader(cfg):
             cfg.test_dataloader.batch_size = batch_size
@@ -91,6 +90,7 @@ class BaseConfigManager:
             cfg.test_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
             cfg.test_dataloader.dataset['classes'] = classes
             cfg.test_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.test_dataloader.dataset['rois'] = rois
         
         def _manage_crop_size(cfg, width, height):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):

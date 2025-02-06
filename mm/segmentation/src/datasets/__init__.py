@@ -1,4 +1,4 @@
-from .labelme_dataset import LabelmeDataset, LoadLabelmeAnnotations
+from .labelme_dataset import LabelmeDataset
 from .mask_dataset import MaskDataset
 
-__all__ = ['LabelmeDataset', 'LoadLabelmeAnnotations', 'MaskDataset']
+__all__ = ['LabelmeDataset', 'MaskDataset']
