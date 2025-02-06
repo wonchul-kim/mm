@@ -17,6 +17,8 @@ backbone: 'swin-s'
 height: 256
 width: 512
 
+rois: [[]]
+
 # train ================================
 batch_size: 1
 amp: True
