@@ -9,12 +9,13 @@ num_classes: null
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
+rois: [[220, 60, 1340, 828]]
 
 # model ======================================================
-model: 'mask2former'
-backbone: 'swin_s'
-height: 768
-width: 1120
+model: null
+backbone: null
+height: null
+width: null
 
 # test =================================================================================
 amp: True
@@ -30,4 +31,4 @@ tta: False
 # custom hooks ==========================
 custom_hooks:
   visualize_test:
-    output_dir: /DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/test/exp/vis
+    output_dir: null
