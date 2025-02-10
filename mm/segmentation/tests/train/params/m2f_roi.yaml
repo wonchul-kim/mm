@@ -36,7 +36,7 @@ rois: [[220, 60, 1340, 828]]
 
 # patch ===================================================
 patch:
-  use_patch: false
+  use_patch: true
   include_point_positive: false
   centric: false
   sliding: true

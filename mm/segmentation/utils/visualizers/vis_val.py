@@ -6,7 +6,7 @@ import cv2
 import random
 
 
-def vis_val(outputs, ratio, output_dir, current_epoch):
+def vis_val(outputs, ratio, output_dir, current_epoch, idx):
     
     color_map = imgviz.label_colormap(50)
     if not osp.exists(output_dir):
@@ -16,7 +16,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
     if not osp.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
         
-    for output in outputs:
+    for jdx, output in enumerate(outputs):
         if random.random() <= ratio:
             # img
             img_path = output.img_path 
@@ -50,7 +50,7 @@ def vis_val(outputs, ratio, output_dir, current_epoch):
             cv2.rectangle(pred_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
 
             vis_img = np.hstack((gt_vis_img, pred_vis_img))
-            cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
+            cv2.imwrite(osp.join(output_dir, filename + f'{idx}_{jdx}.png'), vis_img)
             
             
         

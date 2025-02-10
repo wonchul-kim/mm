@@ -35,7 +35,7 @@ class VisualizeTest(Hook):
             outputs (Sequence[:obj:`SegDataSample`]): Outputs from model.
             mode (str): mode (str): Current mode of runner. Defaults to 'val'.
         """
-        vis_test(outputs, self.output_dir)
+        vis_test(outputs, self.output_dir, batch_idx)
 
 
 

@@ -1,7 +1,7 @@
 from typing import List
 import os.path as osp
 
-import mmengine
+import json
 from mmseg.registry import DATASETS
 from mmseg.datasets.basesegdataset import BaseSegDataset
 import mmengine.fileio as fileio
@@ -68,6 +68,9 @@ class LabelmeDataset(BaseSegDataset):
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
         self._mode = mode 
+        
+        assert self._mode in ['train', 'val', 'test'], ValueError(f'[ERROR] There is no such mode for dataset: {self._mode}')
+        
         self._rois = rois
         self._patch = patch
         self._logs_dir = logs_dir
@@ -96,10 +99,10 @@ class LabelmeDataset(BaseSegDataset):
     def load_data_list(self) -> List[dict]:
 
         input_dir = self.data_prefix.get('img_path', None)
+        data_list = []
+        _suffix_len = len(self.img_suffix)
 
         if not self.patch['use_patch']:
-            data_list = []
-            _suffix_len = len(self.img_suffix)
             for img in fileio.list_dir_or_file(
                     dir_path=input_dir,
                     list_dir=False,
@@ -119,45 +122,88 @@ class LabelmeDataset(BaseSegDataset):
                     data_list.append(data_info)
             data_list = sorted(data_list, key=lambda x: x['img_path'])
             return data_list
-        
         else:
-            from visionsuite.engines.data.slicer import Slicer
-            
-            slicer = Slicer(
-            self._mode,
-            osp.join(input_dir, '..'),
-            classes=list(self.CLASSES),
-            # img_exts=[suffix[1:] for suffix in self.img_suffix],
-            img_exts=[self.img_suffix[1:]],
-            roi_info=self._rois,
-            roi_from_json=False,
-            patch_info=self.patch,
-            logger=None,
-            )
-            slicer.run()
-            slicer.save_imgs_info(output_dir='/HDD/etc/etc')
-            imgs_info, num_data = slicer.imgs_info, slicer.num_data
-            assert (
-                num_data != 0
-            ), f"There is NO images in dataset directory for [{self._mode}]: {osp.join(input_dir, self._mode)} with {self.img_suffix}"
-
-            data_list = []
-            _suffix_len = len(self.img_suffix)
-            for img_info in imgs_info:
+            if self._mode in ['train', 'val']:
+                from visionsuite.engines.data.slicer import Slicer
                 
-                data_info = dict(img_path=img_info['img_file'])
-                assert osp.exists(img_info['img_file']), ValueError(f"[ERROR] There is no such image file: {img_info['img_file']}")
-                data_info['seg_map_path'] = img_info['img_file'][:-_suffix_len] + self.seg_map_suffix
-                assert osp.exists(data_info['seg_map_path']), ValueError(f"[ERROR] There is no such json file: {data_info['seg_map_path']}")
-                
-                for roi in img_info['patches']:
-                    data_info['label_map'] = self.label_map
-                    data_info['reduce_zero_label'] = self.reduce_zero_label
-                    data_info['seg_fields'] = []
-                    data_info['classes'] = self.CLASSES
-                    data_info['mode'] = self._mode
-                    data_info['roi'] = roi
-                    data_list.append(data_info)
-            data_list = sorted(data_list, key=lambda x: x['img_path'])
-            return data_list
+                slicer = Slicer(
+                self._mode,
+                osp.join(input_dir, '..'),
+                classes=list(self.CLASSES),
+                # img_exts=[suffix[1:] for suffix in self.img_suffix],
+                img_exts=[self.img_suffix[1:]],
+                roi_info=self._rois,
+                roi_from_json=False,
+                patch_info=self.patch,
+                logger=None,
+                )
+                slicer.run()
+                slicer.save_imgs_info(output_dir='/HDD/etc/etc')
+                imgs_info, num_data = slicer.imgs_info, slicer.num_data
+                assert (
+                    num_data != 0
+                ), f"There is NO images in dataset directory for [{self._mode}]: {osp.join(input_dir, self._mode)} with {self.img_suffix}"
 
+                for img_info in imgs_info:
+                    for roi in img_info['patches']:
+                        
+                        data_info = dict(img_path=img_info['img_file'])
+                        assert osp.exists(img_info['img_file']), ValueError(f"[ERROR] There is no such image file: {img_info['img_file']}")
+                        data_info['seg_map_path'] = img_info['img_file'][:-_suffix_len] + self.seg_map_suffix
+                        assert osp.exists(data_info['seg_map_path']), ValueError(f"[ERROR] There is no such json file: {data_info['seg_map_path']}")
+                        
+                        data_info['label_map'] = self.label_map
+                        data_info['reduce_zero_label'] = self.reduce_zero_label
+                        data_info['seg_fields'] = []
+                        data_info['classes'] = self.CLASSES
+                        data_info['mode'] = self._mode
+                        data_info['roi'] = roi
+                        data_list.append(data_info)
+                data_list = sorted(data_list, key=lambda x: x['img_path'])
+                return data_list
+
+            else:
+                for img in fileio.list_dir_or_file(
+                    dir_path=input_dir,
+                    list_dir=False,
+                    suffix=self.img_suffix,
+                    recursive=True,
+                    backend_args=self.backend_args):
+                    
+                    dx = int((1.0 - self._patch['overlap_ratio']) * self._patch['width'])
+                    dy = int((1.0 - self._patch['overlap_ratio']) * self._patch['height'])
+                    
+                    for roi in self._rois:
+                        if len(roi) == 0:
+                            
+                            with open(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix), 'r') as jf:
+                                anns = json.load(jf)
+                                
+                            roi = [0, 0, anns['imageWidth'], anns['imageHeight']]
+
+                        for y0 in range(roi[1], roi[3], dy):
+                            for x0 in range(roi[0], roi[2], dx):
+                                
+                                if y0 + self._patch['height'] > roi[3] - roi[1]:
+                                    y = roi[3] - roi[1] - self._patch['height']
+                                else:
+                                    y = y0
+
+                                if x0 + self._patch['width'] > roi[2] - roi[0]:
+                                    x = roi[2] - roi[0] - self._patch['width']
+                                else:
+                                    x = x0
+                                    
+                                data_info = dict(img_path=osp.join(input_dir, img))
+                                data_info['seg_map_path'] = osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix)
+                                data_info['label_map'] = self.label_map
+                                data_info['reduce_zero_label'] = self.reduce_zero_label
+                                data_info['seg_fields'] = []
+                                data_info['classes'] = self.CLASSES
+                                data_info['mode'] = self._mode
+                                data_info['roi'] = [x, y, x + self._patch['width'], y + self._patch['height']]
+                                data_list.append(data_info)
+                                
+                data_list = sorted(data_list, key=lambda x: x['img_path'])
+                return data_list
+                
