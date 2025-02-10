@@ -64,9 +64,12 @@ class LoadImageFromFileWithRoi(LoadImageFromFile):
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
 
-        gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
+        if osp.exists(results['seg_map_path']):
+            gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
                                                 format='opencv',
                                     class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
+        else:
+            gt_semantic_seg = np.zeros(results['img_shape'])
 
         if 'roi' in results and results['roi'] != []:
             gt_semantic_seg = gt_semantic_seg[results['roi'][1]:results['roi'][3], results['roi'][0]:results['roi'][2]]

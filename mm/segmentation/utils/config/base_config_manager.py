@@ -69,7 +69,7 @@ class BaseConfigManager:
     # set dataset ====================================================================================================
     def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, 
                                     classes, batch_size, width, height, 
-                                    rois, patch):
+                                    rois, patch, annotate=False):
         def _manage_train_dataloader(cfg):
             cfg.train_dataloader.batch_size = batch_size
             cfg.train_dataloader.dataset['data_root'] = data_root
@@ -96,6 +96,7 @@ class BaseConfigManager:
             cfg.test_dataloader.dataset['img_suffix'] = img_suffix
             cfg.test_dataloader.dataset['rois'] = rois
             cfg.test_dataloader.dataset['patch'] = patch
+            cfg.test_dataloader.dataset['annotate'] = annotate
         
         def _manage_crop_size(cfg, width, height):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):

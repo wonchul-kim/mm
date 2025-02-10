@@ -24,7 +24,9 @@ test_pipeline = [
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 
+                                          'pad_shape', 'scale_factor', 'flip', 'flip_direction', 
+                                          'reduce_zero_label', 'roi', 'do_metric', 'annotate'])
 ]
 train_dataloader = dict(
     batch_size=1,
@@ -82,4 +84,4 @@ train_cfg = dict(
 # train_cfg = dict(
 #     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=5000)
 val_cfg = dict(type='ValLoop')
-test_cfg = dict(type='TestLoop')
+test_cfg = dict(type='TestLoopV2')

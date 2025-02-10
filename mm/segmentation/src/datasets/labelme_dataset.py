@@ -59,6 +59,7 @@ class LabelmeDataset(BaseSegDataset):
                  mode,
                  patch=None,
                  rois=[[]],
+                 annotate=False,
                  logs_dir=None,
                  img_suffix='.bmp',
                  seg_map_suffix='.json',
@@ -73,6 +74,7 @@ class LabelmeDataset(BaseSegDataset):
         
         self._rois = rois
         self._patch = patch
+        self._annotate = annotate
         self._logs_dir = logs_dir
         
         super().__init__(img_suffix=img_suffix,
@@ -92,6 +94,10 @@ class LabelmeDataset(BaseSegDataset):
     def patch(self):
         return self._patch
         
+    @property 
+    def annotate(self):
+        return self._annotate
+    
     @property 
     def logs_dir(self):
         return self._logs_dir
@@ -176,10 +182,18 @@ class LabelmeDataset(BaseSegDataset):
                     for roi in self._rois:
                         if len(roi) == 0:
                             
-                            with open(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix), 'r') as jf:
-                                anns = json.load(jf)
+                            if osp.exists(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix)):
+                                with open(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix), 'r') as jf:
+                                    anns = json.load(jf)
+                                    
+                                width, height = anns['imageWidth'], anns['imageHeight']
+                                do_metric = True
+                            else:
+                                from mm.utils.fileio.parse_image_file import get_image_size
+                                width, height = get_image_size(osp.join(input_dir, img))
+                                do_metric = False
                                 
-                            roi = [0, 0, anns['imageWidth'], anns['imageHeight']]
+                            roi = [0, 0, width, height]
 
                         for y0 in range(roi[1], roi[3], dy):
                             for x0 in range(roi[0], roi[2], dx):
@@ -202,6 +216,8 @@ class LabelmeDataset(BaseSegDataset):
                                 data_info['classes'] = self.CLASSES
                                 data_info['mode'] = self._mode
                                 data_info['roi'] = [x, y, x + self._patch['width'], y + self._patch['height']]
+                                data_info['do_metric'] = do_metric
+                                data_info['annotate'] = self._annotate
                                 data_list.append(data_info)
                                 
                 data_list = sorted(data_list, key=lambda x: x['img_path'])

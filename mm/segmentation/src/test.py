@@ -12,6 +12,7 @@ from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TestConfigManager
 from mm.segmentation.utils.functions import add_params_to_args, trigger_visualization_hook
 import mm.segmentation.utils.transforms.loading
+import mm.segmentation.src.loops
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -92,7 +93,7 @@ def main():
 def main2():
     output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/test/exp"
     weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train/2_6_15_37_14/weights/iter_20000.pth"
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/val"
+    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/test"
     classes = ['background', 'line', 'stabbed']
     
     parser = argparse.ArgumentParser(
