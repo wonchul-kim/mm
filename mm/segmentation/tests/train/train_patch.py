@@ -61,7 +61,7 @@ def main():
 
     from datetime import datetime 
     now = datetime.now()
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f'
     output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')
     if not osp.exists(output_dir):
         os.mkdir(output_dir)
@@ -93,7 +93,7 @@ def main():
     config_manager.manage_schedule_config(args.max_iters, args.val_interval)
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
                                          args.classes, args.batch_size, args.width, args.height,
-                                         args.rois, args.patch)
+                                         args.rois)
     config_manager.manage_default_hooks_config(args.default_hooks)
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
