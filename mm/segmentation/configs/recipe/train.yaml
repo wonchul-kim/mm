@@ -10,32 +10,30 @@ img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
 # set crop-size/model-size =================================================================================
-model: 'mask2former'
-backbone: 'swin-s'
-# height: 768
-# width: 1120
-height: 256
-width: 512
+model: null
+backbone: null
+height: null
+width: null
 
 rois: [[]]
 
 # patch ===================================================
 patch:
   use_patch: false
-  include_point_positive: null
-  centric: null
-  sliding: null
+  include_point_positive: true
+  centric: false
+  sliding: false
   width: null
   height: null
-  overlap_ratio: null
-  num_involved_pixel: null
-  sliding_bg_ratio: null
-  bg_ratio_by_image: null
-  bg_start_train_epoch_by_image: null
-  bg_start_val_epoch_by_image: null
-  translate: null
-  translate_range_width: null
-  translate_range_height: null
+  overlap_ratio: 0.2
+  num_involved_pixel: 10
+  sliding_bg_ratio: 0
+  bg_ratio_by_image: 0
+  bg_start_train_epoch_by_image: 0
+  bg_start_val_epoch_by_image: 0
+  translate: 0
+  translate_range_width: 0
+  translate_range_height: 0
 
 # train ================================
 batch_size: 1
@@ -43,7 +41,8 @@ amp: True
 epochs: 0
 max_iters: 0
 
-# val_interval: 1000
+batch_size: 1
+amp: True
 val_interval: 50
 
 default_hooks:

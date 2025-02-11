@@ -103,6 +103,8 @@ class BaseConfigManager:
                     if pipeline.get('type') == 'RandomCrop':
                         pipeline['crop_size'] = (height, width)
                         
+                    if pipeline.get('type') == 'Resize':
+                        pipeline['scale'] = (width, height)
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
                     cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
