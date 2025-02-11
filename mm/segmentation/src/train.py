@@ -141,7 +141,7 @@ def main2():
     args.num_classes = len(classes)
     
     args.model= 'mask2former'
-    args.backbone = 'swin-s'
+    args.backbone = 'swin-t'
     args.height = 256
     args.width = 512
     
