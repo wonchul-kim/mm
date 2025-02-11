@@ -266,7 +266,8 @@ class BaseConfigManager:
                     output_dir = val['output_dir']
                     
                 _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
-                                          annotate=val.get('annotate', False), contour_thres=val.get('contour_thres', 50)))
+                                          annotate=val.get('annotate', False), 
+                                          contour_thres=val.get('contour_thres', 50)))
             
             elif key == 'aiv':
                 if val.get('use', False):

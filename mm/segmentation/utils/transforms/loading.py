@@ -9,6 +9,7 @@ import mmcv
 from mmcv.transforms.builder import TRANSFORMS
 from mmcv.transforms.loading import LoadImageFromFile
 from mmseg.datasets.transforms import LoadAnnotations
+from mm.utils.fileio.parse_image_file import get_image_size
 
 
 @TRANSFORMS.register_module()
@@ -64,12 +65,14 @@ class LoadImageFromFileWithRoi(LoadImageFromFile):
 class LoadLabelmeAnnotations(LoadAnnotations):
     def _load_seg_map(self, results: dict) -> None:
 
+        width, height = get_image_size(osp.join(osp.dirname(osp.abspath(results['seg_map_path'])), results['img_path']))
         if osp.exists(results['seg_map_path']):
             gt_semantic_seg = get_mask_from_labelme(results['mode'], results['seg_map_path'], 
+                                                width=width, height=height,
                                                 format='opencv',
                                     class2label={key.lower(): val for val, key in enumerate(results['classes'])}).astype(np.uint8)
         else:
-            gt_semantic_seg = np.zeros(results['img_shape'])
+            gt_semantic_seg = np.zeros((height, width))
 
         if 'roi' in results and results['roi'] != []:
             gt_semantic_seg = gt_semantic_seg[results['roi'][1]:results['roi'][3], results['roi'][0]:results['roi'][2]]
@@ -152,9 +155,7 @@ def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None,
             else:
                 anns = {"shapes": metis}
                 
-            from mm.utils.fileio.parse_image_file import get_image_size
                 
-            width, height = get_image_size(osp.join(osp.dirname(osp.abspath(json_file)), anns['imagePath']))
             mask = np.zeros((height, width))
             for label_idx in range(0, len(class2label.keys())):
                 for shapes in anns['shapes']:

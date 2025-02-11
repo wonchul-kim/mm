@@ -48,6 +48,8 @@ class TestLoopV2(TestLoop):
         for custom_hook in self.runner.cfg['custom_hooks']:
             if 'type' in custom_hook and custom_hook['type'] == 'VisualizeTest':
                 output_dir = custom_hook['output_dir']
+                annotate = custom_hook['annotate']
+                contour_thres = custom_hook['contour_thres']
                 
         if not osp.exists(output_dir):
             os.mkdir(output_dir)    
@@ -56,9 +58,10 @@ class TestLoopV2(TestLoop):
         inputs, data_samples = [], []
         batch_size = len(data_batch['inputs'])
         for input_image, data_sample in zip(data_batch['inputs'], data_batch['data_samples']):
-            
+                       
             patch_info = data_sample.patch
             roi = data_sample.roi
+            filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
             
             if len(roi) == 0:
                 roi = [0, 0, data_sample.img_shape[1], data_sample.img_shape[0]]
@@ -68,6 +71,20 @@ class TestLoopV2(TestLoop):
 
             vis_gt, vis_pred = np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3)), np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3))
 
+            # annotate
+            if annotate and not osp.exists(data_sample.seg_map_path):
+                from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
+
+                annotation_dir = osp.join(output_dir, '..', 'labels')
+                if not osp.exists(annotation_dir):
+                    os.makedirs(annotation_dir, exist_ok=True)
+                
+                _labelme = init_labelme_json(filename + ".bmp", roi[2] - roi[0], roi[3] - roi[1])
+                
+            else:
+                _labelme = None
+            
+            # patch inference
             for y0 in range(roi[1], roi[3], dy):
                 for x0 in range(roi[0], roi[2], dx):
                     
@@ -106,6 +123,15 @@ class TestLoopV2(TestLoop):
                                                        data_batch={'inputs': [patch_data_batch['inputs'][jdx]], 
                                                                    'data_samples': [patch_data_batch['data_samples'][jdx]]}
                                                 )
+                                
+                            if _labelme:
+                                _labelme = get_points_from_image(output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy(), 
+                                                                 output.classes,
+                                                                 roi,
+                                                                 [x, y],
+                                                                 _labelme,
+                                                                 contour_thres,
+                                                            )
                         self.runner.call_hook(
                             'after_test_iter',
                             batch_idx=idx,
@@ -120,9 +146,13 @@ class TestLoopV2(TestLoop):
                         
             cv2.rectangle(vis_gt, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
             cv2.rectangle(vis_pred, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
-            vis_img = np.hstack((vis_gt, vis_pred))
-            filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
-            cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
+            cv2.imwrite(osp.join(output_dir, filename + '.png'), np.hstack((vis_gt, vis_pred)))
+            
+            if _labelme:
+                import json
+                
+                with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
+                    json.dump(_labelme, jsf)
                 
 
 
