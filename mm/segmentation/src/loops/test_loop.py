@@ -18,11 +18,11 @@ class TestLoopV2(TestLoop):
         self.test_loss.clear()
         for idx, data_batch in enumerate(self.dataloader):
             if hasattr(data_batch['data_samples'][0], 'patch') and data_batch['data_samples'][0].patch:
-                self.run_iter_patch(idx, data_batch)
+                _size = self.run_iter_patch(idx, data_batch)
+                metrics = self.evaluator.evaluate(_size)
             else:
                 self.run_iter(idx, data_batch)
-
-        metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
+                metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
         if self.test_loss:
             loss_dict = _parse_losses(self.test_loss, 'test')
@@ -57,6 +57,7 @@ class TestLoopV2(TestLoop):
         color_map = imgviz.label_colormap(50)
         inputs, data_samples = [], []
         batch_size = len(data_batch['inputs'])
+        eval_cnt = 0
         for input_image, data_sample in zip(data_batch['inputs'], data_batch['data_samples']):
                        
             patch_info = data_sample.patch
@@ -117,12 +118,13 @@ class TestLoopV2(TestLoop):
                             outputs = self.runner.model.test_step(patch_data_batch)
 
                         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
+                        eval_outputs, eval_inputs, eval_data_samples = [], [], []
                         for jdx, output in enumerate(outputs):
-                            if output.gt_sem_seg:
-                                self.evaluator.process(data_samples=[output], 
-                                                       data_batch={'inputs': [patch_data_batch['inputs'][jdx]], 
-                                                                   'data_samples': [patch_data_batch['data_samples'][jdx]]}
-                                                )
+                            if osp.exists(output.seg_map_path):
+                                eval_outputs.append(output)
+                                eval_inputs.append(patch_data_batch['inputs'][jdx])
+                                eval_data_samples.append(patch_data_batch['data_samples'][jdx])
+                                eval_cnt += 1
                                 
                             if _labelme:
                                 _labelme = get_points_from_image(output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy(), 
@@ -132,12 +134,18 @@ class TestLoopV2(TestLoop):
                                                                  _labelme,
                                                                  contour_thres,
                                                             )
-                        self.runner.call_hook(
-                            'after_test_iter',
-                            batch_idx=idx,
-                            data_batch=data_batch,
-                            outputs=outputs)
+                        self.evaluator.process(data_samples=eval_outputs, 
+                                                       data_batch={'inputs': eval_inputs, 
+                                                                   'data_samples': eval_data_samples}
+                                                )
                         
+                                
+                        self.runner.call_hook(
+                                'after_test_iter',
+                                batch_idx=idx,
+                                data_batch=data_batch,
+                                outputs=outputs)
+                            
                         for _input, output in zip(inputs, outputs):
                             vis_gt[output.patch[1]:output.patch[3], output.patch[0]:output.patch[2]] = cv2.addWeighted(np.transpose(_input.cpu().detach().numpy(), (1, 2, 0)), 0.4, color_map[output.gt_sem_seg.data.squeeze(0).cpu().detach().numpy()], 0.6, 0)
                             vis_pred[output.patch[1]:output.patch[3], output.patch[0]:output.patch[2]] = cv2.addWeighted(np.transpose(_input.cpu().detach().numpy(), (1, 2, 0)), 0.4, color_map[output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy()], 0.6, 0)
@@ -156,3 +164,4 @@ class TestLoopV2(TestLoop):
                 
 
 
+        return eval_cnt

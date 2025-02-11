@@ -94,31 +94,10 @@ def main2():
     output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/test/exp"
     weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train/2_6_15_37_14/weights/iter_20000.pth"
     classes = ['background', 'line', 'stabbed']
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
-    rois = [[]]
-    patch = {
-        "use_patch": False,
-        "include_point_positive": True,
-        "centric": False,
-        "sliding": True,
-        "width": 512,
-        "height": 256,
-        "overlap_ratio": 0.2,
-        "num_involved_pixel": 10,
-        "sliding_bg_ratio": 0,
-        "bg_ratio_by_image": 0,
-        "bg_start_train_epoch_by_image": 0,
-        "bg_start_val_epoch_by_image": 0,
-        "translate": 0,
-        "translate_range_width": 0,
-        "translate_range_height": 0,
-    }
-
-
-    # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/test"
-    # rois = [[220, 60, 1340, 828]]
+    # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
+    # rois = [[]]
     # patch = {
-    #     "use_patch": True,
+    #     "use_patch": False,
     #     "include_point_positive": True,
     #     "centric": False,
     #     "sliding": True,
@@ -134,6 +113,27 @@ def main2():
     #     "translate_range_width": 0,
     #     "translate_range_height": 0,
     # }
+
+
+    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/val"
+    rois = [[220, 60, 1340, 828]]
+    patch = {
+        "use_patch": True,
+        "include_point_positive": True,
+        "centric": False,
+        "sliding": True,
+        "width": 512,
+        "height": 256,
+        "overlap_ratio": 0.2,
+        "num_involved_pixel": 10,
+        "sliding_bg_ratio": 0,
+        "bg_ratio_by_image": 0,
+        "bg_start_train_epoch_by_image": 0,
+        "bg_start_val_epoch_by_image": 0,
+        "translate": 0,
+        "translate_range_width": 0,
+        "translate_range_height": 0,
+    }
 
     
     parser = argparse.ArgumentParser(
