@@ -93,8 +93,27 @@ def main():
 def main2():
     output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/test/exp"
     weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train/2_6_15_37_14/weights/iter_20000.pth"
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/test"
+    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
     classes = ['background', 'line', 'stabbed']
+    rois = [[]]
+    patch = {
+        "use_patch": False,
+        "include_point_positive": True,
+        "centric": False,
+        "sliding": True,
+        "width": 512,
+        "height": 256,
+        "overlap_ratio": 0.2,
+        "num_involved_pixel": 10,
+        "sliding_bg_ratio": 0,
+        "bg_ratio_by_image": 0,
+        "bg_start_train_epoch_by_image": 0,
+        "bg_start_val_epoch_by_image": 0,
+        "translate": 0,
+        "translate_range_width": 0,
+        "translate_range_height": 0,
+    }
+
     
     parser = argparse.ArgumentParser(
         description='MMSeg test (and eval) a model')
@@ -115,7 +134,12 @@ def main2():
     args.height = 256
     args.width = 512
     
+    args.rois = rois
+    args.patch = patch
+    
     args.custom_hooks['visualize_test']['output_dir'] = osp.join(output_dir, 'vis')
+    args.custom_hooks['visualize_test']['contour_thres'] = 50
+    args.custom_hooks['visualize_test']['annotate'] = True
 
     config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
     config_manager = TestConfigManager()

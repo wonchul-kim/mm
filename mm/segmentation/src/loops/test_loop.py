@@ -1,60 +1,27 @@
-# Copyright (c) OpenMMLab. All rights reserved.
-import bisect
-import logging
-import time
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import torch
-from torch.utils.data import DataLoader
 
-from mmengine.evaluator import Evaluator
-from mmengine.logging import HistoryBuffer, print_log
 from mmengine.registry import LOOPS
-from mmengine.structures import BaseDataElement
-from mmengine.utils import is_list_of
 from mmengine.runner.amp import autocast
-from mmengine.runner.base_loop import BaseLoop
+from mmengine.runner.loops import TestLoop, _parse_losses, _update_losses
 
 
 @LOOPS.register_module()
-class TestLoopV2(BaseLoop):
-    def __init__(self,
-                 runner,
-                 dataloader: Union[DataLoader, Dict],
-                 evaluator: Union[Evaluator, Dict, List],
-                 fp16: bool = False):
-        super().__init__(runner, dataloader)
-
-        if isinstance(evaluator, dict) or isinstance(evaluator, list):
-            self.evaluator = runner.build_evaluator(evaluator)  # type: ignore
-        else:
-            self.evaluator = evaluator  # type: ignore
-        if hasattr(self.dataloader.dataset, 'metainfo'):
-            self.evaluator.dataset_meta = self.dataloader.dataset.metainfo
-            self.runner.visualizer.dataset_meta = \
-                self.dataloader.dataset.metainfo
-        else:
-            print_log(
-                f'Dataset {self.dataloader.dataset.__class__.__name__} has no '
-                'metainfo. ``dataset_meta`` in evaluator, metric and '
-                'visualizer will be None.',
-                logger='current',
-                level=logging.WARNING)
-        self.fp16 = fp16
-        self.test_loss: Dict[str, HistoryBuffer] = dict()
-
+class TestLoopV2(TestLoop):
     def run(self) -> dict:
         """Launch test."""
         self.runner.call_hook('before_test')
         self.runner.call_hook('before_test_epoch')
         self.runner.model.eval()
 
-        # clear test loss
         self.test_loss.clear()
         for idx, data_batch in enumerate(self.dataloader):
-            self.run_iter(idx, data_batch)
+            if hasattr(data_batch['data_samples'][0], 'patch') and data_batch['data_samples'][0].patch:
+                self.run_iter_patch(idx, data_batch)
+            else:
+                self.run_iter(idx, data_batch)
 
-        # compute metrics
         metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
         if self.test_loss:
@@ -66,81 +33,96 @@ class TestLoopV2(BaseLoop):
         return metrics
 
     @torch.no_grad()
-    def run_iter(self, idx, data_batch: Sequence[dict]) -> None:
-        """Iterate one mini-batch.
-
-        Args:
-            data_batch (Sequence[dict]): Batch of data from dataloader.
-        """
+    def run_iter_patch(self, idx, data_batch: Sequence[dict]) -> None:
+        import copy
+        import numpy as np
+        import os
+        import os.path as osp
+        import cv2
+        import imgviz
+        from mmengine.structures import PixelData
+        
         self.runner.call_hook(
             'before_test_iter', batch_idx=idx, data_batch=data_batch)
-        # predictions should be sequence of BaseDataElement
-        with autocast(enabled=self.fp16):
-            outputs = self.runner.model.test_step(data_batch)
-
-        outputs, self.test_loss = _update_losses(outputs, self.test_loss)
         
-        for jdx, output in enumerate(outputs):
-            if output.do_metric:
-                self.evaluator.process(data_samples=[output], data_batch={'inputs': [data_batch['inputs'][jdx]], 
-                                                                          'data_samples': [data_batch['data_samples'][jdx]]}
-                                       )
-        self.runner.call_hook(
-            'after_test_iter',
-            batch_idx=idx,
-            data_batch=data_batch,
-            outputs=outputs)
+        for custom_hook in self.runner.cfg['custom_hooks']:
+            if 'type' in custom_hook and custom_hook['type'] == 'VisualizeTest':
+                output_dir = custom_hook['output_dir']
+                
+        if not osp.exists(output_dir):
+            os.mkdir(output_dir)    
+        
+        color_map = imgviz.label_colormap(50)
+        inputs, data_samples = [], []
+        batch_size = len(data_batch['inputs'])
+        for input_image, data_sample in zip(data_batch['inputs'], data_batch['data_samples']):
+            
+            patch_info = data_sample.patch
+            roi = data_sample.roi
+            
+            if len(roi) == 0:
+                roi = [0, 0, data_sample.img_shape[1], data_sample.img_shape[0]]
+                
+            dx = int((1.0 - patch_info['overlap_ratio']) * patch_info['width'])
+            dy = int((1.0 - patch_info['overlap_ratio']) * patch_info['height'])
+
+            vis_gt, vis_pred = np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3)), np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3))
+
+            for y0 in range(roi[1], roi[3], dy):
+                for x0 in range(roi[0], roi[2], dx):
+                    
+                    patch_data_sample = copy.deepcopy(data_sample)
+                    patch_input_image = copy.deepcopy(input_image)
+                    if y0 + patch_info['height'] > roi[3] - roi[1]:
+                        y = roi[3] - roi[1] - patch_info['height']
+                    else:
+                        y = y0
+
+                    if x0 + patch_info['width'] > roi[2] - roi[0]:
+                        x = roi[2] - roi[0] - patch_info['width']
+                    else:
+                        x = x0
+                        
+                    patch_input_image = patch_input_image[:, y:y + patch_info['height'], x:x + patch_info['width']]
+                    
+                    patch_data_sample.gt_sem_seg = PixelData(data=data_sample.gt_sem_seg.data[:, y:y + patch_info['height'], x:x + patch_info['width']])
+                    patch_data_sample.set_metainfo({'patch': [x, y, x + patch_info['width'], y + patch_info['height']]})
+                    patch_data_sample.set_metainfo({'ori_shape': (patch_info['height'], patch_info['width'])})
+                    patch_data_sample.set_metainfo({'img_shape': (patch_info['height'], patch_info['width'])})
+                    
+                    inputs.append(patch_input_image)
+                    data_samples.append(patch_data_sample)
+                    
+                    if batch_size%len(inputs) == 0:
+                        patch_data_batch = {'inputs': inputs, 'data_samples': data_samples}   
+                    
+                        with autocast(enabled=self.fp16):
+                            outputs = self.runner.model.test_step(patch_data_batch)
+
+                        outputs, self.test_loss = _update_losses(outputs, self.test_loss)
+                        for jdx, output in enumerate(outputs):
+                            if output.gt_sem_seg:
+                                self.evaluator.process(data_samples=[output], 
+                                                       data_batch={'inputs': [patch_data_batch['inputs'][jdx]], 
+                                                                   'data_samples': [patch_data_batch['data_samples'][jdx]]}
+                                                )
+                        self.runner.call_hook(
+                            'after_test_iter',
+                            batch_idx=idx,
+                            data_batch=data_batch,
+                            outputs=outputs)
+                        
+                        for _input, output in zip(inputs, outputs):
+                            vis_gt[output.patch[1]:output.patch[3], output.patch[0]:output.patch[2]] = cv2.addWeighted(np.transpose(_input.cpu().detach().numpy(), (1, 2, 0)), 0.4, color_map[output.gt_sem_seg.data.squeeze(0).cpu().detach().numpy()], 0.6, 0)
+                            vis_pred[output.patch[1]:output.patch[3], output.patch[0]:output.patch[2]] = cv2.addWeighted(np.transpose(_input.cpu().detach().numpy(), (1, 2, 0)), 0.4, color_map[output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy()], 0.6, 0)
+                        
+                        inputs, data_samples = [], []
+                        
+            cv2.rectangle(vis_gt, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
+            cv2.rectangle(vis_pred, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
+            vis_img = np.hstack((vis_gt, vis_pred))
+            filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
+            cv2.imwrite(osp.join(output_dir, filename + '.png'), vis_img)
+                
 
 
-def _parse_losses(losses: Dict[str, HistoryBuffer],
-                  stage: str) -> Dict[str, float]:
-    """Parses the raw losses of the network.
-
-    Args:
-        losses (dict): raw losses of the network.
-        stage (str): The stage of loss, e.g., 'val' or 'test'.
-
-    Returns:
-        dict[str, float]: The key is the loss name, and the value is the
-        average loss.
-    """
-    all_loss = 0
-    loss_dict: Dict[str, float] = dict()
-
-    for loss_name, loss_value in losses.items():
-        avg_loss = loss_value.mean()
-        loss_dict[loss_name] = avg_loss
-        if 'loss' in loss_name:
-            all_loss += avg_loss
-
-    loss_dict[f'{stage}_loss'] = all_loss
-    return loss_dict
-
-
-def _update_losses(outputs: list, losses: dict) -> Tuple[list, dict]:
-    """Update and record the losses of the network.
-
-    Args:
-        outputs (list): The outputs of the network.
-        losses (dict): The losses of the network.
-
-    Returns:
-        list: The updated outputs of the network.
-        dict: The updated losses of the network.
-    """
-    if isinstance(outputs[-1],
-                  BaseDataElement) and outputs[-1].keys() == ['loss']:
-        loss = outputs[-1].loss  # type: ignore
-        outputs = outputs[:-1]
-    else:
-        loss = dict()
-
-    for loss_name, loss_value in loss.items():
-        if loss_name not in losses:
-            losses[loss_name] = HistoryBuffer()
-        if isinstance(loss_value, torch.Tensor):
-            losses[loss_name].update(loss_value.item())
-        elif is_list_of(loss_value, torch.Tensor):
-            for loss_value_i in loss_value:
-                losses[loss_name].update(loss_value_i.item())
-    return outputs, losses

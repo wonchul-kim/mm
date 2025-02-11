@@ -152,10 +152,9 @@ def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None,
             else:
                 anns = {"shapes": metis}
                 
-            if height is None:
-                height = anns['imageHeight']
-            if width is None:
-                width = anns['imageWidth']
+            from mm.utils.fileio.parse_image_file import get_image_size
+                
+            width, height = get_image_size(osp.join(osp.dirname(osp.abspath(json_file)), anns['imagePath']))
             mask = np.zeros((height, width))
             for label_idx in range(0, len(class2label.keys())):
                 for shapes in anns['shapes']:

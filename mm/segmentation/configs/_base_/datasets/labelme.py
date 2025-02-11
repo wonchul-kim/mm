@@ -5,9 +5,13 @@ width = 640
 height = 640
 train_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
+    dict(type='Resize', scale=(width, height), keep_ratio=False),
     dict(type='RandomFlip', prob=0.3),
     dict(type='PhotoMetricDistortion'),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 
+                                          'img_shape', 'pad_shape', 'scale_factor', 
+                                          'flip', 'flip_direction', 'reduce_zero_label', 
+                                          'classes', 'roi', 'patch'])
 ]
 
 val_pipeline = [
@@ -16,17 +20,23 @@ val_pipeline = [
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip', 'flip_direction', 'reduce_zero_label', 'roi'])
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 
+                                          'img_shape', 'pad_shape', 'scale_factor', 
+                                          'flip', 'flip_direction', 'reduce_zero_label', 
+                                          'classes', 'roi', 'patch'])
 ]
 test_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
     dict(type='Resize', scale=(width, height), keep_ratio=False),
+    dict(type='RandomFlip', prob=0.0),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
     dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 
                                           'pad_shape', 'scale_factor', 'flip', 'flip_direction', 
-                                          'reduce_zero_label', 'roi', 'do_metric', 'annotate'])
+                                          'reduce_zero_label', 
+                                          'classes', 
+                                          'roi', 'patch', 'do_metric', 'annotate'])
 ]
 train_dataloader = dict(
     batch_size=1,
@@ -76,7 +86,8 @@ test_dataloader = dict(
 
 val_evaluator = dict(type='IoUMetricV2', iou_metrics=['mIoU', 'mDice', 'mFscore'],
                      keep_results=True, classwise=True)
-test_evaluator = val_evaluator
+test_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore'],
+                     keep_results=True, classwise=True)
 
 train_cfg = dict(
     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=50, 

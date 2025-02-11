@@ -69,7 +69,7 @@ class BaseConfigManager:
     # set dataset ====================================================================================================
     def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, 
                                     classes, batch_size, width, height, 
-                                    rois, patch, annotate=False):
+                                    rois, patch):
         def _manage_train_dataloader(cfg):
             cfg.train_dataloader.batch_size = batch_size
             cfg.train_dataloader.dataset['data_root'] = data_root
@@ -96,9 +96,8 @@ class BaseConfigManager:
             cfg.test_dataloader.dataset['img_suffix'] = img_suffix
             cfg.test_dataloader.dataset['rois'] = rois
             cfg.test_dataloader.dataset['patch'] = patch
-            cfg.test_dataloader.dataset['annotate'] = annotate
         
-        def _manage_crop_size(cfg, width, height):
+        def _manage_crop_size(cfg, width, height, patch=None):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
                 for pipeline in cfg.train_pipeline:
                     if pipeline.get('type') == 'RandomCrop':
@@ -115,18 +114,21 @@ class BaseConfigManager:
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
                     
-                    
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.val_pipeline):
                     cfg.val_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
                     cfg.val_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
-                for pipeline in cfg.test_pipeline:
+                resize_index = 0
+                for idx, pipeline in enumerate(cfg.test_pipeline):
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
-                    
-                    
+                        resize_index = idx
+                        
+                if patch and patch['use_patch']:
+                    del cfg.test_pipeline[resize_index]
+                        
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
@@ -144,7 +146,7 @@ class BaseConfigManager:
         if hasattr(self._cfg, 'width'):
             self._cfg.width = width
 
-        _manage_crop_size(self._cfg, width, height)
+        _manage_crop_size(self._cfg, width, height, self.args.patch if hasattr(self.args, 'patch') else None)
 
     # set num_classes =================================================================================
     def manage_m2f_config(self, num_classes, width, height):
@@ -262,7 +264,9 @@ class BaseConfigManager:
                     raise RuntimeError(f"Output directory must be defined")
                 else:
                     output_dir = val['output_dir']
-                _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir))
+                    
+                _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
+                                          annotate=val.get('annotate', False), contour_thres=val.get('contour_thres', 50)))
             
             elif key == 'aiv':
                 if val.get('use', False):

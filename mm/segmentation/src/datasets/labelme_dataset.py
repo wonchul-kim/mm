@@ -175,51 +175,19 @@ class LabelmeDataset(BaseSegDataset):
                     suffix=self.img_suffix,
                     recursive=True,
                     backend_args=self.backend_args):
-                    
-                    dx = int((1.0 - self._patch['overlap_ratio']) * self._patch['width'])
-                    dy = int((1.0 - self._patch['overlap_ratio']) * self._patch['height'])
-                    
+                    data_info = dict(img_path=osp.join(input_dir, img))
+                    seg_map = img[:-_suffix_len] + self.seg_map_suffix
+                    data_info['seg_map_path'] = osp.join(input_dir, seg_map)
                     for roi in self._rois:
-                        if len(roi) == 0:
-                            
-                            if osp.exists(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix)):
-                                with open(osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix), 'r') as jf:
-                                    anns = json.load(jf)
-                                    
-                                width, height = anns['imageWidth'], anns['imageHeight']
-                                do_metric = True
-                            else:
-                                from mm.utils.fileio.parse_image_file import get_image_size
-                                width, height = get_image_size(osp.join(input_dir, img))
-                                do_metric = False
-                                
-                            roi = [0, 0, width, height]
-
-                        for y0 in range(roi[1], roi[3], dy):
-                            for x0 in range(roi[0], roi[2], dx):
-                                
-                                if y0 + self._patch['height'] > roi[3] - roi[1]:
-                                    y = roi[3] - roi[1] - self._patch['height']
-                                else:
-                                    y = y0
-
-                                if x0 + self._patch['width'] > roi[2] - roi[0]:
-                                    x = roi[2] - roi[0] - self._patch['width']
-                                else:
-                                    x = x0
-                                    
-                                data_info = dict(img_path=osp.join(input_dir, img))
-                                data_info['seg_map_path'] = osp.join(input_dir, img[:-_suffix_len] + self.seg_map_suffix)
-                                data_info['label_map'] = self.label_map
-                                data_info['reduce_zero_label'] = self.reduce_zero_label
-                                data_info['seg_fields'] = []
-                                data_info['classes'] = self.CLASSES
-                                data_info['mode'] = self._mode
-                                data_info['roi'] = [x, y, x + self._patch['width'], y + self._patch['height']]
-                                data_info['do_metric'] = do_metric
-                                data_info['annotate'] = self._annotate
-                                data_list.append(data_info)
-                                
+                        data_info['label_map'] = self.label_map
+                        data_info['reduce_zero_label'] = self.reduce_zero_label
+                        data_info['seg_fields'] = []
+                        data_info['classes'] = self.CLASSES
+                        data_info['mode'] = self._mode
+                        data_info['roi'] = roi
+                        data_info['patch'] = self._patch
+                        data_info['annotate'] = self._annotate
+                        data_list.append(data_info)
                 data_list = sorted(data_list, key=lambda x: x['img_path'])
-                return data_list
                 
+                return data_list

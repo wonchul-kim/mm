@@ -10,26 +10,25 @@ img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
 # rois ====================================================
-# rois: [[220, 60, 1340, 828]]
 rois: [[]]
 
 # patch ===================================================
 patch:
-  use_patch: true
-  include_point_positive: null
-  centric: null
-  sliding: null
-  width: 512
-  height: 256
+  use_patch: false
+  include_point_positive: true
+  centric: false
+  sliding: false
+  width: null
+  height: null
   overlap_ratio: 0.2
   num_involved_pixel: 10
-  sliding_bg_ratio: null
-  bg_ratio_by_image: null
-  bg_start_train_epoch_by_image: null
-  bg_start_val_epoch_by_image: null
-  translate: null
-  translate_range_width: null
-  translate_range_height: null
+  sliding_bg_ratio: 0
+  bg_ratio_by_image: 0
+  bg_start_train_epoch_by_image: 0
+  bg_start_val_epoch_by_image: 0
+  translate: 0
+  translate_range_width: 0
+  translate_range_height: 0
 
 # model ======================================================
 model: null
@@ -52,3 +51,5 @@ tta: False
 custom_hooks:
   visualize_test:
     output_dir: null
+    annotate: False
+    contour_thres: 50
