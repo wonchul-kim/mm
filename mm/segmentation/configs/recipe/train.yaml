@@ -40,9 +40,6 @@ batch_size: 1
 amp: True
 epochs: 0
 max_iters: 0
-
-batch_size: 1
-amp: True
 val_interval: 50
 
 default_hooks:
