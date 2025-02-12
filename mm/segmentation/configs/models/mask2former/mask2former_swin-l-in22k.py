@@ -1,4 +1,4 @@
-_base_ = ['./mask2former_swin-b-in1k_8xb2.py']
+_base_ = ['./mask2former_swin-b-in1k.py']
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_large_patch4_window12_384_22k_20220412-6580f57d.pth'  # noqa
 
 model = dict(

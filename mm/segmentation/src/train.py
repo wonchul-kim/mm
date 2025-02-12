@@ -57,14 +57,24 @@ def parse_args():
     return args
 
 
+def get_backbone_weights_map(model_name):
+    if model_name == 'mask2former':
+        return backbone_weights_map
+    elif model_name == 'cosnet':
+        return cosnet_backbone_weights_map
+    elif model_name == 'deeplabv3plus':
+        return dlabv3plus_backbone_weights_map
+    else:
+        raise NotImplementedError(f'[ERROR] There is no such model name for backbone-weights-map: {model_name}')
+
 def main():
     # set config =======================================================================================================
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
+    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
-    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}_8xb2.py'
+    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
