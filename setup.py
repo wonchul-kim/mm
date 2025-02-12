@@ -60,6 +60,5 @@ setup(
         '': ['*.yaml', '*.json'], },
     include_package_data=True,
     install_requires=parse_requirements(PARENT / 'mm/segmentation/requirements.txt'),
-    install_requires=[""],
 )
 
