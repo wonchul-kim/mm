@@ -56,6 +56,10 @@ class BaseConfigManager:
             if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
                 cfg.train_cfg.max_iters = max_iters
                 cfg.train_cfg.val_interval = val_interval
+            elif cfg.train_cfg.get('type') == 'IterBasedTrainLoopV2':
+                cfg.train_cfg.max_iters = max_iters
+                cfg.train_cfg.val_interval = val_interval
+                
         def _manage_param_scheduler(cfg):
             if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
                 for scheduler in cfg.param_scheduler:

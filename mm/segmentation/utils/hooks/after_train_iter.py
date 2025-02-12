@@ -39,7 +39,15 @@ class HookAfterTrainIter(Hook):
             if 'loss' in outputs:
                 train_log['loss'] = outputs['loss'].item()
                 
-            for idx, base_lr in enumerate(runner.optim_wrapper.get_lr()['base_lr']):
+            lr_dict = runner.optim_wrapper.get_lr()
+            if 'base_lr' in lr_dict:
+                lr_list = lr_dict['base_lr']
+            elif 'lr' in lr_dict:
+                lr_list = lr_dict['lr']        
+            else:
+                raise NotImplementedError(f"[ERROR] NOT Considered this case of lr: {lr_dict}")
+        
+            for idx, base_lr in enumerate(lr_list):
                 train_log[f'lr_{idx}'] = base_lr
             
             runner.train_log = train_log
