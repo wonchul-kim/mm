@@ -3,3 +3,5 @@ ftfy
 regex
 timm
 visionsuite
+nvidia-ml-py3
+imgviz
