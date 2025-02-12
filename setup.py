@@ -47,18 +47,50 @@ def parse_requirements(file_path: Path):
     
     return requirements 
 
-setup(
-    name='mm',
-    version=get_version(),
-    python_requires='>=3.9',
-    description=('Template'),
-    long_description=README,
-    long_description_content_type='text/markdown',
-    # packages=['athena'] + [str(x) for x in Path('athena').rglob('*/') if x.is_dir() and '__' not in str(x)],
-    packages=find_packages(exclude=[]),
-    package_data={
-        '': ['*.yaml', '*.json'], },
-    include_package_data=True,
-    install_requires=parse_requirements(PARENT / 'mm/segmentation/requirements.txt'),
-)
+# setup(
+#     name='mm',
+#     version=get_version(),
+#     python_requires='>=3.9',
+#     description=('Template'),
+#     long_description=README,
+#     long_description_content_type='text/markdown',
+#     # packages=['athena'] + [str(x) for x in Path('athena').rglob('*/') if x.is_dir() and '__' not in str(x)],
+#     packages=find_packages(exclude=[]),
+#     package_data={
+#         '': ['*.yaml', '*.json'], },
+#     include_package_data=True,
+#     # install_requires=parse_requirements(PARENT / 'mm/segmentation/requirements.txt') + ["nvidia-ml-py3", "imgviz"],
+#     # install_requires=["nvidia-ml-py3", "imgviz"],
+# )
 
+try:
+    setup(
+        name='mm',
+        version='{{VERSION_PLACEHOLDER}}',
+        python_requires='>=3.9',
+        description=('Template for Python Athena'),
+        long_description=README,
+        long_description_content_type='text/markdown',
+        # packages=['athena'] + [str(x) for x in Path('athena').rglob('*/') if x.is_dir() and '__' not in str(x)],
+        packages=find_packages(exclude=[]),
+        package_data={
+            '': ['*.yaml', '*.json'], },
+        include_package_data=True,
+        install_requires=["nvidia-ml-py3", 'imgviz'],
+    )
+except:
+    setup(
+        name='mm',
+        version=get_version(),
+        python_requires='>=3.9',
+        description=('Template for Python Athena'),
+        long_description=README,
+        long_description_content_type='text/markdown',
+        # packages=['athena'] + [str(x) for x in Path('athena').rglob('*/') if x.is_dir() and '__' not in str(x)],
+        packages=find_packages(exclude=[]),
+        package_data={
+            '': ['*.yaml', '*.json'], },
+        include_package_data=True,
+        # install_requires=["nvidia-ml-py3"],
+        install_requires=["nvidia-ml-py3"],
+    )

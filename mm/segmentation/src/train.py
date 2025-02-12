@@ -306,7 +306,7 @@ def main4():
     from datetime import datetime 
     now = datetime.now()
     # output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/cosnet/train'
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/cosnet/outputs/SEGMENTATION'
     input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
     classes = ['background', 'line', 'stabbed']
 
@@ -330,9 +330,9 @@ def main4():
     }
     
     
-    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
+    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}', 'train')     
     if not osp.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir)
         
     val_dir = osp.join(output_dir, 'val')
     os.mkdir(val_dir)
@@ -397,7 +397,7 @@ def main4():
     runner.train()
 
 if __name__ == '__main__':
-    main()
+    # main()
     # main2()
     # main3()
-    # main4()
+    main4()

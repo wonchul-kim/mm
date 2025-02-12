@@ -1,7 +1,7 @@
-ARG PYTORCH="1.11.0"
-ARG CUDA="11.3"
+ARG PYTORCH="2.1.2"
+ARG CUDA="11.8"
 ARG CUDNN="8"
-ARG MMCV="2.0.1"
+ARG MMCV="2.1.0"
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 
