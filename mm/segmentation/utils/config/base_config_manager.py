@@ -48,6 +48,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_m2f_config
         elif args.model == 'cosnet':
             self.manage_model_config = self.manage_cosnet_config
+        elif args.model == 'deeplabv3plus':
+            self.manage_model_config = self.manage_deeplabv3plus_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
     
@@ -198,6 +200,27 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         _manage_encoder_weights(self._cfg)
+        
+    def manage_deeplabv3plus_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                    
+                    if 'auxiliary_head' in cfg.model and 'num_classes' in cfg.model.auxiliary_head:
+                        cfg.model.auxiliary_head.num_classes = num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
         
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
