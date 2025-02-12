@@ -64,12 +64,14 @@ def main():
 
     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
 
-    config_file = ROOT / f'../configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
+    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}_8xb2.py'
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
     config_manager.manage_schedule_config(args.max_iters, args.val_interval)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
     config_manager.manage_default_hooks_config(args.default_hooks)
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
@@ -385,7 +387,7 @@ def main4():
     runner.train()
 
 if __name__ == '__main__':
-    # main()
+    main()
     # main2()
     # main3()
-    main4()
+    # main4()
