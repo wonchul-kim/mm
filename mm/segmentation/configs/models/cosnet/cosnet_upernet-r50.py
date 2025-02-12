@@ -6,10 +6,9 @@ _base_ = [
 ]
 
 norm_cfg = dict(type='BN', requires_grad=True)
-# model settings
 model = dict(
     type='EncoderDecoder',
-    pretrained='/HDD/weights/cosnet/cosnet_imagenet1k.pth.tar',
+    pretrained=None,
     backbone=dict(
         type='COSNet',
         depths=[3, 3, 12, 3],
@@ -34,19 +33,8 @@ optim_wrapper = dict(
     # paramwise_cfg=dict(custom_keys=custom_keys, norm_decay_mult=0.0)
 )
 
-# # learning policy
-# lr_config = dict(policy='poly', warmup='linear', warmup_iters=1500,
-#                  warmup_ratio=1e-6, power=1.0, min_lr=1e-8, by_epoch=False)
-
 # learning policy
 param_scheduler = [
-    # dict(
-    #     type='PolyLR',
-    #     eta_min=0,
-    #     power=0.9,
-    #     begin=0,
-    #     end=160000,
-    #     by_epoch=False)
     dict(
         type='LinearLR',
         start_factor=1e-6,

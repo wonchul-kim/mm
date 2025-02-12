@@ -189,9 +189,15 @@ class BaseConfigManager:
             cfg.crop_size = new_crop_size 
             cfg.data_preprocessor.size = new_crop_size
             cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_encoder_weights(cfg):
+            from mm.utils.weights import get_weights_from_nexus
+
+            cfg.model.pretrained = get_weights_from_nexus('segmentation', 'mmseg', 'cosnet', 'imagenet1k' , 'pth.tar')
 
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
+        _manage_encoder_weights(self._cfg)
         
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
