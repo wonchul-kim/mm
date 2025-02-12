@@ -1,9 +1,6 @@
 
 import os.path as osp
 
-from mmengine.config import Config
-import warnings
-
 def create_custom_dataset(dataset_type):
     import importlib.util
     import os
@@ -42,8 +39,8 @@ class BaseConfigManager:
     
     def build(self, args, config_file):
                 
-        if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
-            create_custom_dataset(args.dataset_type)
+        # if 'dataset_type' in args and args.dataset_type in ['mask', 'labelme']:
+        #     create_custom_dataset(args.dataset_type)
             
         self._cfg, self._args = self.build_config(args, config_file)
         
@@ -51,6 +48,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_m2f_config
         elif args.model == 'cosnet':
             self.manage_model_config = self.manage_cosnet_config
+        elif args.model == 'deeplabv3plus':
+            self.manage_model_config = self.manage_deeplabv3plus_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
     
@@ -59,6 +58,10 @@ class BaseConfigManager:
             if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
                 cfg.train_cfg.max_iters = max_iters
                 cfg.train_cfg.val_interval = val_interval
+            elif cfg.train_cfg.get('type') == 'IterBasedTrainLoopV2':
+                cfg.train_cfg.max_iters = max_iters
+                cfg.train_cfg.val_interval = val_interval
+                
         def _manage_param_scheduler(cfg):
             if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
                 for scheduler in cfg.param_scheduler:
@@ -70,13 +73,17 @@ class BaseConfigManager:
         _manage_param_scheduler(self._cfg)
                    
     # set dataset ====================================================================================================
-    def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, classes, batch_size, width, height):
+    def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, 
+                                    classes, batch_size, width, height, 
+                                    rois, patch):
         def _manage_train_dataloader(cfg):
             cfg.train_dataloader.batch_size = batch_size
             cfg.train_dataloader.dataset['data_root'] = data_root
             cfg.train_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
             cfg.train_dataloader.dataset['classes'] = classes
             cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.train_dataloader.dataset['rois'] = rois
+            cfg.train_dataloader.dataset['patch'] = patch
             
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
@@ -84,6 +91,8 @@ class BaseConfigManager:
             cfg.val_dataloader.dataset['classes'] = classes
             cfg.val_dataloader.dataset['img_suffix'] = img_suffix
             cfg.val_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
+            cfg.val_dataloader.dataset['rois'] = rois
+            cfg.val_dataloader.dataset['patch'] = patch
             
         def _manage_test_dataloader(cfg):
             cfg.test_dataloader.batch_size = batch_size
@@ -91,13 +100,17 @@ class BaseConfigManager:
             cfg.test_dataloader.dataset['seg_map_suffix'] = seg_map_suffix
             cfg.test_dataloader.dataset['classes'] = classes
             cfg.test_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.test_dataloader.dataset['rois'] = rois
+            cfg.test_dataloader.dataset['patch'] = patch
         
-        def _manage_crop_size(cfg, width, height):
+        def _manage_crop_size(cfg, width, height, patch=None):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
                 for pipeline in cfg.train_pipeline:
                     if pipeline.get('type') == 'RandomCrop':
                         pipeline['crop_size'] = (height, width)
                         
+                    if pipeline.get('type') == 'Resize':
+                        pipeline['scale'] = (width, height)
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
                     cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
@@ -109,18 +122,21 @@ class BaseConfigManager:
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
                     
-                    
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.val_pipeline):
                     cfg.val_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
                     cfg.val_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
-                for pipeline in cfg.test_pipeline:
+                resize_index = 0
+                for idx, pipeline in enumerate(cfg.test_pipeline):
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
-                    
-                    
+                        resize_index = idx
+                        
+                if patch and patch['use_patch']:
+                    del cfg.test_pipeline[resize_index]
+                        
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
                 else:
@@ -138,7 +154,7 @@ class BaseConfigManager:
         if hasattr(self._cfg, 'width'):
             self._cfg.width = width
 
-        _manage_crop_size(self._cfg, width, height)
+        _manage_crop_size(self._cfg, width, height, self.args.patch if hasattr(self.args, 'patch') else None)
 
     # set num_classes =================================================================================
     def manage_m2f_config(self, num_classes, width, height):
@@ -175,6 +191,33 @@ class BaseConfigManager:
             cfg.crop_size = new_crop_size 
             cfg.data_preprocessor.size = new_crop_size
             cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_encoder_weights(cfg):
+            from mm.utils.weights import get_weights_from_nexus
+
+            cfg.model.pretrained = get_weights_from_nexus('segmentation', 'mmseg', 'cosnet', 'imagenet1k' , 'pth.tar')
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_encoder_weights(self._cfg)
+        
+    def manage_deeplabv3plus_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                    
+                    if 'auxiliary_head' in cfg.model and 'num_classes' in cfg.model.auxiliary_head:
+                        cfg.model.auxiliary_head.num_classes = num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
 
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
@@ -256,7 +299,10 @@ class BaseConfigManager:
                     raise RuntimeError(f"Output directory must be defined")
                 else:
                     output_dir = val['output_dir']
-                _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir))
+                    
+                _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
+                                          annotate=val.get('annotate', False), 
+                                          contour_thres=val.get('contour_thres', 50)))
             
             elif key == 'aiv':
                 if val.get('use', False):

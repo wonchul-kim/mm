@@ -14,6 +14,7 @@ num_classes: 4
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
+rois: [[220, 60, 1340, 868]]
 
 # model ======================================================
 model: 'mask2former'

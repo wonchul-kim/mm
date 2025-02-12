@@ -19,6 +19,7 @@ from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
 from mm.segmentation.utils.functions import add_params_to_args
 from mm.segmentation.src.models.mask2former import backbone_weights_map
+import mm.segmentation.utils.transforms.loading
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -53,10 +54,36 @@ def parse_args():
 
 
 def main():
+      
     # set config =======================================================================================================
     args = parse_args()
-    add_params_to_args(args, ROOT / 'params/m2f.yaml')
+    add_params_to_args(args, ROOT / 'params/m2f_roi.yaml')
 
+    from datetime import datetime 
+    now = datetime.now()
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
+    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')
+    if not osp.exists(output_dir):
+        os.mkdir(output_dir)
+        
+    val_dir = osp.join(output_dir, 'val')
+    os.mkdir(val_dir)
+    
+    debug_dir = osp.join(output_dir, 'debug')
+    os.mkdir(debug_dir)
+    
+    logs_dir = osp.join(output_dir, 'logs')
+    os.mkdir(logs_dir)
+    
+    weights_dir = osp.join(output_dir, 'weights')
+    os.mkdir(weights_dir)
+    
+    args.output_dir = output_dir
+    args.custom_hooks['visualize_val']['output_dir'] = val_dir
+    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
+    args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
+    args.custom_hooks['checkpoint']['output_dir'] = weights_dir
+    
     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
 
     config_file = ROOT / f'../../configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
@@ -64,7 +91,9 @@ def main():
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
     config_manager.manage_schedule_config(args.max_iters, args.val_interval)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
     config_manager.manage_default_hooks_config(args.default_hooks)
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)

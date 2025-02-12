@@ -55,7 +55,9 @@ def main():
     config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois)
     config_manager.manage_custom_test_hooks_config(args.custom_hooks)
 
     cfg = config_manager.cfg

@@ -1,6 +1,6 @@
 dataset_type: labelme
-data_root: /HDD/datasets/projects/Tenneco/Metalbearing/outer/241120/split_patch_dataset_unit
-output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train
+data_root: /DeepLearning/_athena_tests/datasets/polygon2/split_dataset
+output_dir: null
 load_from: null
 
 # data =========================
@@ -12,11 +12,9 @@ num_classes: 3
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
-# set crop-size/model-size =================================================================================
+# set crop-size/model-size ======================================================
 model: 'mask2former'
 backbone: 'swin-s'
-# height: 768
-# width: 1120
 height: 256
 width: 512
 
@@ -24,7 +22,6 @@ width: 512
 batch_size: 1
 amp: True
 max_iters: 20000
-# val_interval: 1000
 val_interval: 50
 
 default_hooks:
@@ -33,18 +30,39 @@ default_hooks:
 # etc.
 resume: False
 
+# rois [[x1, y1, x2, y2], ...]====================================================
+rois: [[220, 60, 1340, 828]]
+# rois: [[]]
+
+# patch ===================================================
+patch:
+  use_patch: true
+  include_point_positive: false
+  centric: false
+  sliding: true
+  width: 512
+  height: 256
+  overlap_ratio: 0.2
+  num_involved_pixel: 10
+  sliding_bg_ratio: 0
+  bg_ratio_by_image: 0
+  bg_start_train_epoch_by_image: 1
+  bg_start_val_epoch_by_image: 1
+  translate: 0.1
+  translate_range_width: 10
+  translate_range_height: 10
 
 # custom hooks ==========================
 custom_hooks:
   visualize_val:
     freq_epoch: 1
     ratio: 0.5
-    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/val
+    output_dir: null
 
   before_train:
     debug_dataloader:
       ratio: 0.5
-      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/debug
+      output_dir: null
 
   after_train_epoch:
 
@@ -53,7 +71,7 @@ custom_hooks:
   aiv:
     use: true
     logging: 
-      output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/logs
+      output_dir: null
 
       monitor: 
         use: true 
@@ -65,4 +83,4 @@ custom_hooks:
     interval: 1000
     by_epoch: false 
     save_best: 'mIoU'
-    output_dir: /HDD/etc/etc/outputs/SEGMENTATION/1234/train/weights
+    output_dir: null

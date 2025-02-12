@@ -27,4 +27,4 @@ class VisualizeVal(Hook):
         current_epoch = current_iter // iters_per_epoch
             
         if current_epoch%self.freq_epoch == 0:
-            vis_val(outputs, self.ratio, self.output_dir, current_epoch)
+            vis_val(outputs, self.ratio, self.output_dir, current_epoch, batch_idx)
