@@ -395,7 +395,7 @@ def main4():
     runner.train()
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
     # main3()
     # main4()
