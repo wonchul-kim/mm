@@ -53,6 +53,8 @@ class BaseConfigManager:
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
     
+        self.manage_frozen_stages(args.frozen_stages)
+    
     def manage_schedule_config(self, max_iters, val_interval):
         def _manage_train_loop(cfg):
             if cfg.train_cfg.get('type') == 'IterBasedTrainLoop':
@@ -325,3 +327,20 @@ class BaseConfigManager:
                 self._cfg.custom_hooks = _custom_hooks
             else:
                 self._cfg.custom_hooks += _custom_hooks
+        
+    # freeze backbone ==================================================================================
+    def manage_frozen_stages(self, frozen_stages):
+        
+        if frozen_stages != -1:
+
+            if hasattr(self._cfg.model.backbone, 'frozen_stages'):
+                if self._cfg.model.backbone.type == 'SwinTransformer':
+                    assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                
+                self._cfg.model.backbone.frozen_stages = frozen_stages
+            else:
+                raise RuntimeError(f"There is no `frozen_stages` in backbone, YOU NEED TO CHECK!")
+            
+        
+                
+    

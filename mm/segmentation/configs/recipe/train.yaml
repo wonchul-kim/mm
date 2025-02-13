@@ -14,6 +14,7 @@ model: null
 backbone: null
 height: null
 width: null
+frozen_stages: 3
 
 rois: [[]]
 

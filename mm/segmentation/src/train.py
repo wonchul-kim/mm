@@ -109,7 +109,7 @@ def main2():
 
     from datetime import datetime 
     now = datetime.now()
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION'
     input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
     classes = ['background', 'line', 'stabbed']
 
@@ -155,7 +155,7 @@ def main2():
     args.num_classes = len(classes)
     
     args.model= 'mask2former'
-    args.backbone = 'swin-l-in22k'
+    args.backbone = 'swin-s'
     args.height = 256
     args.width = 512
     
@@ -173,7 +173,7 @@ def main2():
     
     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
 
-    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}_8xb2.py'
+    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
@@ -207,8 +207,7 @@ def main3():
 
     from datetime import datetime 
     now = datetime.now()
-    # output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/cosnet/train'
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/cosnet/outputs/SEGMENTATION'
     input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
     classes = ['background', 'line', 'stabbed']
 
@@ -305,7 +304,6 @@ def main4():
 
     from datetime import datetime 
     now = datetime.now()
-    # output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train'
     output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/cosnet/outputs/SEGMENTATION'
     input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
     classes = ['background', 'line', 'stabbed']
@@ -397,7 +395,7 @@ def main4():
     runner.train()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()
     # main3()
     # main4()
