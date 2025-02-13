@@ -144,7 +144,8 @@ class LabelmeDataset(BaseSegDataset):
                 logger=None,
                 )
                 slicer.run()
-                slicer.save_imgs_info(output_dir='/HDD/etc/etc')
+                if self._logs_dir:
+                    slicer.save_imgs_info(output_dir=self._logs_dir)
                 imgs_info, num_data = slicer.imgs_info, slicer.num_data
                 assert (
                     num_data != 0
