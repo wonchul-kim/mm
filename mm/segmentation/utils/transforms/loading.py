@@ -111,7 +111,7 @@ def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None,
         
         assert osp.exists(json_file), ValueError(f"There is no annotation file: {json_file} to {mode}")
         if metis is None:
-            with open(json_file) as f:
+            with open(json_file, encoding='utf-8') as f:
                 anns = json.load(f)
         else:
             anns = {"shapes": metis}
@@ -150,7 +150,7 @@ def get_mask_from_labelme(mode, json_file, class2label, width=None, height=None,
     elif mode == 'test':
         if osp.exists(json_file):
             if metis is None:
-                with open(json_file) as f:
+                with open(json_file, encoding='utf-8') as f:
                     anns = json.load(f)
             else:
                 anns = {"shapes": metis}
