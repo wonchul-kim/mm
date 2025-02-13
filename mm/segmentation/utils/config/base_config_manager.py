@@ -246,6 +246,7 @@ class BaseConfigManager:
             if key == 'checkpoint':
                 _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
                                         by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
+                                        max_keep_ckpts=val.get('max_keep_ckpts', 2),
                                         out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
                                     )
             

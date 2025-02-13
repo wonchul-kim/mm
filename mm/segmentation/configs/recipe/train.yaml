@@ -80,3 +80,4 @@ custom_hooks:
     by_epoch: false 
     save_best: 'mIoU'
     output_dir: null
+    max_keep_ckpts: 2
