@@ -73,7 +73,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
     
-    config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
+    config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}.py'
     config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
@@ -182,5 +182,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
