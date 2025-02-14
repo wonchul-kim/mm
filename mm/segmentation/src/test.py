@@ -77,7 +77,10 @@ def main():
     config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, args.classes, args.batch_size, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, 
+                                         args.seg_map_suffix, args.classes, 
+                                         args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
     config_manager.manage_custom_test_hooks_config(args.custom_hooks)
 
     cfg = config_manager.cfg
@@ -91,8 +94,8 @@ def main():
     runner.test()
 
 def main2():
-    output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mm_m2f/train/2_6_15_37_14/weights/iter_20000.pth"
+    output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/train/weights/best_mIoU_iter_20.pth"
     classes = ['background', 'line', 'stabbed']
     # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
     # rois = [[]]
@@ -162,7 +165,7 @@ def main2():
     args.custom_hooks['visualize_test']['contour_thres'] = 50
     args.custom_hooks['visualize_test']['annotate'] = True
 
-    config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}_8xb2.py'
+    config_file = ROOT / f'segmentation/configs/models/mask2former/{args.model}_{args.backbone}.py'
     config_manager = TestConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
