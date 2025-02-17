@@ -27,7 +27,7 @@ val_pipeline = [
 ]
 test_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
-    dict(type='Resize', scale=(width, height), keep_ratio=False),
+    # dict(type='Resize', scale=(width, height), keep_ratio=False),
     dict(type='RandomFlip', prob=0.0),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform

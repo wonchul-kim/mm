@@ -137,8 +137,8 @@ class BaseConfigManager:
                         pipeline['scale'] = (width, height)
                         resize_index = idx
                         
-                if patch and patch['use_patch']:
-                    del cfg.test_pipeline[resize_index]
+                # if patch and patch['use_patch']:
+                #     del cfg.test_pipeline[resize_index]
                         
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))

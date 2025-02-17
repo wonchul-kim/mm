@@ -95,8 +95,9 @@ def main():
 
 def main2():
     output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/train/weights/best_mIoU_iter_20.pth"
-    classes = ['background', 'line', 'stabbed']
+    # weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/train/weights/best_mIoU_iter_20.pth"
+    weights = "/HDD/etc/tenneco/outputs/weights/best_mIoU_iter_9115.pth"
+    classes = ['background', 'a', 'b', 'c']
     # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
     # rois = [[]]
     # patch = {
@@ -118,10 +119,10 @@ def main2():
     # }
 
 
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/val"
+    input_dir = "/HDD/etc/tenneco/test_images"
     rois = [[220, 60, 1340, 828]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
@@ -155,8 +156,8 @@ def main2():
     
     args.model= 'mask2former'
     args.backbone = 'swin-s'
-    args.height = 256
-    args.width = 512
+    args.height = 768
+    args.width = 1120
     
     args.rois = rois
     args.patch = patch
