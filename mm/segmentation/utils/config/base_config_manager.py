@@ -336,7 +336,7 @@ class BaseConfigManager:
 
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
-                    assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 
                 self._cfg.model.backbone.frozen_stages = frozen_stages
             else:
