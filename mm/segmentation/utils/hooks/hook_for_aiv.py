@@ -140,11 +140,13 @@ class HookForAiv(Hook):
                 for gpu, gpu_log in runner.train_gpu_logger.mean().items():
                     for key, val in gpu_log.items():
                         train_log[f"{gpu} {key}"] = val
+                runner.train_gpu_logger.clear()
                     
             # time
             if hasattr(runner, 'time_duration'):
                 runner.time_duration['train']['tac'] = time.perf_counter()
                 train_log['duration (sec)'] = runner.time_duration['train']['tac'] - runner.time_duration['train']['tic']
+                runner.time_duration['train']['tic'] = time.perf_counter()
                 
             # save --------------------------------------------------------
             runner.train_log = train_log
@@ -184,7 +186,6 @@ class HookForAiv(Hook):
         """
         # time
         runner.time_duration['val']['tic'] = time.perf_counter()
-
 
     def after_val_iter(self,
                     runner,
@@ -234,7 +235,7 @@ class HookForAiv(Hook):
             if hasattr(runner, 'time_duration'):
                 runner.time_duration['val']['tac'] = time.perf_counter()
                 val_log['duration (sec)'] = runner.time_duration['val']['tac'] - runner.time_duration['val']['tic']
-            
+                
         # save --------------------------------------------
         runner.val_log = val_log
         if hasattr(runner, 'aiv_val_monitor'):
