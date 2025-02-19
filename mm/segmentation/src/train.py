@@ -86,6 +86,10 @@ def main():
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
+    cfg.model_wrapper_cfg=dict(
+        type='MMDistributedDataParallel',
+        find_unused_parameters=True
+    )
 
     # ================================================================================================================
     if 'runner_type' not in cfg:
