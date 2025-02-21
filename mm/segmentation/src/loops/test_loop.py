@@ -6,6 +6,32 @@ from mmengine.registry import LOOPS
 from mmengine.runner.amp import autocast
 from mmengine.runner.loops import TestLoop, _parse_losses, _update_losses
 
+def translate_tensor(tensor, shift_x, shift_y):
+    import torch.nn.functional as F
+    _, h, w = tensor.shape
+    pad_x = abs(shift_x)
+    pad_y = abs(shift_y)
+    
+    # 패딩 적용
+    padded = F.pad(tensor, (pad_x, pad_x, pad_y, pad_y), mode='constant', value=0)
+    
+    # 이동된 영역 추출
+    if shift_y >= 0:
+        start_y = pad_y*2
+        end_y = start_y + h
+    else:
+        start_y = 0
+        end_y = start_y + h
+    if shift_x >= 0:
+        start_x = pad_x*2
+        end_x = start_x + w
+    else:
+        start_x = 0
+        end_x = start_x + w
+    
+    translated = padded[:, start_y:end_y, start_x:end_x]
+    
+    return translated
 
 @LOOPS.register_module()
 class TestLoopV2(TestLoop):
@@ -193,10 +219,13 @@ class TestLoopV2(TestLoop):
             batch_idx=idx,
             data_batch=data_batch,
             outputs=outputs)
+    
+
+                           
                             
     @torch.no_grad()
     def run_tta_batch(self, data_batch):               
-        from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip
+        from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, RandomRotation
         from mmengine.structures import PixelData
 
         augs = self.runner.cfg.tta['augs']
@@ -217,6 +246,25 @@ class TestLoopV2(TestLoop):
                     new_data_batch['inputs'].append(RandomVerticalFlip(1)(batch_input))
                     new_data_batch['data_samples'].append(batch_data_sample)
                     
+                if key == 'Rotate' and val:
+                    if isinstance(val, str):
+                        val = [int(x.strip()) for x in val.split(',')]
+                    elif isinstance(val, int):
+                        val = [val]
+                    
+                    for degree in val:                    
+                        new_data_batch['inputs'].append(RandomRotation(degree)(batch_input))
+                        new_data_batch['data_samples'].append(batch_data_sample)
+                        
+                if key == 'Translate' and val:
+                    if isinstance(val, str):
+                        val = [int(x.strip()) for x in val.split(',')]
+                    elif isinstance(val, int):
+                        val = [val]
+                        
+                    new_data_batch['inputs'].append(translate_tensor(batch_input, val[0], val[1]))
+                    new_data_batch['data_samples'].append(batch_data_sample)
+                    
             batch_output = self.runner.model.test_step(new_data_batch)
             
             idx = 0
@@ -227,6 +275,25 @@ class TestLoopV2(TestLoop):
             
                 if key == 'VerticalFlip' and val:
                     batch_output[idx + 1].seg_logits = PixelData(data=RandomVerticalFlip(1)(batch_output[idx + 1].seg_logits.data))
+                    idx += 1
+                    
+                if key == 'Rotate' and val:
+                    if isinstance(val, str):
+                        val = [int(x.strip()) for x in val.split(',')]
+                    elif isinstance(val, int):
+                        val = [val]
+                    
+                    for degree in val:                    
+                        batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
+                        idx += 1
+                        
+                if key == 'Translate' and val:
+                    if isinstance(val, str):
+                        val = [int(x.strip()) for x in val.split(',')]
+                    elif isinstance(val, int):
+                        val = [val]
+                    
+                    batch_output[idx + 1].seg_logits = PixelData(data=translate_tensor(batch_output[idx + 1].seg_logits.data, -val[0], -val[1]))
                     idx += 1
             
             seg_logits = batch_output[0].seg_logits.data
@@ -243,6 +310,7 @@ class TestLoopV2(TestLoop):
                             ).to(logits).squeeze(1)
             else:
                 seg_pred = logits.argmax(dim=0)
+            data_sample.set_data({'seg_logits': PixelData(data=logits)})
             data_sample.set_data({'pred_sem_seg': PixelData(data=seg_pred)})
             if hasattr(batch_output[0], 'gt_sem_seg'):
                 data_sample.set_data(

@@ -14,10 +14,12 @@ rois: [[]]
 
 # tta ======================================================
 tta:
-  use: false
+  use: true
   augs: 
     HorizontalFlip: true 
     VerticalFlip: true
+    Rotate: 90
+    Translate: 100,100
 
 
 # patch ===================================================
