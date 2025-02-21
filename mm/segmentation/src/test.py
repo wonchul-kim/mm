@@ -177,14 +177,9 @@ def main2():
 
     cfg = config_manager.cfg
 
-    if args.tta:
-        cfg.test_dataloader.dataset.pipeline = cfg.tta_pipeline
-        cfg.tta_model.module = cfg.model
-        cfg.model = cfg.tta_model
-
     runner = Runner.from_cfg(cfg)
     runner.test()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()

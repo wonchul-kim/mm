@@ -12,6 +12,14 @@ seg_map_suffix: '.json'
 # rois ====================================================
 rois: [[]]
 
+# tta ======================================================
+tta:
+  use: false
+  augs: 
+    HorizontalFlip: true 
+    VerticalFlip: true
+
+
 # patch ===================================================
 patch:
   use_patch: false
@@ -43,7 +51,6 @@ out: null
 batch_size: 1
 
 # etc. ===================================================
-tta: False
 # wait_time: 2
 # show: False
 

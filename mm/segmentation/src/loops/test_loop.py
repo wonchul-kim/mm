@@ -21,7 +21,10 @@ class TestLoopV2(TestLoop):
                 _size = self.run_iter_patch(idx, data_batch)
                 metrics = self.evaluator.evaluate(_size)
             else:
-                self.run_iter(idx, data_batch)
+                if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                    self.run_iter_tta(idx, data_batch)
+                else:
+                    self.run_iter(idx, data_batch)
                 metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
         if self.test_loss:
@@ -115,7 +118,10 @@ class TestLoopV2(TestLoop):
                         patch_data_batch = {'inputs': inputs, 'data_samples': data_samples}   
                     
                         with autocast(enabled=self.fp16):
-                            outputs = self.runner.model.test_step(patch_data_batch)
+                            if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                                outputs = self.run_tta_batch(patch_data_batch)
+                            else:
+                                outputs = self.runner.model.test_step(patch_data_batch)
 
                         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
                         eval_outputs, eval_inputs, eval_data_samples = [], [], []
@@ -165,3 +171,83 @@ class TestLoopV2(TestLoop):
 
 
         return eval_cnt
+    
+    @torch.no_grad()
+    def run_iter_tta(self, idx, data_batch: Sequence[dict]) -> None:
+        """Iterate one mini-batch.
+
+        Args:
+            data_batch (Sequence[dict]): Batch of data from dataloader.
+        """
+        self.runner.call_hook(
+            'before_test_iter', batch_idx=idx, data_batch=data_batch)
+                
+        with autocast(enabled=self.fp16):
+            outputs = self.run_tta_batch(data_batch)
+
+        outputs, self.test_loss = _update_losses(outputs, self.test_loss)
+
+        self.evaluator.process(data_samples=outputs, data_batch=data_batch)
+        self.runner.call_hook(
+            'after_test_iter',
+            batch_idx=idx,
+            data_batch=data_batch,
+            outputs=outputs)
+                            
+    @torch.no_grad()
+    def run_tta_batch(self, data_batch):               
+        from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip
+        from mmengine.structures import PixelData
+
+        augs = self.runner.cfg.tta['augs']
+        batch_inputs = data_batch['inputs']
+        batch_data_samples = data_batch['data_samples']
+        
+        new_data_batch = {'inputs': [], 'data_samples': []}
+        batch_outputs = []
+        for batch_input, batch_data_sample in zip(batch_inputs, batch_data_samples):
+            new_data_batch['inputs'].append(batch_input)
+            new_data_batch['data_samples'].append(batch_data_sample)
+            for key, val in augs.items():
+                if key == 'HorizontalFlip' and val:
+                    new_data_batch['inputs'].append(RandomHorizontalFlip(1)(batch_input))
+                    new_data_batch['data_samples'].append(batch_data_sample)
+                
+                if key == 'VerticalFlip' and val:
+                    new_data_batch['inputs'].append(RandomVerticalFlip(1)(batch_input))
+                    new_data_batch['data_samples'].append(batch_data_sample)
+                    
+            batch_output = self.runner.model.test_step(new_data_batch)
+            
+            idx = 0
+            for key, val in augs.items():
+                if key == 'HorizontalFlip' and val:
+                    batch_output[idx + 1].seg_logits = PixelData(data=RandomHorizontalFlip(1)(batch_output[idx + 1].seg_logits.data))
+                    idx += 1
+            
+                if key == 'VerticalFlip' and val:
+                    batch_output[idx + 1].seg_logits = PixelData(data=RandomVerticalFlip(1)(batch_output[idx + 1].seg_logits.data))
+                    idx += 1
+            
+            seg_logits = batch_output[0].seg_logits.data
+            logits = torch.zeros(seg_logits.shape).to(seg_logits)
+            for data_sample in batch_output:
+                seg_logit = data_sample.seg_logits.data
+                if self.runner.model.out_channels > 1:
+                    logits += seg_logit.softmax(dim=0)
+                else:
+                    logits += seg_logit.sigmoid()
+            logits /= len(batch_output)
+            if self.runner.model.out_channels == 1:
+                seg_pred = (logits > self.runner.model.decode_head.threshold
+                            ).to(logits).squeeze(1)
+            else:
+                seg_pred = logits.argmax(dim=0)
+            data_sample.set_data({'pred_sem_seg': PixelData(data=seg_pred)})
+            if hasattr(batch_output[0], 'gt_sem_seg'):
+                data_sample.set_data(
+                    {'gt_sem_seg': batch_output[0].gt_sem_seg})
+            data_sample.set_metainfo({'img_path': batch_output[0].img_path})
+            batch_outputs.append(data_sample)
+            
+        return batch_outputs
