@@ -221,8 +221,8 @@ def main3():
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
-        "width": 512,
-        "height": 256,
+        "width": 1120,
+        "height": 768,
         "overlap_ratio": 0.2,
         "num_involved_pixel": 10,
         "sliding_bg_ratio": 0,
@@ -258,8 +258,9 @@ def main3():
     
     args.model= 'cosnet'
     args.backbone = 'upernet-r50'
-    args.height = 256
-    args.width = 512
+    args.height = 768
+    args.width = 1120
+    args.frozen_stages = 3
     
     args.rois = rois
     args.patch = patch
