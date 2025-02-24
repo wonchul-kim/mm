@@ -358,6 +358,7 @@ def main4():
     args.backbone = 'r101-d8'
     args.height = 256
     args.width = 512
+    args.frozen_stages = 3
     
     args.rois = rois
     args.patch = patch
@@ -371,8 +372,7 @@ def main4():
     args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
     args.custom_hooks['checkpoint']['output_dir'] = weights_dir
     
-    # args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, cosnet_backbone_weights_map[args.backbone], 'pth')
-    args.load_from = '/HDD/weights/mmseg/deeplabv3plus/deeplabv3plus_r50-d8_512x512_160k_ade20k_20200615_124504-6135c7e0.pth'
+    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, dlabv3plus_backbone_weights_map[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
