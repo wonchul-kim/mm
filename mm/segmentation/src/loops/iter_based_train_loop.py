@@ -59,7 +59,7 @@ class IterBasedTrainLoopV2(IterBasedTrainLoop):
         
     @torch.no_grad()
     def run_eval_iter(self, data_batch: Sequence[dict]):
-
+        self.runner.model.eval()
         outputs = self.runner.model.val_step(data_batch)
         outputs, self.train_loss = _update_losses(outputs, self.train_loss)
         self.evaluator.process(data_samples=outputs, data_batch=data_batch)
