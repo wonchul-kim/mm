@@ -84,15 +84,14 @@ test_dataloader = dict(
         seg_map_suffix='.png',
         pipeline=val_pipeline))
 
-val_evaluator = dict(type='IoUMetricV2', iou_metrics=['mIoU', 'mDice', 'mFscore'],
+train_evaluator = dict(type='IoUMetricV2', iou_metrics=['mIoU', 'mDice', 'mFscore'],
                      keep_results=True, classwise=True)
+val_evaluator = train_evaluator
 test_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore'],
                      keep_results=True, classwise=True)
 
 train_cfg = dict(
     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=50, 
-    evaluator=val_evaluator)
-# train_cfg = dict(
-#     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=5000)
+    evaluator=train_evaluator)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoopV2')
