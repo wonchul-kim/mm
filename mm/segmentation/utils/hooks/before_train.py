@@ -24,5 +24,6 @@ class HookBeforeTrain(Hook):
             #                                     self.vis_dataloader_ratio, self.vis_dataloader_dir)
             Thread(target=vis_dataloader, args=(deepcopy(runner.train_dataloader.dataset), 'train',
                                                 self.vis_dataloader_ratio, self.vis_dataloader_dir), daemon=True).start()
-            Thread(target=vis_dataloader, args=(deepcopy(runner.val_dataloader), 'val',
+            if hasattr(runner, 'val_dataloader'):
+                Thread(target=vis_dataloader, args=(deepcopy(runner.val_dataloader), 'val',
                                                 self.vis_dataloader_ratio, self.vis_dataloader_dir), daemon=True).start()
