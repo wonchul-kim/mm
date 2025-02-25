@@ -65,6 +65,8 @@ def get_backbone_weights_map(model_name):
         return cosnet_backbone_weights_map
     elif model_name == 'deeplabv3plus':
         return dlabv3plus_backbone_weights_map
+    elif model_name == 'pidnet':
+        return pidnet_backbone_weights_map
     else:
         raise NotImplementedError(f'[ERROR] There is no such model name for backbone-weights-map: {model_name}')
 
