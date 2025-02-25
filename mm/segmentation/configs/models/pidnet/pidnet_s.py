@@ -51,20 +51,20 @@ model = dict(
             dict(
                 type='CrossEntropyLoss',
                 use_sigmoid=False,
-                class_weight=class_weight,
+                class_weight=[1.0] * num_classes,
                 loss_weight=0.4),
             dict(
                 type='OhemCrossEntropy',
                 thres=0.9,
                 min_kept=131072,
-                class_weight=class_weight,
+                class_weight=[1.0] * num_classes,
                 loss_weight=1.0),
             dict(type='BoundaryLoss', loss_weight=20.0),
             dict(
                 type='OhemCrossEntropy',
                 thres=0.9,
                 min_kept=131072,
-                class_weight=class_weight,
+                class_weight=[1.0] * num_classes,
                 loss_weight=1.0)
         ]),
     train_cfg=dict(),

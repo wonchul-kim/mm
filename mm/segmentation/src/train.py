@@ -501,8 +501,8 @@ def main5():
     runner.train()
     
 if __name__ == '__main__':
-    main()
+    # main()
     # main2()
     # main3()
     # main4()
-    # main5()
+    main5()
