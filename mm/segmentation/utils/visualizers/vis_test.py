@@ -6,6 +6,7 @@ import cv2
 
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 
+
 def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=50):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
@@ -68,6 +69,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             gt_vis_img = input_image.copy()
             # gt_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[gt_sem_seg], 0.6, 0)
             gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
+            
             # cv2.rectangle(gt_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
                 
             pred_vis_img = input_image.copy()
@@ -75,10 +77,17 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             pred_vis_img = cv2.addWeighted(input_image, 0.4, color_map[pred_sem_seg], 0.6, 0)
             # cv2.rectangle(pred_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
 
+            vis_legend = np.zeros((input_height, 300, 3), dtype="uint8")
+            for idx, _class in enumerate(classes):
+                color = [int(c) for c in color_map[idx]]
+                cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
+            # vis_legend = cv2.vconcat([text_legends, vis_legend])
+
             if gt_vis_img is not None:
-                vis_img = np.hstack((gt_vis_img, pred_vis_img))
+                vis_img = np.hstack((gt_vis_img, pred_vis_img, vis_legend))
             else:
-                vis_img = pred_vis_img
+                vis_img = np.hstack((pred_vis_img, vis_legend))
             cv2.imwrite(osp.join(output_dir, filename + f'_{idx}_{jdx}.png'), vis_img)
                 
             heatmaps = []
