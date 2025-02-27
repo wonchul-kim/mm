@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
-
+from visionsuite.utils.helpers import get_text_coords
 
 def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=50):
     
@@ -40,6 +40,11 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             else:
                 roi = output.roi
                 
+            gt_vis_img = input_image.copy()
+            # gt_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[gt_sem_seg], 0.6, 0)
+            gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
+            # cv2.rectangle(gt_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
+
             # annotate
             if annotate or not osp.exists(output.seg_map_path):
                 import json 
@@ -49,28 +54,31 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                     os.makedirs(annotation_dir, exist_ok=True)
                 
                 _labelme = init_labelme_json(filename + ".bmp", input_width, input_height)
-                _labelme = get_points_from_image(pred_sem_seg, output.classes,
+                _labelme, label_points = get_points_from_image(pred_sem_seg, output.classes,
                                     roi,
                                     [0, 0],
                                     _labelme,
                                     contour_thres,
+                                    conf=0.5,
+                                    ret_points=True,
                                 )
+                
+                for idx, (label, points) in enumerate(label_points.items()):
+                    for point in points['bbox']:
+                        font_scale = 1
+                        offset_h = 10
+                        cv2.putText(gt_vis_img, label, get_text_coords([[point[0] - roi[0], point[1] - roi[1]], [point[2] - roi[0], point[3] - roi[1]]], 
+                                                                       input_width, input_height, offset_h=offset_h), 
+                                    cv2.FONT_HERSHEY_SIMPLEX, font_scale, tuple(map(int, color_map[idx + 1])), 3)
                 
                 with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
                     json.dump(_labelme, jsf)
             else:
                 _labelme = None
-
                 
             if reduce_zero_label:
                 gt_sem_seg[gt_sem_seg == 255] = -1
                 gt_sem_seg += 1
-        
-            gt_vis_img = input_image.copy()
-            # gt_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[gt_sem_seg], 0.6, 0)
-            gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
-            
-            # cv2.rectangle(gt_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
                 
             pred_vis_img = input_image.copy()
             # pred_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[pred_sem_seg], 0.6, 0)
