@@ -40,7 +40,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                 roi = output.roi
                 
             # annotate
-            if annotate and not osp.exists(output.seg_map_path):
+            if annotate or not osp.exists(output.seg_map_path):
                 import json 
                 
                 annotation_dir = osp.join(output_dir, '..', 'labels')

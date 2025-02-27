@@ -102,7 +102,7 @@ class TestLoopV2(TestLoop):
             vis_gt, vis_pred = np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3)), np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3))
 
             # annotate
-            if annotate and not osp.exists(data_sample.seg_map_path):
+            if annotate or not osp.exists(data_sample.seg_map_path):
                 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 
                 annotation_dir = osp.join(output_dir, '..', 'labels')

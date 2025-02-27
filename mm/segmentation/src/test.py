@@ -94,10 +94,10 @@ def main():
     runner.test()
 
 def main2():
-    output_dir = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/test/exp"
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/cosnet_epochs100/test"
     # weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/train/weights/best_mIoU_iter_20.pth"
-    weights = "/HDD/etc/tenneco/outputs/weights/best_mIoU_iter_9115.pth"
-    classes = ['background', 'a', 'b', 'c']
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/cosnet_epochs100/train/weights/best_mIoU_iter_11446.pth"
+    classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
     # rois = [[]]
     # patch = {
@@ -119,7 +119,7 @@ def main2():
     # }
 
 
-    input_dir = "/HDD/etc/tenneco/test_images"
+    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val_"
     rois = [[220, 60, 1340, 828]]
     patch = {
         "use_patch": False,
@@ -181,5 +181,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
