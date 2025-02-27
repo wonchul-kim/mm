@@ -28,7 +28,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             input_height, input_width = input_image.shape[:2]
             
             # output
-            classes = output.classes
+            classes = output.classes[1:]
             seg_logits = output.seg_logits.data.cpu().detach().numpy()
             gt_sem_seg = output.gt_sem_seg.data.squeeze(0).cpu().detach().numpy()
             pred_sem_seg = output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy()
@@ -54,7 +54,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                     os.makedirs(annotation_dir, exist_ok=True)
                 
                 _labelme = init_labelme_json(filename + ".bmp", input_width, input_height)
-                _labelme, label_points = get_points_from_image(pred_sem_seg, output.classes,
+                _labelme, label_points = get_points_from_image(pred_sem_seg, classes,
                                     roi,
                                     [0, 0],
                                     _labelme,
