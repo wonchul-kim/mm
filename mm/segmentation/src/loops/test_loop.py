@@ -181,6 +181,7 @@ class TestLoopV2(TestLoop):
                 
         with autocast(enabled=self.fp16):
             outputs = self.run_tta_batch(data_batch)
+            # outputs = self.runner.model.test_step(data_batch)
 
         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
 

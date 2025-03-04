@@ -5,7 +5,6 @@ from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, Ran
 from mmengine.structures import PixelData
 
 
-
 def translate_tensor(tensor, shift_x, shift_y):
     _, h, w = tensor.shape
     pad_x = abs(shift_x)
