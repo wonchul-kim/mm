@@ -41,8 +41,10 @@ class ExportConfigManager(BaseConfigManager):
             self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}_tta')
             
         for key, val in args.backend_config.items():
-            self._cfg['backend_config'][key] = val
-            
+            if key == 'fp16_mode' and val:
+                self._cfg['backend_config']['common_config'][key] = val
+                self._cfg['onnx_config']['save_file'] += '_fp16'
+                
         for idx in range(len(self._cfg['onnx_config']['output_names'])):
             self._cfg['backend_config']['model_inputs'][idx] = dict(
                     input_shapes=dict(
