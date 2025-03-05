@@ -77,16 +77,19 @@ def main2():
     
     config_manager = ExportConfigManager()
     config_manager.build(args, str(ROOT / f'segmentation/configs/_base_/onnx_config.py'))
-
+    cfg = config_manager.cfg
+    
     torch2onnx(
-        config_manager.cfg['model_inputs'],
+        cfg['model_inputs'],
         args.work_dir,
-        get_ir_config(config_manager.cfg)['save_file'],
-        deploy_cfg=config_manager.cfg,
+        get_ir_config(cfg)['save_file'],
+        deploy_cfg=cfg,
         model_cfg=args.model_cfg,
         model_checkpoint=args.checkpoint,
-        device=args.device)
+        device=args.device, 
+        tta=cfg.tta)
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    main2()

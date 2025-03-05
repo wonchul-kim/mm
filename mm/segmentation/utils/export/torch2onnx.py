@@ -1,5 +1,5 @@
 import os.path as osp
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Dict
 
 import torch
 import mmengine
@@ -11,7 +11,8 @@ def torch2onnx(model_inputs: torch.Tensor,
                deploy_cfg: Union[str, mmengine.Config],
                model_cfg: Union[str, mmengine.Config],
                model_checkpoint: Optional[str] = None,
-               device: str = 'cuda:0'):
+               device: str = 'cuda:0',
+               tta: Dict = {}):
     from mmdeploy.apis.core.pipeline_manager import no_mp
     from mmdeploy.utils import (Backend, get_backend, get_dynamic_axes,
                                 get_input_shape, get_onnx_config, load_config)
@@ -21,7 +22,7 @@ def torch2onnx(model_inputs: torch.Tensor,
     deploy_cfg, model_cfg = load_config(deploy_cfg, model_cfg)
     mmengine.mkdir_or_exist(osp.abspath(work_dir))
 
-    input_shape = get_input_shape(deploy_cfg)
+    # input_shape = get_input_shape(deploy_cfg)
 
     # create model an inputs
     from mmdeploy.apis import build_task_processor
@@ -37,6 +38,10 @@ def torch2onnx(model_inputs: torch.Tensor,
     #     model_inputs = model_inputs[0]
     # data_samples = data['data_samples']
     # input_metas = {'data_samples': data_samples, 'mode': 'predict'}
+
+    if tta != {} and 'augs' in tta:
+        from mm.segmentation.src.models.tta_model import TTASegModel
+        torch_model = TTASegModel(torch_model, tta['augs'], shape=(deploy_cfg.onnx_config.input_shape[1], deploy_cfg.onnx_config.input_shape[0]))
 
     # export to onnx
     context_info = dict()
