@@ -45,11 +45,12 @@ class TTASegModel(torch.nn.Module):
             outputs: logits - tensor shaped (bs, num_classes, height, width)
         """
 
-    #     outputs = self.forward_tta(inputs=inputs, data_samples=data_samples, mode=mode)
+        outputs = self.forward_tta(inputs=inputs, data_samples=data_samples, mode=mode)
+        # outputs = self.model(inputs=inputs, data_samples=data_samples, mode=mode)
         
-    #     return outputs
+        return outputs
     
-    # def forward_tta(self, inputs: torch.Tensor, data_samples: Optional[list] = None, mode: str = 'tensor'):
+    def forward_tta(self, inputs: torch.Tensor, data_samples: Optional[list] = None, mode: str = 'tensor'):
         batch_inputs = inputs
         
         if data_samples is None:
@@ -199,7 +200,7 @@ class TTASegModel(torch.nn.Module):
                     batch_output[idx + 1].seg_logits = PixelData(data=RandomVerticalFlip(1)(batch_output[idx + 1].seg_logits.data))
                 idx += 1
                 
-            if key == 'Rotate' and val:
+            if key == 'Rotate' and val and val != 0:
                 if isinstance(val, str):
                     val = [int(x.strip()) for x in val.split(',')]
                 elif isinstance(val, int):
