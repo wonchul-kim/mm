@@ -28,9 +28,9 @@ backend_config:
 
 # tta ======================================================
 tta:
-  use: false
+  use: true
   augs: 
-    HorizontalFlip: false
-    VerticalFlip: false
-    Rotate: 0
-    Translate: 0,0
+    HorizontalFlip: true
+    VerticalFlip: true
+    Rotate: 90
+    Translate: 100,100

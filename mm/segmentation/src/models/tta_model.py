@@ -61,14 +61,17 @@ class TTASegModel(torch.nn.Module):
                 name='img_shape', value=self._shape, field_type='metainfo')
         
         batch_data_samples = data_samples
-        new_data_batch = {'inputs': [], 'data_samples': []}
-        self.make_tta_batch(new_data_batch, batch_inputs[0], batch_data_samples[0])
-        batch_output = self.model(inputs=torch.stack(new_data_batch['inputs'], dim=0), 
-                                  data_samples=new_data_batch['data_samples'], mode=mode)
-        self.recover_tta_output(batch_output)
-        merged_output = self.merge_tta_batch(batch_output)
+        batch_outputs = []
+        for batch_input, batch_data_sample in zip(batch_inputs, batch_data_samples):
+            new_data_batch = {'inputs': [], 'data_samples': []}
+            self.make_tta_batch(new_data_batch, batch_input, batch_data_sample)
+            batch_output = self.model(inputs=torch.stack(new_data_batch['inputs'], dim=0), 
+                                    data_samples=new_data_batch['data_samples'], mode=mode)
+            self.recover_tta_output(batch_output)
+            merged_output = self.merge_tta_batch(batch_output)
+            batch_outputs.append(merged_output)
             
-        return merged_output
+        return torch.stack(batch_outputs, dim=0)
     
     def test_step(self, data_batch):
         return self._model.test_step(data_batch)
@@ -134,7 +137,7 @@ class TTASegModel(torch.nn.Module):
                     
                 new_data_batch['inputs'].append(translate_tensor(batch_input, val[0], val[1]))
                 new_data_batch['data_samples'].append(batch_data_sample)
-
+        
     def merge_tta_batch(self, batch_output):
         if isinstance(batch_output, torch.Tensor):
             seg_logits = batch_output[0]
@@ -152,14 +155,6 @@ class TTASegModel(torch.nn.Module):
                 seg_pred = logits.argmax(dim=0)
                 
             return logits
-            # data_sample.set_data({'seg_logits': PixelData(data=logits)})
-            # data_sample.set_data({'pred_sem_seg': PixelData(data=seg_pred)})
-            # if hasattr(batch_output[0], 'gt_sem_seg'):
-            #     data_sample.set_data(
-            #         {'gt_sem_seg': batch_output[0].gt_sem_seg})
-            # data_sample.set_metainfo({'img_path': batch_output[0].img_path})
-            
-            # return data_sample
         else:
             seg_logits = batch_output[0].seg_logits.data
             logits = torch.zeros(seg_logits.shape).to(seg_logits)
@@ -213,15 +208,3 @@ class TTASegModel(torch.nn.Module):
                         batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
                     idx += 1
                     
-            if key == 'Translate' and val:
-                if isinstance(val, str):
-                    val = [int(x.strip()) for x in val.split(',')]
-                elif isinstance(val, int):
-                    val = [val]
-                
-                if isinstance(batch_output[idx + 1], torch.Tensor):  
-                    batch_output[idx + 1] = translate_tensor(batch_output[idx + 1], -val[0], -val[1])
-                else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=translate_tensor(batch_output[idx + 1].seg_logits.data, -val[0], -val[1]))
-                idx += 1
-                
