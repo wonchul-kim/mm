@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as F
 from typing import Optional
 
-from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, RandomRotation
 from mmengine.structures import PixelData
 from mmseg.structures import SegDataSample
 
@@ -31,6 +30,13 @@ def translate_tensor(tensor, shift_x, shift_y):
     translated = padded[:, start_y:end_y, start_x:end_x]
     
     return translated
+
+def random_horizontal_flip(tensor):
+    return torch.flip(tensor, dims=[-1])
+
+
+def random_vertical_flip(tensor):
+    return torch.flip(tensor, dims=[-2])
 
 class TTASegModel(torch.nn.Module):
     def __init__(self, model, augs, shape=None):
@@ -112,22 +118,22 @@ class TTASegModel(torch.nn.Module):
         new_data_batch['data_samples'].append(batch_data_sample)
         for key, val in self._augs.items():
             if key == 'HorizontalFlip' and val:
-                new_data_batch['inputs'].append(RandomHorizontalFlip(1)(batch_input))
+                new_data_batch['inputs'].append(random_horizontal_flip(batch_input))
                 new_data_batch['data_samples'].append(batch_data_sample)
             
             if key == 'VerticalFlip' and val:
-                new_data_batch['inputs'].append(RandomVerticalFlip(1)(batch_input))
+                new_data_batch['inputs'].append(random_vertical_flip(batch_input))
                 new_data_batch['data_samples'].append(batch_data_sample)
                 
-            if key == 'Rotate' and val:
-                if isinstance(val, str):
-                    val = [int(x.strip()) for x in val.split(',')]
-                elif isinstance(val, int):
-                    val = [val]
+            # if key == 'Rotate' and val:
+            #     if isinstance(val, str):
+            #         val = [int(x.strip()) for x in val.split(',')]
+            #     elif isinstance(val, int):
+            #         val = [val]
                 
-                for degree in val:                    
-                    new_data_batch['inputs'].append(RandomRotation(degree)(batch_input))
-                    new_data_batch['data_samples'].append(batch_data_sample)
+            #     for degree in val:                    
+            #         new_data_batch['inputs'].append(RandomRotation(degree)(batch_input))
+            #         new_data_batch['data_samples'].append(batch_data_sample)
                     
             if key == 'Translate' and val:
                 if isinstance(val, str):
@@ -183,28 +189,54 @@ class TTASegModel(torch.nn.Module):
         for key, val in self._augs.items():
             if key == 'HorizontalFlip' and val:
                 if isinstance(batch_output[idx + 1], torch.Tensor):
-                    batch_output[idx + 1] = RandomHorizontalFlip(1)(batch_output[idx + 1])
+                    batch_output[idx + 1] = random_horizontal_flip(batch_output[idx + 1])
                 else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=RandomHorizontalFlip(1)(batch_output[idx + 1].seg_logits.data))
+                    batch_output[idx + 1].seg_logits = PixelData(data=random_horizontal_flip(batch_output[idx + 1].seg_logits.data))
                 idx += 1
         
             if key == 'VerticalFlip' and val:
                 if isinstance(batch_output[idx + 1], torch.Tensor):
-                    batch_output[idx + 1] = RandomVerticalFlip(1)(batch_output[idx + 1])
+                    batch_output[idx + 1] = random_vertical_flip(batch_output[idx + 1])
                 else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=RandomVerticalFlip(1)(batch_output[idx + 1].seg_logits.data))
+                    batch_output[idx + 1].seg_logits = PixelData(data=random_vertical_flip(batch_output[idx + 1].seg_logits.data))
                 idx += 1
                 
-            if key == 'Rotate' and val and val != 0:
+            # if key == 'Rotate' and val and val != 0:
+            #     if isinstance(val, str):
+            #         val = [int(x.strip()) for x in val.split(',')]
+            #     elif isinstance(val, int):
+            #         val = [val]
+                
+            #     for degree in val:      
+            #         if isinstance(batch_output[idx + 1], torch.Tensor):              
+            #             batch_output[idx + 1] = RandomRotation(360 - degree)(batch_output[idx + 1])
+            #         else:
+            #             batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
+            #         idx += 1
+                    
+            if key == 'Translate' and val:
                 if isinstance(val, str):
                     val = [int(x.strip()) for x in val.split(',')]
                 elif isinstance(val, int):
                     val = [val]
-                
-                for degree in val:      
-                    if isinstance(batch_output[idx + 1], torch.Tensor):              
-                        batch_output[idx + 1] = RandomRotation(360 - degree)(batch_output[idx + 1])
-                    else:
-                        batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
-                    idx += 1
+                if isinstance(batch_output[idx + 1], torch.Tensor):
+                    batch_output[idx + 1] = translate_tensor(batch_output[idx + 1], -val[0], -val[1])
+                else:
+                    batch_output[idx + 1].seg_logits = PixelData(data=translate_tensor(batch_output[idx + 1].seg_logits.data, -val[0], -val[1]))
+                idx += 1
+
                     
+if __name__ == '__main__':
+    import cv2
+    from torchvision.transforms import RandomHorizontalFlip, RandomVerticalFlip, RandomRotation
+
+    # img_file = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset/train/0_124062721060032_6_Outer.bmp"
+    img_file = "/DeepLearning/_athena_tests/datasets/rectangle1/split_dataset/val/14_122083110333055_3_Socket_Bottom.bmp"
+    img = cv2.imread(img_file)
+    
+    input_tensor = torch.from_numpy(img)
+    # flipped_tensor = random_horizontal_flip(input_tensor)
+    flipped_tensor = RandomHorizontalFlip(1)(input_tensor)
+    cv2.imwrite("/HDD/etc/etc/hflip_image.bmp", flipped_tensor.numpy())
+    # flipped_tensor = random_vertical_flip(input_tensor)
+    # cv2.imwrite("/HDD/etc/etc/vflip_image.bmp", flipped_image)
