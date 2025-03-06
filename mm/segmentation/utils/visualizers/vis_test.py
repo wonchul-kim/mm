@@ -7,7 +7,7 @@ import cv2
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 from visionsuite.utils.helpers import get_text_coords
 
-def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=50):
+def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=10):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
@@ -86,7 +86,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             # cv2.rectangle(pred_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
 
             vis_legend = np.zeros((input_height, 300, 3), dtype="uint8")
-            for idx, _class in enumerate(classes):
+            for idx, _class in enumerate(('background', ) + classes):
                 color = [int(c) for c in color_map[idx]]
                 cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
