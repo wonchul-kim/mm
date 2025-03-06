@@ -94,10 +94,12 @@ def main():
     runner.test()
 
 def main2():
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
-    # weights = "/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION/2025_02_13_14_28_08/train/weights/best_mIoU_iter_20.pth"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
     classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+    
     # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
     # rois = [[]]
     # patch = {
@@ -154,13 +156,23 @@ def main2():
     args.classes = classes
     args.num_classes = len(classes)
     
-    args.model= 'mask2former'
-    args.backbone = 'swin-s'
+    # args.model= 'mask2former'
+    # args.backbone = 'swin-s'
+    args.model= 'pidnet'
+    args.backbone = 'l'
     args.height = 768
     args.width = 1120
     
     args.rois = rois
     args.patch = patch
+    
+    args.tta = {'use': True, 'augs':{
+                                        'HorizontalFlip': True,
+                                        'VerticalFlip': True, 
+                                        'Rotate': 90,
+                                        'Translate': '100,100'
+                            }
+                }
     
     args.custom_hooks['visualize_test']['output_dir'] = osp.join(output_dir, 'vis')
     args.custom_hooks['visualize_test']['contour_thres'] = 50
