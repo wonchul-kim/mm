@@ -1,8 +1,8 @@
 
 # export ===========================================
-model_cfg: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250110/outputs/SEGMENTATION/2025_01_24_01_10_49/train/mask2former_swin-s_8xb2.py'
-checkpoint: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/train/weights/best_mIoU_iter_58050.pth'
-output_dir: '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/m2f_patch/outputs/SEGMENTATION/250110/export'
+model_cfg: null
+checkpoint: null
+output_dir: null
 
 device: null
 batch_size: null
@@ -21,7 +21,7 @@ onnx_config:
   save_file: 'ONNX.onnx'
   input_names: ['data']
   output_names: ['output']
-  opset_version: 13
+  opset_version: 14
 
 backend_config:
   fp16_mode: false
