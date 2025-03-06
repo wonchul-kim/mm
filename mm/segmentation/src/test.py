@@ -175,7 +175,7 @@ def main2():
                 }
     
     args.custom_hooks['visualize_test']['output_dir'] = osp.join(output_dir, 'vis')
-    args.custom_hooks['visualize_test']['contour_thres'] = 50
+    args.custom_hooks['visualize_test']['contour_thres'] = 10
     args.custom_hooks['visualize_test']['annotate'] = True
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'

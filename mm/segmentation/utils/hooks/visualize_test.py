@@ -16,7 +16,7 @@ from mm.segmentation.utils.visualizers.vis_test import vis_test
 
 @HOOKS.register_module()
 class VisualizeTest(Hook):
-    def __init__(self, output_dir, annotate=False, contour_thres=50):
+    def __init__(self, output_dir, annotate=False, contour_thres=10):
         self._visualizer: Visualizer = Visualizer.get_current_instance()
         self.output_dir = output_dir
         self.annotate = annotate 

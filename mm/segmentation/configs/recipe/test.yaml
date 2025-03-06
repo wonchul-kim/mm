@@ -61,4 +61,4 @@ custom_hooks:
   visualize_test:
     output_dir: null
     annotate: False
-    contour_thres: 50
+    contour_thres: 10
