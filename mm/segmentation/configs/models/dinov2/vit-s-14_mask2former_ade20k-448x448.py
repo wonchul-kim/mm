@@ -4,48 +4,6 @@ _base_ = [
         '../../_base_/models/dinov2/vit-s-14_mask2former_ade20k-448x448.py',
 ]
 
-crop_size = (448, 448)
-num_classes = 150
-data_preprocessor=dict(
-        type="SegDataPreProcessor",
-        mean=[123.675, 116.28, 103.53],
-        std=[58.395, 57.12, 57.375],
-        size=crop_size,
-        bgr_to_rgb=True,
-        pad_val=0,
-        seg_pad_val=255,
-    )
-model = dict(
-    type="EncoderDecoder",
-    data_preprocessor=data_preprocessor,
-    backbone=dict(
-        type="DinoVisionTransformer",
-        patch_size=14,
-        embed_dim=1024,
-        depth=24,
-        out_indices=[7, 11, 15, 23],
-        num_heads=16,
-        img_size=448,
-        init_cfg=dict(
-            type="Pretrained",
-            checkpoint="/HDD/weights/dinov2/dinov2_vitl14_pretrain.pth",
-        ),
-    ),
-    decode_head=dict(
-        type="Mask2FormerHead",
-        in_channels=[1024, 1024, 1024, 1024],
-        num_classes=num_classes,
-        loss_cls=dict(
-            type="mmdet.CrossEntropyLoss",
-            use_sigmoid=False,
-            loss_weight=2.0,
-            reduction="mean",
-            class_weight=[1.0] * num_classes + [0.1],
-        ),
-    ),
-)
-
-
 max_epochs = 1000
 embed_multi = dict(lr_mult=1.0, decay_mult=0.0)
 optim_wrapper = dict(

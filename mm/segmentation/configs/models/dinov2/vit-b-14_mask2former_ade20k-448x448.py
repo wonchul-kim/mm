@@ -21,19 +21,19 @@ model = dict(
     backbone=dict(
         type="DinoVisionTransformer",
         patch_size=14,
-        embed_dim=1024,
-        depth=24,
-        out_indices=[7, 11, 15, 23],
-        num_heads=16,
+        embed_dim=768,
+        depth=12,
+        out_indices=[2, 5, 8, 11],
+        num_heads=12,
         img_size=448,
         init_cfg=dict(
             type="Pretrained",
-            checkpoint="/HDD/weights/dinov2/dinov2_vitl14_pretrain.pth",
+            checkpoint="/HDD/weights/dinov2/dinov2_vitb14_pretrain.pth",
         ),
     ),
     decode_head=dict(
         type="Mask2FormerHead",
-        in_channels=[1024, 1024, 1024, 1024],
+        in_channels=[768, 768, 768, 768],
         num_classes=num_classes,
         loss_cls=dict(
             type="mmdet.CrossEntropyLoss",
