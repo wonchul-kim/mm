@@ -20,7 +20,6 @@ model = dict(
         out_indices=[2, 5, 8, 11],
         num_heads=6,
         mlp_ratio=4,
-        img_size=crop_size,
         ffn_layer="mlp",
         init_values=1e-05,
         block_chunks=0,

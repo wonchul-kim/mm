@@ -89,6 +89,9 @@ class DinoVisionTransformer(BaseModule):
         block_chunks=1,
         out_indices=[7, 11, 15, 23],
         init_cfg=None,
+        frozen_stages=-1,
+        frozen_exclude=[],
+        **kwargs,
     ):
         """
         Args:
@@ -113,6 +116,8 @@ class DinoVisionTransformer(BaseModule):
             block_chunks: (int) split block sequence into block_chunks units for FSDP wrap
         """
         super().__init__(init_cfg)
+        self.frozen_stages = frozen_stages
+        self.frozen_exclude = frozen_exclude
         norm_layer = partial(nn.LayerNorm, eps=1e-6)
         self.out_indices = out_indices
         
@@ -191,6 +196,8 @@ class DinoVisionTransformer(BaseModule):
         self.head = nn.Identity()
 
         self.mask_token = nn.Parameter(torch.zeros(1, embed_dim))
+        
+        self._freeze_stages()
 
     def interpolate_pos_encoding(self, x, w, h):
         previous_dtype = x.dtype
@@ -363,3 +370,43 @@ class DinoVisionTransformer(BaseModule):
                 ret[0][3], scale_factor=0.5, mode="bilinear", align_corners=False
             )
         return ret
+    
+    def _freeze_stages(self):
+        for frozen_idx in range(self.frozen_stages):
+            if frozen_idx == 0:
+                self.patch_embed.eval()
+                for param in self.patch_embed.parameters():
+                    param.requires_grad = False
+            
+            self.blocks[frozen_idx].eval()
+            for name, param in self.blocks[frozen_idx].named_parameters():
+                if not any([exclude in name for exclude in self.frozen_exclude]):
+                    param.requires_grad = False
+                
+            if frozen_idx == len(self.blocks) - 1:
+                self.norm.eval()
+                for param in self.norm.parameters():
+                    param.requires_grad = False
+                
+                
+            
+
+###############################################################################
+if __name__ == "__main__":
+    # check parameters of backbone
+    model = DinoVisionTransformer(patch_size=14,
+        embed_dim=384,
+        depth=12,
+        out_indices=[2, 5, 8, 11],
+        num_heads=6,
+        mlp_ratio=4,
+        ffn_layer="mlp",
+        init_values=1e-05,
+        block_chunks=0,
+        qkv_bias=True,
+        proj_bias=True,
+        ffn_bias=True,
+        frozen_stages=-1)
+    
+    for param in model.parameters():
+        print(param.requires_grad)
