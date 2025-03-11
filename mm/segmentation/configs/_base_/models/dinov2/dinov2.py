@@ -1,4 +1,4 @@
-crop_size = (700, 700)
+crop_size = (518, 518)
 stride = (crop_size[0] // 2, crop_size[1] // 2)
 data_preprocessor = dict(
     bgr_to_rgb=True,
