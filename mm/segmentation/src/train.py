@@ -77,7 +77,8 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
+    if 'dinov2' not in args.model:
+        args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
@@ -608,9 +609,9 @@ def main6(): # dinov2
     
     
 if __name__ == '__main__':
-    # main()
+    main()
     # main2()
     # main3()
     # main4()
     # main5()
-    main6()
+    # main6()
