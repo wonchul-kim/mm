@@ -16,7 +16,8 @@ from mm.segmentation.utils.hooks import VisualizeVal
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-
+# from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
+from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
 from mm.segmentation.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
@@ -76,10 +77,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' not in args.model:
-        # from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
-        from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
-        
+    if 'dinov2' not in args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
