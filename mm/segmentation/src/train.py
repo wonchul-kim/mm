@@ -68,10 +68,6 @@ def get_backbone_weights_map(model_name):
         return dlabv3plus_backbone_weights_map
     elif model_name == 'pidnet':
         return pidnet_backbone_weights_map
-    elif model_name == 'dinov2':
-        # from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
-        from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
-
     else:
         raise NotImplementedError(f'[ERROR] There is no such model name for backbone-weights-map: {model_name}')
 
@@ -81,6 +77,9 @@ def main():
     add_params_to_args(args, args.args_filename)
 
     if 'dinov2' not in args.model:
+        # from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
+        from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
+        
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
@@ -111,8 +110,6 @@ def main():
 
     # start training
     runner.train()
-
-
 
 def main2():
       
