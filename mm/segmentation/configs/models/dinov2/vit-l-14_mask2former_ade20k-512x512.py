@@ -1,12 +1,11 @@
 _base_ = [
         '../../_base_/default_runtime.py', 
         '../../_base_/datasets/ade20k-512x512.py',
+        # '../../_base_/models/dinov2/mask2former_ade20k-512x512.py',
 ]
 crop_size = (512, 512)
 num_classes = 150
-model = dict(
-    type="EncoderDecoder",
-    data_preprocessor=dict(
+data_preprocessor=dict(
         type="SegDataPreProcessor",
         mean=[123.675, 116.28, 103.53],
         std=[58.395, 57.12, 57.375],
@@ -14,10 +13,13 @@ model = dict(
         bgr_to_rgb=True,
         pad_val=0,
         seg_pad_val=255,
-    ),
+    )
+model = dict(
+    type="EncoderDecoder",
+    data_preprocessor=data_preprocessor,
     backbone=dict(
         type="DinoVisionTransformer",
-        patch_size=16,
+        patch_size=14,
         embed_dim=1024,
         depth=24,
         num_heads=16,
@@ -29,10 +31,10 @@ model = dict(
         qkv_bias=True,
         proj_bias=True,
         ffn_bias=True,
-        # init_cfg=dict(
-        #     type="Pretrained",
-        #     checkpoint="checkpoints/dinov2_converted.pth",
-        # ),
+        init_cfg=dict(
+            type="Pretrained",
+            checkpoint="/HDD/weights/dinov2/dinov2_vitl14_pretrain.pth",
+        ),
     ),
     decode_head=dict(
         type="Mask2FormerHead",

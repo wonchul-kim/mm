@@ -31,7 +31,7 @@ from mmseg.registry import RUNNERS
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
-    parser.add_argument('--config', default='/HDD/_projects/github/mm/mm/segmentation/configs/models/dinov2/vitb16-mask2former_ade20k-512x512.py')
+    parser.add_argument('--config', default='/HDD/_projects/github/mm/mm/segmentation/configs/models/dinov2/vit-l-14_mask2former_ade20k-512x512.py')
     parser.add_argument('--work-dir', default='/HDD/etc/outputs')
     parser.add_argument(
         '--resume',
