@@ -1,4 +1,5 @@
 from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
+from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer
 # from dinov2.eval.segmentation.models.decode_heads.linear_head import BNHead
 from mm.segmentation.src.models.dinov2.lienar_head import BNHead
 
@@ -13,24 +14,24 @@ from mmengine.runner import Runner
 
 from mmseg.registry import RUNNERS
 
-import sys
-import builtins
+# import sys
+# import builtins
 
-# Monkey patching the import system to redirect imports of mmcv.runner to mmengine.model
-def custom_import(name, globals=None, locals=None, fromlist=(), level=0):
-    if name == "mmcv.runner":
-        name = "mmengine.model"
-    return original_import(name, globals, locals, fromlist, level)
+# # Monkey patching the import system to redirect imports of mmcv.runner to mmengine.model
+# def custom_import(name, globals=None, locals=None, fromlist=(), level=0):
+#     if name == "mmcv.runner":
+#         name = "mmengine.model"
+#     return original_import(name, globals, locals, fromlist, level)
 
-# Save the original import function
-original_import = builtins.__import__
-# Override the import function
-builtins.__import__ = custom_import
+# # Save the original import function
+# original_import = builtins.__import__
+# # Override the import function
+# builtins.__import__ = custom_import
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a segmentor')
-    parser.add_argument('--config', default='/HDD/_projects/github/mm/mm/segmentation/configs/models/dinov2/dinov2_vitb14_bnhead_ade20k_ms_config.py')
+    parser.add_argument('--config', default='/HDD/_projects/github/mm/mm/segmentation/configs/models/dinov2/vitb16-mask2former_ade20k-512x512.py')
     parser.add_argument('--work-dir', default='/HDD/etc/outputs')
     parser.add_argument(
         '--resume',
