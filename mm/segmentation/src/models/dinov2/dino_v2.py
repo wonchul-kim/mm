@@ -17,12 +17,25 @@ import torch.utils.checkpoint
 from mmseg.models.builder import BACKBONES
 from mmengine.model import BaseModule
 import torch.nn.functional as F
-from dinov2.layers import (
-    Mlp,
-    PatchEmbed,
-    SwiGLUFFNFused,
-    MemEffAttention,
-    NestedTensorBlock as Block,
+
+try:
+    from dinov2.layers import (
+        Mlp,
+        PatchEmbed,
+        SwiGLUFFNFused,
+        MemEffAttention,
+        NestedTensorBlock as Block,
+    )
+except:
+    from . import install_dinov2 
+    install_dinov2()
+    
+    from dinov2.layers import (
+        Mlp,
+        PatchEmbed,
+        SwiGLUFFNFused,
+        MemEffAttention,
+        NestedTensorBlock as Block,
 )
 
 

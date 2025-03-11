@@ -1,5 +1,11 @@
-from mm.segmentation.src.models.dinov2.facebook_dinov2.models.vision_transformer import DinoVisionTransformer, Block, MemEffAttention
-
+try:
+    from dinov2.models.vision_transformer import DinoVisionTransformer, Block, MemEffAttention
+except:
+    
+    from . import install_dinov2 
+    install_dinov2()
+    from dinov2.models.vision_transformer import DinoVisionTransformer, Block, MemEffAttention
+    
 from typing import Optional
 from functools import partial
 import warnings

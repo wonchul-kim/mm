@@ -6,18 +6,22 @@ def install_dinov2():
     import os
 
     # Clone the repository
-    subprocess.run(["git", "clone", "https://github.com/facebookresearch/dinov2.git"])
+    resp = subprocess.run(["git", "clone", "https://github.com/facebookresearch/dinov2.git"], check=True)
 
-    # Navigate to the cloned directory
+    if resp.returncode != 0:
+        raise RuntimeError(f"Failed to clone the repository for dinov2")
+
     import os
     os.chdir("dinov2")
 
-    # Install dependencies
     # subprocess.run([sys.executable, "-m", "pip", "install", "-r", "repip iquirements.txt"])
 
-    # Install the package
-    subprocess.run([sys.executable, "setup.py", "install"])
-        
-    # Remove the cloned dinov2 folder
+    # subprocess.run([sys.executable, "setup.py", "install"])
+
+    # env = os.environ.copy()
+    # env["SETUPTOOLS_USE_DISTUTILS"] = "stdlib"
+    # subprocess.run([sys.executable, "setup.py", "install", "--single-version-externally-managed"], env=env, check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", ".", "--no-deps"], check=True)
+
     os.chdir("..")
     shutil.rmtree("dinov2")

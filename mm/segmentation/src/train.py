@@ -16,8 +16,7 @@ from mm.segmentation.utils.hooks import VisualizeVal
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
-from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer
+
 from mm.segmentation.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
@@ -69,6 +68,10 @@ def get_backbone_weights_map(model_name):
         return dlabv3plus_backbone_weights_map
     elif model_name == 'pidnet':
         return pidnet_backbone_weights_map
+    elif model_name == 'dinov2':
+        # from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
+        from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
+
     else:
         raise NotImplementedError(f'[ERROR] There is no such model name for backbone-weights-map: {model_name}')
 
@@ -506,7 +509,10 @@ def main5():
     runner.train()
     
 def main6(): # dinov2
-      
+          
+    # from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
+    from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer 
+    
     # set config =======================================================================================================
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
@@ -557,6 +563,7 @@ def main6(): # dinov2
     args.data_root = input_dir
     args.classes = classes
     args.num_classes = len(classes)
+
     
     args.model= 'dinov2'
     # args.backbone = 'vit-l-14'
