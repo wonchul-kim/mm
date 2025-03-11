@@ -102,7 +102,7 @@ class DinoVisionTransformer(BaseModule):
         super().__init__(init_cfg)
         norm_layer = partial(nn.LayerNorm, eps=1e-6)
         self.out_indices = out_indices
-
+        
         self.num_features = (
             self.embed_dim
         ) = embed_dim  # num_features for consistency with other models

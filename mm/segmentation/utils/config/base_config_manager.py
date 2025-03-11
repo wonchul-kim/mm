@@ -263,7 +263,9 @@ class BaseConfigManager:
         _manage_train_pipeline(self._cfg)
     
     def manage_dinov2_config(self, num_classes, width, height):
-        
+        from mm.segmentation.configs.models.dinov2 import backbone_weights_map as dinov2_backbone_weights_map
+        from mm.utils.weights import get_weights_from_nexus
+
         def _manage_num_classes(cfg):
             cfg.num_classes = num_classes 
             if 'model' in cfg:
@@ -273,12 +275,24 @@ class BaseConfigManager:
                         cfg.model.decode_head.loss_cls.class_weight = [1.0] * num_classes + [0.1]
                         
         def _manage_crop_size(cfg, new_crop_size):
+            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
+            #     cfg.model.backbone.img_size = new_crop_size
+                        
             cfg.crop_size = new_crop_size 
             cfg.data_preprocessor.size = new_crop_size
             cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_backbone_weights(cfg):
+            cfg.model.backbone.init_cfg = dict(
+                                                type="Pretrained",
+                                                checkpoint=get_weights_from_nexus('segmentation', 'mmseg', 
+                                                                                  self.args.model, 
+                                                                                  dinov2_backbone_weights_map[self.args.backbone], 'pth'),
+                                            )
 
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
+        _manage_backbone_weights(self._cfg)
         
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):

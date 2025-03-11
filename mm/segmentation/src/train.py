@@ -23,7 +23,6 @@ from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
 from mm.segmentation.configs.models.deeplabv3plus import backbone_weights_map as dlabv3plus_backbone_weights_map
 from mm.segmentation.configs.models.pidnet import backbone_weights_map as pidnet_backbone_weights_map
-from mm.segmentation.configs.models.dinov2 import backbone_weights_map as dinov2_backbone_weights_map
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
 
@@ -559,6 +558,8 @@ def main6(): # dinov2
     args.num_classes = len(classes)
     
     args.model= 'dinov2'
+    # args.backbone = 'vit-l-14'
+    # args.backbone = 'vit-b-14'
     args.backbone = 'vit-s-14'
     args.height = 224
     args.width = 448
@@ -578,7 +579,7 @@ def main6(): # dinov2
     args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
     args.custom_hooks['checkpoint']['output_dir'] = weights_dir
     
-    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, dinov2_backbone_weights_map[args.backbone], 'pth')
+    # args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, dinov2_backbone_weights_map[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
