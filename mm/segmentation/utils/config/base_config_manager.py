@@ -375,7 +375,8 @@ class BaseConfigManager:
                     
                 _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
                                           annotate=val.get('annotate', False), 
-                                          contour_thres=val.get('contour_thres', 10)))
+                                          contour_thres=val.get('contour_thres', 10),
+                                          contour_conf=val.get('contour_conf', 0.5)))
             
             elif key == 'aiv':
                 if val.get('use', False):

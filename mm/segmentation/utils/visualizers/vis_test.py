@@ -7,7 +7,7 @@ import cv2
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 from visionsuite.utils.helpers import get_text_coords
 
-def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=10):
+def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=10, contour_conf=0.5):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
@@ -59,7 +59,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                                     [0, 0],
                                     _labelme,
                                     contour_thres,
-                                    conf=0.5,
+                                    conf=contour_conf,
                                     ret_points=True,
                                 )
                 
