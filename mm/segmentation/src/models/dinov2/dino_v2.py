@@ -198,6 +198,11 @@ class DinoVisionTransformer(BaseModule):
         self.mask_token = nn.Parameter(torch.zeros(1, embed_dim))
         
         self._freeze_stages()
+        print("*** frozen_stages: ", self.frozen_stages)
+        print("*** frozen_exclude: ", self.frozen_exclude)
+        for name, param in self.named_parameters():
+            print(f"{name}: {param.requires_grad}")
+            
 
     def interpolate_pos_encoding(self, x, w, h):
         previous_dtype = x.dtype
@@ -372,21 +377,28 @@ class DinoVisionTransformer(BaseModule):
         return ret
     
     def _freeze_stages(self):
-        for frozen_idx in range(self.frozen_stages):
-            if frozen_idx == 0:
-                self.patch_embed.eval()
-                for param in self.patch_embed.parameters():
+        
+        if self.frozen_stages != -1:
+            self.eval()
+            if self.frozen_stages == len(self.blocks):
+                for param in self.parameters():
                     param.requires_grad = False
-            
-            self.blocks[frozen_idx].eval()
-            for name, param in self.blocks[frozen_idx].named_parameters():
-                if not any([exclude in name for exclude in self.frozen_exclude]):
-                    param.requires_grad = False
-                
-            if frozen_idx == len(self.blocks) - 1:
-                self.norm.eval()
-                for param in self.norm.parameters():
-                    param.requires_grad = False
+            else:
+                for frozen_idx in range(self.frozen_stages):
+                    if frozen_idx == 0:
+                        self.patch_embed.eval()
+                        for param in self.patch_embed.parameters():
+                            param.requires_grad = False
+                    
+                    self.blocks[frozen_idx].eval()
+                    for name, param in self.blocks[frozen_idx].named_parameters():
+                        if not any([exclude in name for exclude in self.frozen_exclude]):
+                            param.requires_grad = False
+                        
+                    if frozen_idx == len(self.blocks) - 1:
+                        self.norm.eval()
+                        for param in self.norm.parameters():
+                            param.requires_grad = False
                 
                 
             
