@@ -165,9 +165,7 @@ class TestLoopV2(TestLoop):
             cv2.rectangle(vis_pred, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
             
             vis_legend = np.zeros((roi[3] - roi[1], 300, 3), dtype="uint8")
-            print("classes: ", classes)
             for idx, _class in enumerate(('background', ) + tuple(classes)):
-                print(">>>> ", _class)
                 color = [int(c) for c in color_map[idx]]
                 cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
