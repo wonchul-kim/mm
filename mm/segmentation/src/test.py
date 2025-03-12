@@ -94,14 +94,14 @@ def main():
     runner.test()
 
 def main2():
-    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
-    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
-    classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+    # # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
+    # # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
+    # classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     
-    # input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_roi_patch_dataset/test"
-    # rois = [[]]
+    # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val"
+    # rois = [[220, 60, 1340, 828]] #[[]]
     # patch = {
     #     "use_patch": False,
     #     "include_point_positive": True,
@@ -119,17 +119,20 @@ def main2():
     #     "translate_range_width": 0,
     #     "translate_range_height": 0,
     # }
-
-
-    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val"
-    rois = [[220, 60, 1340, 828]]
+    
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_27300.pth"
+    classes = ['background', 'STABBED', 'DUST']
+   
+    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
+    rois = [[]]
     patch = {
-        "use_patch": False,
+        "use_patch": True,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
         "width": 512,
-        "height": 256,
+        "height": 512,
         "overlap_ratio": 0.2,
         "num_involved_pixel": 10,
         "sliding_bg_ratio": 0,
@@ -160,13 +163,13 @@ def main2():
     # args.backbone = 'swin-s'
     args.model= 'pidnet'
     args.backbone = 'l'
-    args.height = 768
-    args.width = 1120
+    args.height = 512
+    args.width = 512
     
     args.rois = rois
     args.patch = patch
     
-    args.tta = {'use': True, 'augs':{
+    args.tta = {'use': False, 'augs':{
                                         'HorizontalFlip': True,
                                         'VerticalFlip': True, 
                                         'Rotate': 90,
@@ -174,9 +177,10 @@ def main2():
                             }
                 }
     
+    args.custom_hooks['visualize_test']['annotate'] = True
     args.custom_hooks['visualize_test']['output_dir'] = osp.join(output_dir, 'vis')
     args.custom_hooks['visualize_test']['contour_thres'] = 10
-    args.custom_hooks['visualize_test']['annotate'] = True
+    args.custom_hooks['visualize_test']['contour_conf'] = True
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TestConfigManager()
@@ -193,5 +197,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()

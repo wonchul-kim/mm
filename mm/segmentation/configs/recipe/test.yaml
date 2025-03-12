@@ -62,3 +62,4 @@ custom_hooks:
     output_dir: null
     annotate: False
     contour_thres: 10
+    contour_conf: 0.5

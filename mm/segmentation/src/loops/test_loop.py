@@ -52,6 +52,7 @@ class TestLoopV2(TestLoop):
                 output_dir = custom_hook['output_dir']
                 annotate = custom_hook['annotate']
                 contour_thres = custom_hook['contour_thres']
+                contour_conf = custom_hook['contour_conf']
                 
         if not osp.exists(output_dir):
             os.mkdir(output_dir)    
@@ -138,6 +139,7 @@ class TestLoopV2(TestLoop):
                                                                  [x, y],
                                                                  _labelme,
                                                                  contour_thres,
+                                                                 conf=contour_conf,
                                                             )
                         self.evaluator.process(data_samples=eval_outputs, 
                                                        data_batch={'inputs': eval_inputs, 
