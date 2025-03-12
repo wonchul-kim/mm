@@ -120,12 +120,12 @@ def main2():
     #     "translate_range_height": 0,
     # }
     
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/pidnet_epochs300/test/exp"
-    # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_27300.pth"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_40344.pth"
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_27300.pth"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_40344.pth"
     classes = ['background', 'STABBED', 'DUST']
    
-    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/val"
+    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
     rois = [[]]
     patch = {
         "use_patch": True,
@@ -170,11 +170,11 @@ def main2():
     args.rois = rois
     args.patch = patch
     
-    args.tta = {'use': False, 'augs':{
+    args.tta = {'use': True, 'augs':{
                                         'HorizontalFlip': True,
                                         'VerticalFlip': True, 
                                         'Rotate': 90,
-                                        'Translate': '100,100'
+                                        'Translate': '50,50'
                             }
                 }
     

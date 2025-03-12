@@ -16,6 +16,8 @@ class TestLoopV2(TestLoop):
         self.test_loss.clear()
         for idx, data_batch in enumerate(self.dataloader):
             if hasattr(data_batch['data_samples'][0], 'patch') and data_batch['data_samples'][0].patch:
+                if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                    self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
                 _size = self.run_iter_patch(idx, data_batch)
                 metrics = self.evaluator.evaluate(_size)
             else:
