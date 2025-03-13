@@ -25,7 +25,7 @@ from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
 from mm.segmentation.configs.models.deeplabv3plus import backbone_weights_map as dlabv3plus_backbone_weights_map
 from mm.segmentation.configs.models.pidnet import backbone_weights_map as pidnet_backbone_weights_map
-from mm.segmentation.configs.models.gcnet import backbone_weights_map as pidnet_backbone_weights_map
+from mm.segmentation.configs.models.gcnet import backbone_weights_map as gcnet_backbone_weights_map
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
 
@@ -72,6 +72,9 @@ def get_backbone_weights_map(model_name):
         return dlabv3plus_backbone_weights_map
     elif model_name == 'pidnet':
         return pidnet_backbone_weights_map
+    elif model_name == 'gcnet':
+        return gcnet_backbone_weights_map
+    
     else:
         raise NotImplementedError(f'[ERROR] There is no such model name for backbone-weights-map: {model_name}')
 
@@ -682,7 +685,7 @@ def gcnet():
     args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
     args.custom_hooks['checkpoint']['output_dir'] = weights_dir
     
-    # args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, dinov2_backbone_weights_map[args.backbone], 'pth')
+    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, gcnet_backbone_weights_map[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TrainConfigManager()
