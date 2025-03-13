@@ -666,7 +666,9 @@ def gcnet():
 
     
     args.model= 'gcnet'
-    args.backbone = 's'
+    # args.backbone = 's'
+    # args.backbone = 'm'
+    args.backbone = 'l'
     args.height = 256
     args.width = 512
     args.frozen_stages = -1
@@ -713,10 +715,10 @@ def gcnet():
     runner.train()
     
 if __name__ == '__main__':
-    main()
+    # main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
     # pidnet()
     # dinov2()
-    # gcnet()
+    gcnet()

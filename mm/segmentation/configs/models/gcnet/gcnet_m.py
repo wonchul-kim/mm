@@ -1,6 +1,5 @@
 _base_ = [
-        '../../_base_/default_runtime.py', 
-        '../../_base_/datasets/labelme.py'
+        './gcnet_s.py',
 ]
 
 class_weight = [
@@ -9,9 +8,8 @@ class_weight = [
     1.0507
 ]
 crop_size = (1024, 1024)
-num_classes = 19
-max_iters = 120000
 norm_cfg = dict(type='BN', requires_grad=True)
+num_classes = 19
 data_preprocessor = dict(
     type='SegDataPreProcessor',
     size=crop_size,
@@ -26,23 +24,14 @@ model = dict(
     backbone=dict(
         type='GCNet',
         in_channels=3,
-        channels=32,
-        ppm_channels=128,
-        num_blocks_per_stage=[4, 4, [5, 4], [5, 4], [2, 2]],
-        norm_cfg=norm_cfg,
-        act_cfg=dict(type='ReLU', inplace=True),
-        align_corners=False,
-        deploy=False,
+        channels=64,
     ),
     decode_head=dict(
         type='GCNetHead',
-        in_channels=32 * 4,
-        channels=64,
+        in_channels=64 * 4,
+        channels=128,
         dropout_ratio=0.,
         num_classes=num_classes,
-        align_corners=False,
-        norm_cfg=norm_cfg,
-        act_cfg=dict(type='ReLU', inplace=True),
         loss_decode=[
             dict(
                 type='OhemCrossEntropy',
@@ -58,10 +47,10 @@ model = dict(
                 loss_weight=1.0),
         ]
     ),
-    train_cfg=dict(),
-    test_cfg=dict(mode='whole')
 )
 
+max_iters = 120000
+interval = 12000
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
 optim_wrapper = dict(type='OptimWrapper', optimizer=optimizer, clip_grad=None)
 # learning policy
