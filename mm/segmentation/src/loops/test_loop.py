@@ -16,6 +16,8 @@ class TestLoopV2(TestLoop):
         self.test_loss.clear()
         for idx, data_batch in enumerate(self.dataloader):
             if hasattr(data_batch['data_samples'][0], 'patch') and data_batch['data_samples'][0].patch:
+                if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                    self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
                 _size = self.run_iter_patch(idx, data_batch)
                 metrics = self.evaluator.evaluate(_size)
             else:
@@ -52,6 +54,7 @@ class TestLoopV2(TestLoop):
                 output_dir = custom_hook['output_dir']
                 annotate = custom_hook['annotate']
                 contour_thres = custom_hook['contour_thres']
+                contour_conf = custom_hook['contour_conf']
                 
         if not osp.exists(output_dir):
             os.mkdir(output_dir)    
@@ -60,6 +63,7 @@ class TestLoopV2(TestLoop):
         inputs, data_samples = [], []
         batch_size = len(data_batch['inputs'])
         eval_cnt = 0
+        classes = set()
         for input_image, data_sample in zip(data_batch['inputs'], data_batch['data_samples']):
                        
             patch_info = data_sample.patch
@@ -125,6 +129,7 @@ class TestLoopV2(TestLoop):
                         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
                         eval_outputs, eval_inputs, eval_data_samples = [], [], []
                         for jdx, output in enumerate(outputs):
+                            classes.update(output.classes[1:])
                             if osp.exists(output.seg_map_path):
                                 eval_outputs.append(output)
                                 eval_inputs.append(patch_data_batch['inputs'][jdx])
@@ -133,11 +138,12 @@ class TestLoopV2(TestLoop):
                                 
                             if _labelme:
                                 _labelme = get_points_from_image(output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy(), 
-                                                                 output.classes,
+                                                                 list(classes),
                                                                  roi,
                                                                  [x, y],
                                                                  _labelme,
                                                                  contour_thres,
+                                                                 conf=contour_conf,
                                                             )
                         self.evaluator.process(data_samples=eval_outputs, 
                                                        data_batch={'inputs': eval_inputs, 
@@ -159,7 +165,14 @@ class TestLoopV2(TestLoop):
                         
             cv2.rectangle(vis_gt, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
             cv2.rectangle(vis_pred, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
-            cv2.imwrite(osp.join(output_dir, filename + '.png'), np.hstack((vis_gt, vis_pred)))
+            
+            vis_legend = np.zeros((roi[3] - roi[1], 300, 3), dtype="uint8")
+            for idx, _class in enumerate(('background', ) + tuple(classes)):
+                color = [int(c) for c in color_map[idx]]
+                cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
+            
+            cv2.imwrite(osp.join(output_dir, filename + '.png'), np.hstack((vis_gt, vis_pred, vis_legend)))
             
             if _labelme:
                 import json

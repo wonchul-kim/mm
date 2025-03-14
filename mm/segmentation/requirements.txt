@@ -5,3 +5,6 @@ timm
 visionsuite
 nvidia-ml-py3
 imgviz
+xformers
+cuml-cu11
+fvcore
