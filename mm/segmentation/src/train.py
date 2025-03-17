@@ -817,11 +817,11 @@ def sam2():
     runner.train()
     
 if __name__ == '__main__':
-    # main()
+    main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
     # pidnet()
     # dinov2()
     # gcnet()
-    sam2()
+    # sam2()
