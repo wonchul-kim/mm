@@ -20,8 +20,6 @@ from mm.segmentation.src.runners import RunnerV1
 from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer
 from mm.segmentation.src.models.gcnet.gcnethead import GCNetHead 
 from mm.segmentation.src.models.gcnet.gcnet import GCNet
-from mm.segmentation.src.models.sam2.sam2unet import SAM2UNet
-from mm.segmentation.src.models.sam2.sam2unet_head import SAM2UNetHead
 from mm.segmentation.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
@@ -30,6 +28,7 @@ from mm.segmentation.configs.models.pidnet import backbone_weights_map as pidnet
 from mm.segmentation.configs.models.gcnet import backbone_weights_map as gcnet_backbone_weights_map
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
+import mm.segmentation.src.models
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()

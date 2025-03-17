@@ -7,11 +7,11 @@ from sam2.build_sam import build_sam2
 from mmseg.registry import MODELS
 from mmengine.model import BaseModule
 from mmseg.utils import OptConfigType
-from .modules import DoubleConv, Up, Adapter, BasicConv2d, RFB_modified
+from mm.segmentation.src.models.sam2.decode_heads.sam2unet_head import Up, Adapter, RFB_modified
 
 # class SAM2UNet(BaseModule):
 @MODELS.register_module()
-class SAM2UNet(nn.Module):
+class SAM2Encoder(nn.Module):
     def __init__(self, num_classes, 
                     model_cfg: str,
                     exclude_layers: List[str] = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
