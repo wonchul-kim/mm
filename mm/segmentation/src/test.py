@@ -2,7 +2,6 @@
 import argparse
 import os
 import os.path as osp
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
@@ -105,9 +104,9 @@ def main2():
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
     classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     
-    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
+    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
     # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
-    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
+    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
     rois = [[220, 60, 1340, 828]] #[[]]
     patch = {
         "use_patch": False,
@@ -207,5 +206,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
