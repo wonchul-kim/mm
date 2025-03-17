@@ -2,6 +2,7 @@
 import argparse
 import os
 import os.path as osp
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
@@ -95,10 +96,10 @@ def main():
     runner.test()
 
 def main2():
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
     weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/train/weights/best_mIoU_iter_69310.pth"
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/test/exp"
+    output_dir = '/HDD/etc/repeatablility/mask2former_epochs140/test/exp'
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/train/weights/best_mIoU_iter_71638.pth"
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
@@ -206,5 +207,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()
