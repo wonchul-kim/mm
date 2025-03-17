@@ -20,7 +20,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     backbone=dict(
         type='SAM2Encoder',
-        model_cfg="sam2_hiera_l.yaml",
+        model_cfg="sam2_hiera_t.yaml",
         exclude_layers = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                         'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                         'obj_ptr_proj', 'image_encoder.neck'],
@@ -29,7 +29,7 @@ model = dict(
     decode_head=dict(
         type='SAM2UNetHead',
         num_classes=num_classes,
-        rfb_channels = [[144, 64], [288, 64], [576, 64], [1152, 64]],
+        rfb_channels = [[96, 64], [192, 64], [384, 64], [768, 64]],
         norm_cfg=norm_cfg,
         act_cfg=dict(type='ReLU', inplace=True),
         # loss_decode=[

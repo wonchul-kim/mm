@@ -769,7 +769,7 @@ def sam2():
     
     args.model= 'sam2'
     # args.backbone = 's'
-    # args.backbone = 'm'
+    # args.backbone = 't'
     args.backbone = 'l'
     args.height = 256
     args.width = 512

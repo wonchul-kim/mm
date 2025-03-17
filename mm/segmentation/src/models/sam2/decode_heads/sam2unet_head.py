@@ -141,9 +141,11 @@ def structure_loss(pred, mask):
 @MODELS.register_module()
 class SAM2UNetHead(BaseDecodeHead):
     def __init__(self,
-                 in_channels: int,
-                 channels: int,
                  num_classes: int,
+                 in_channels: int = 3,
+                 channels: int = 64,
+                 rfb_channels: List[int] = [[144, 64], [288, 64], [576, 64], [1152, 64]], # large
+                 up_channels: List[int] = [[128, 64], [128, 64], [128, 64]],
                  norm_cfg: OptConfigType = dict(type='BN', requires_grad=True),
                  act_cfg: OptConfigType = dict(type='ReLU', inplace=True),
                  **kwargs):
@@ -155,27 +157,31 @@ class SAM2UNetHead(BaseDecodeHead):
             act_cfg=act_cfg,
             **kwargs)
         
-        self.rfb1 = RFB_modified(144, 64)
-        self.rfb2 = RFB_modified(288, 64)
-        self.rfb3 = RFB_modified(576, 64)
-        self.rfb4 = RFB_modified(1152, 64)
-        self.up1 = (Up(128, 64))
-        self.up2 = (Up(128, 64))
-        self.up3 = (Up(128, 64))
-        self.up4 = (Up(128, 64))
-        self.side1 = nn.Conv2d(64, num_classes, kernel_size=1)
-        self.side2 = nn.Conv2d(64, num_classes, kernel_size=1)
-        self.head = nn.Conv2d(64, num_classes, kernel_size=1)
+        # RFB
+        self.rfb1 = RFB_modified(rfb_channels[0][0], rfb_channels[0][1])
+        self.rfb2 = RFB_modified(rfb_channels[1][0], rfb_channels[1][1])
+        self.rfb3 = RFB_modified(rfb_channels[2][0], rfb_channels[2][1])
+        self.rfb4 = RFB_modified(rfb_channels[3][0], rfb_channels[3][1])
+        
+        # Upsample
+        self.up1 = (Up(up_channels[0][0], up_channels[0][1]))
+        self.up2 = (Up(up_channels[1][0], up_channels[1][1]))
+        self.up3 = (Up(up_channels[2][0], up_channels[2][1]))
+        
+        # Conv
+        self.conv1 = nn.Conv2d(up_channels[0][1], num_classes, kernel_size=1)
+        self.conv2 = nn.Conv2d(up_channels[1][1], num_classes, kernel_size=1)
+        self.conv3 = nn.Conv2d(up_channels[2][1], num_classes, kernel_size=1)
 
     def forward(self, inputs: Union[Tensor, Tuple[Tensor]]) -> Union[Tensor, Tuple[Tensor]]:
         x1, x2, x3, x4 = inputs
         x1, x2, x3, x4 = self.rfb1(x1), self.rfb2(x2), self.rfb3(x3), self.rfb4(x4)
         x = self.up1(x4, x3)
-        out1 = F.interpolate(self.side1(x), scale_factor=16, mode='bilinear')
+        out1 = F.interpolate(self.conv1(x), scale_factor=16, mode='bilinear')
         x = self.up2(x, x2)
-        out2 = F.interpolate(self.side2(x), scale_factor=8, mode='bilinear')
+        out2 = F.interpolate(self.conv2(x), scale_factor=8, mode='bilinear')
         x = self.up3(x, x1)
-        out = F.interpolate(self.head(x), scale_factor=4, mode='bilinear')
+        out = F.interpolate(self.conv3(x), scale_factor=4, mode='bilinear')
         
         return (out, out1, out2) if self.training else out
 
