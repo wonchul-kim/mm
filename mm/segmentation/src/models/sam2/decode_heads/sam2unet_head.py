@@ -128,12 +128,22 @@ class RFB_modified(nn.Module):
         return x
 
 
-def structure_loss(pred, mask):
+# def structure_loss(pred, mask):
+#     import torch
+#     import torch.nn.functional as F
+#     mask = mask.squeeze(1) 
+#     weit = 1 + 5*torch.abs(F.avg_pool2d(mask.float(), kernel_size=31, stride=1, padding=15) - mask.float())
+#     ce_loss = F.cross_entropy(pred, mask.long(), reduction='none')
+#     ce_loss = (weit * ce_loss).sum(dim=(1, 2)) / weit.sum(dim=(1, 2))
+    
+#     return ce_loss.mean()
+
+def structure_loss(pred, mask, ce):
     import torch
     import torch.nn.functional as F
     mask = mask.squeeze(1) 
     weit = 1 + 5*torch.abs(F.avg_pool2d(mask.float(), kernel_size=31, stride=1, padding=15) - mask.float())
-    ce_loss = F.cross_entropy(pred, mask.long(), reduction='none')
+    ce_loss = ce(pred, mask.long())
     ce_loss = (weit * ce_loss).sum(dim=(1, 2)) / weit.sum(dim=(1, 2))
     
     return ce_loss.mean()
@@ -192,9 +202,9 @@ class SAM2UNetHead(BaseDecodeHead):
         
         pred0, pred1, pred2 = seg_logits 
         
-        loss['loss0'] = structure_loss(pred0, seg_label)
-        loss['loss1'] = structure_loss(pred1, seg_label)
-        loss['loss2'] = structure_loss(pred2, seg_label)
+        loss['loss0'] = structure_loss(pred0, seg_label, self.loss_decode[0])
+        loss['loss1'] = structure_loss(pred1, seg_label, self.loss_decode[0])
+        loss['loss2'] = structure_loss(pred2, seg_label, self.loss_decode[0])
         loss['loss'] = loss['loss0'] + loss['loss1'] + loss['loss2']
         
         return loss

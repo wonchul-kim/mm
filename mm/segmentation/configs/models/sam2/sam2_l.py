@@ -4,7 +4,7 @@ _base_ = [
 ]
 
 crop_size = (1024, 1024)
-num_classes = 4
+num_classes = 3
 max_iters = 120000
 norm_cfg = dict(type='BN', requires_grad=True)
 data_preprocessor = dict(
@@ -32,20 +32,20 @@ model = dict(
         rfb_channels = [[144, 64], [288, 64], [576, 64], [1152, 64]],
         norm_cfg=norm_cfg,
         act_cfg=dict(type='ReLU', inplace=True),
-        # loss_decode=[
-        #     dict(
-        #         type='OhemCrossEntropy',
-        #         thres=0.9,
-        #         min_kept=131072,
-        #         class_weight=[1.]*num_classes,
-        #         loss_weight=0.4),
-        #     dict(
-        #         type='OhemCrossEntropy',
-        #         thres=0.9,
-        #         min_kept=131072,
-        #         class_weight=[1.]*num_classes,
-        #         loss_weight=1.0),
-        # ]
+        loss_decode=[
+            # dict(
+            #     type='OhemCrossEntropy',
+            #     thres=0.9,
+            #     min_kept=131072,
+            #     class_weight=[1.]*num_classes,
+            #     loss_weight=0.4),
+            dict(
+                type='OhemCrossEntropy',
+                thres=0.9,
+                min_kept=131072,
+                class_weight=[1.]*num_classes,
+                loss_weight=1.0),
+        ]
     ),
     train_cfg=dict(),
     test_cfg=dict(mode='whole')
