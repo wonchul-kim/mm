@@ -1,19 +1,16 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from typing import List 
 
 from sam2.build_sam import build_sam2
 from mmseg.registry import MODELS
 from mmengine.model import BaseModule
-from mmseg.utils import OptConfigType
-from mm.segmentation.src.models.sam2.decode_heads.sam2unet_head import Up, Adapter, RFB_modified
+from mm.segmentation.src.models.sam2.decode_heads.sam2unet_head import Adapter
 
 # class SAM2UNet(BaseModule):
 @MODELS.register_module()
 class SAM2Encoder(nn.Module):
-    def __init__(self, num_classes, 
-                    model_cfg: str,
+    def __init__(self, model_cfg: str,
                     exclude_layers: List[str] = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                                                  'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                                                  'obj_ptr_proj', 'image_encoder.neck'],
@@ -53,44 +50,5 @@ class SAM2Encoder(nn.Module):
             *blocks
         )
         
-        
-        self.rfb1 = RFB_modified(144, 64)
-        self.rfb2 = RFB_modified(288, 64)
-        self.rfb3 = RFB_modified(576, 64)
-        self.rfb4 = RFB_modified(1152, 64)
-        self.up1 = (Up(128, 64))
-        self.up2 = (Up(128, 64))
-        self.up3 = (Up(128, 64))
-        self.up4 = (Up(128, 64))
-        self.side1 = nn.Conv2d(64, num_classes, kernel_size=1)
-        self.side2 = nn.Conv2d(64, num_classes, kernel_size=1)
-        self.head = nn.Conv2d(64, num_classes, kernel_size=1)
-
     def forward(self, x):
-        x1, x2, x3, x4 = self.encoder(x)
-        x1, x2, x3, x4 = self.rfb1(x1), self.rfb2(x2), self.rfb3(x3), self.rfb4(x4)
-        x = self.up1(x4, x3)
-        out1 = F.interpolate(self.side1(x), scale_factor=16, mode='bilinear')
-        x = self.up2(x, x2)
-        out2 = F.interpolate(self.side2(x), scale_factor=8, mode='bilinear')
-        x = self.up3(x, x1)
-        out = F.interpolate(self.head(x), scale_factor=4, mode='bilinear')
-        
-        return out, out1, out2 if self.training else out
-
-    def forward_export(self, x):
-        x1, x2, x3, x4 = self.encoder(x)
-        x1, x2, x3, x4 = self.rfb1(x1), self.rfb2(x2), self.rfb3(x3), self.rfb4(x4)
-        x = self.up1(x4, x3)
-        x = self.up2(x, x2)
-        x = self.up3(x, x1)
-        out = F.interpolate(self.head(x), scale_factor=4, mode='bilinear')
-        
-        return out
-
-if __name__ == "__main__":
-    with torch.no_grad():
-        model = SAM2UNet(4).cuda()
-        x = torch.randn(1, 3, 352, 352).cuda()
-        out, out1, out2 = model(x)
-        print(out.shape, out1.shape, out2.shape)
+        return self.encoder(x)

@@ -1,11 +1,11 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 from torch import Tensor
 import torch.nn as nn
 
 from mmseg.models.utils import resize
 from mmseg.models.decode_heads.decode_head import BaseDecodeHead
 from mmseg.registry import MODELS
-from mmseg.utils import OptConfigType, SampleList
+from mmseg.utils import OptConfigType, SampleList, ConfigType
 
 import torch
 import torch.nn as nn
@@ -155,12 +155,29 @@ class SAM2UNetHead(BaseDecodeHead):
             act_cfg=act_cfg,
             **kwargs)
         
+        self.rfb1 = RFB_modified(144, 64)
+        self.rfb2 = RFB_modified(288, 64)
+        self.rfb3 = RFB_modified(576, 64)
+        self.rfb4 = RFB_modified(1152, 64)
+        self.up1 = (Up(128, 64))
+        self.up2 = (Up(128, 64))
+        self.up3 = (Up(128, 64))
+        self.up4 = (Up(128, 64))
+        self.side1 = nn.Conv2d(64, num_classes, kernel_size=1)
+        self.side2 = nn.Conv2d(64, num_classes, kernel_size=1)
+        self.head = nn.Conv2d(64, num_classes, kernel_size=1)
 
     def forward(self, inputs: Union[Tensor, Tuple[Tensor]]) -> Union[Tensor, Tuple[Tensor]]:
-        if self.training:
-            return inputs
-        else:
-            return inputs[0]
+        x1, x2, x3, x4 = inputs
+        x1, x2, x3, x4 = self.rfb1(x1), self.rfb2(x2), self.rfb3(x3), self.rfb4(x4)
+        x = self.up1(x4, x3)
+        out1 = F.interpolate(self.side1(x), scale_factor=16, mode='bilinear')
+        x = self.up2(x, x2)
+        out2 = F.interpolate(self.side2(x), scale_factor=8, mode='bilinear')
+        x = self.up3(x, x1)
+        out = F.interpolate(self.head(x), scale_factor=4, mode='bilinear')
+        
+        return (out, out1, out2) if self.training else out
 
     def loss_by_feat(self, seg_logits: Tuple[Tensor],
                     batch_data_samples: SampleList) -> dict:
@@ -178,4 +195,3 @@ class SAM2UNetHead(BaseDecodeHead):
         
                     
                     
-            

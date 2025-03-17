@@ -21,7 +21,6 @@ model = dict(
     backbone=dict(
         type='SAM2Encoder',
         model_cfg="sam2_hiera_l.yaml",
-        num_classes=num_classes,
         exclude_layers = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                         'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                         'obj_ptr_proj', 'image_encoder.neck'],
