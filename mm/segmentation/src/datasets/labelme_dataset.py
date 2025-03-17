@@ -116,6 +116,10 @@ class LabelmeDataset(BaseSegDataset):
                     recursive=True,
                     backend_args=self.backend_args):
                 data_info = dict(img_path=osp.join(input_dir, img))
+                is_parent_path = False 
+                if len(img.split('/')) > 1:
+                    is_parent_path = len(img.split('/'))
+                data_info['is_parent_path'] = is_parent_path
                 seg_map = img[:-_suffix_len] + self.seg_map_suffix
                 data_info['seg_map_path'] = osp.join(input_dir, seg_map)
                 for roi in self._rois:
@@ -155,6 +159,7 @@ class LabelmeDataset(BaseSegDataset):
                     for roi in img_info['patches']:
                         
                         data_info = dict(img_path=img_info['img_file'])
+                        data_info['is_parent_path'] = False # TODO
                         assert osp.exists(img_info['img_file']), ValueError(f"[ERROR] There is no such image file: {img_info['img_file']}")
                         data_info['seg_map_path'] = img_info['img_file'][:-_suffix_len] + self.seg_map_suffix
                         assert osp.exists(data_info['seg_map_path']), ValueError(f"[ERROR] There is no such json file: {data_info['seg_map_path']}")
@@ -177,6 +182,10 @@ class LabelmeDataset(BaseSegDataset):
                     recursive=True,
                     backend_args=self.backend_args):
                     data_info = dict(img_path=osp.join(input_dir, img))
+                    is_parent_path = False 
+                    if len(img.split('/')) > 1:
+                        is_parent_path = len(img.split('/'))
+                    data_info['is_parent_path'] = is_parent_path
                     seg_map = img[:-_suffix_len] + self.seg_map_suffix
                     data_info['seg_map_path'] = osp.join(input_dir, seg_map)
                     for roi in self._rois:

@@ -7,7 +7,8 @@ import cv2
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 from visionsuite.utils.helpers import get_text_coords
 
-def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres=10, contour_conf=0.5):
+def vis_test(outputs, output_dir, data_batch, idx, annotate=False, 
+             contour_thres=10, contour_conf=0.5, create_parent_path=False):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
@@ -22,6 +23,10 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
             # img
             img_path = output.img_path 
             filename = osp.split(osp.splitext(img_path)[0])[-1]
+            parent_path = None
+            if output.is_parent_path:
+                parent_path = osp.split(osp.splitext(img_path)[0])[-2]
+                parent_path = '/'.join(parent_path.split("/")[-output.is_parent_path:])
             
             # input
             input_image = np.transpose(input_image.cpu().detach().numpy(), (1, 2, 0))
@@ -71,8 +76,19 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                                                                        input_width, input_height, offset_h=offset_h), 
                                     cv2.FONT_HERSHEY_SIMPLEX, font_scale, tuple(map(int, color_map[idx + 1])), 3)
                 
-                with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
-                    json.dump(_labelme, jsf)
+                if parent_path:
+                    if create_parent_path:
+                        if not osp.exists(osp.join(annotation_dir, parent_path)):
+                            os.makedirs(osp.join(annotation_dir, parent_path))
+                    
+                        with open(os.path.join(annotation_dir, parent_path, filename + ".json"), "w") as jsf:
+                            json.dump(_labelme, jsf)
+                    else:
+                        with open(os.path.join(annotation_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + ".json"), "w") as jsf:
+                            json.dump(_labelme, jsf)
+                else:
+                    with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
+                        json.dump(_labelme, jsf)
             else:
                 _labelme = None
                 
@@ -96,7 +112,16 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                 vis_img = np.hstack((gt_vis_img, pred_vis_img, vis_legend))
             else:
                 vis_img = np.hstack((pred_vis_img, vis_legend))
-            cv2.imwrite(osp.join(output_dir, filename + f'_{idx}_{jdx}.png'), vis_img)
+                
+            if parent_path:
+                if create_parent_path:
+                    if not osp.exists(osp.join(output_dir, parent_path)):
+                        os.makedirs(osp.join(output_dir, parent_path))
+                    cv2.imwrite(osp.join(output_dir, parent_path, filename + f'_{idx}_{jdx}.png'), vis_img)
+                else:
+                    cv2.imwrite(osp.join(output_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{idx}_{jdx}.png'), vis_img)
+            else:
+                cv2.imwrite(osp.join(output_dir, filename + f'_{idx}_{jdx}.png'), vis_img)
                 
             heatmaps = []
             for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, classes)):
@@ -125,6 +150,15 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False, contour_thres
                 vis_heatmap = cv2.hconcat([gt_vis_heatmap] + heatmaps + [colorbar])
             else:
                 vis_heatmap = cv2.hconcat(heatmaps + [colorbar])
-            cv2.imwrite(osp.join(logits_dir, filename + f'_{idx}_{jdx}.png'), vis_heatmap)
+                
+            if parent_path:
+                if create_parent_path:
+                    if not osp.exists(osp.join(logits_dir, parent_path)):
+                        os.makedirs(osp.join(logits_dir, parent_path))
+                    cv2.imwrite(osp.join(logits_dir, parent_path, filename + f'_{idx}_{jdx}.png'), vis_heatmap)   
+                else:
+                    cv2.imwrite(osp.join(logits_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{idx}_{jdx}.png'), vis_heatmap)
+            else:
+                cv2.imwrite(osp.join(logits_dir, filename + f'_{idx}_{jdx}.png'), vis_heatmap)
             
             
