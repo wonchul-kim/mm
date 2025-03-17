@@ -5,7 +5,8 @@ import os.path as osp
 
 from mmengine.config import Config, DictAction
 from mmengine.runner import Runner
-
+from mm.segmentation.src.models.gcnet.gcnethead import GCNetHead 
+from mm.segmentation.src.models.gcnet.gcnet import GCNet
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeTest
 from mm.segmentation.utils.metrics import IoUMetricV2
@@ -94,46 +95,23 @@ def main():
     runner.test()
 
 def main2():
-    # # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
-    # # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth"
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
-    # classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/gcnet_epochs100/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
+    classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     
-    # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val"
-    # rois = [[220, 60, 1340, 828]] #[[]]
-    # patch = {
-    #     "use_patch": False,
-    #     "include_point_positive": True,
-    #     "centric": False,
-    #     "sliding": True,
-    #     "width": 512,
-    #     "height": 256,
-    #     "overlap_ratio": 0.2,
-    #     "num_involved_pixel": 10,
-    #     "sliding_bg_ratio": 0,
-    #     "bg_ratio_by_image": 0,
-    #     "bg_start_train_epoch_by_image": 0,
-    #     "bg_start_val_epoch_by_image": 0,
-    #     "translate": 0,
-    #     "translate_range_width": 0,
-    #     "translate_range_height": 0,
-    # }
-    
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_27300.pth"
-    # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_40344.pth"
-    classes = ['background', 'STABBED', 'DUST']
-   
-    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
-    rois = [[]]
+    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val"
+    rois = [[220, 60, 1340, 828]] #[[]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
         "width": 512,
-        "height": 512,
+        "height": 256,
         "overlap_ratio": 0.2,
         "num_involved_pixel": 10,
         "sliding_bg_ratio": 0,
@@ -144,6 +122,31 @@ def main2():
         "translate_range_width": 0,
         "translate_range_height": 0,
     }
+    
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_27300.pth"
+    # # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/pidnet_epochs300/train/weights/best_mIoU_iter_40344.pth"
+    # classes = ['background', 'STABBED', 'DUST']
+   
+    # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
+    # rois = [[]]
+    # patch = {
+    #     "use_patch": True,
+    #     "include_point_positive": True,
+    #     "centric": False,
+    #     "sliding": True,
+    #     "width": 512,
+    #     "height": 512,
+    #     "overlap_ratio": 0.2,
+    #     "num_involved_pixel": 10,
+    #     "sliding_bg_ratio": 0,
+    #     "bg_ratio_by_image": 0,
+    #     "bg_start_train_epoch_by_image": 0,
+    #     "bg_start_val_epoch_by_image": 0,
+    #     "translate": 0,
+    #     "translate_range_width": 0,
+    #     "translate_range_height": 0,
+    # }
 
     
     parser = argparse.ArgumentParser(
@@ -162,15 +165,17 @@ def main2():
     
     # args.model= 'mask2former'
     # args.backbone = 'swin-s'
-    args.model= 'pidnet'
-    args.backbone = 'l'
-    args.height = 512
-    args.width = 512
+    # args.model= 'pidnet'
+    # args.backbone = 'l'
+    args.model = 'gcnet'
+    args.backbone = 'm'
+    args.height = 1120
+    args.width = 768
     
     args.rois = rois
     args.patch = patch
     
-    args.tta = {'use': True, 'augs':{
+    args.tta = {'use': False, 'augs':{
                                         'HorizontalFlip': True,
                                         'VerticalFlip': True, 
                                         'Rotate': 90,
@@ -198,5 +203,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()
