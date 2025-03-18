@@ -1,11 +1,9 @@
-import torch
 import torch.nn as nn
 from typing import List 
 
-from sam2.build_sam import build_sam2
 from mmseg.registry import MODELS
 from mmengine.model import BaseModule
-from mm.segmentation.src.models.sam2.decode_heads.sam2unet_head import Adapter
+from .decode_heads.sam2unet_head import Adapter
 
 # class SAM2UNet(BaseModule):
 @MODELS.register_module()
@@ -14,9 +12,17 @@ class SAM2Encoder(nn.Module):
                     exclude_layers: List[str] = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                                                  'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                                                  'obj_ptr_proj', 'image_encoder.neck'],
-                    forzen_stages: int=1,
+                    frozen_stages: int=1,
                     checkpoint_path=None) -> None:
-        super().__init__()    
+        super().__init__()   
+        try: 
+            from sam2.build_sam import build_sam2
+        except:
+            from mm.utils.git import install_by_clone
+            print(f"CANNOT import sam2, need to install it first")
+            install_by_clone(url="https://github.com/facebookresearch/sam2.git", dir_name='sam2')
+            print(f"SUCCESSFULLY Installed sam2")
+            from sam2.build_sam import build_sam2
 
         if checkpoint_path:
             model = build_sam2(model_cfg, checkpoint_path)
@@ -35,7 +41,7 @@ class SAM2Encoder(nn.Module):
 
         self.encoder = model.image_encoder.trunk
 
-        if forzen_stages != 0:
+        if frozen_stages != -1:
             for param in self.encoder.parameters():
                 param.requires_grad = False
             blocks = []

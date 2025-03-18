@@ -25,6 +25,7 @@ model = dict(
                         'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                         'obj_ptr_proj', 'image_encoder.neck'],
         checkpoint_path=None,
+        frozen_stages=1,
     ),
     decode_head=dict(
         type='SAM2UNetHead',
