@@ -4,7 +4,7 @@ _base_ = [
 ]
 
 crop_size = (1024, 1024)
-num_classes = 4
+num_classes = 3
 max_iters = 120000
 norm_cfg = dict(type='BN', requires_grad=True)
 data_preprocessor = dict(

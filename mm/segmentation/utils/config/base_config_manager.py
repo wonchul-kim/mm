@@ -334,8 +334,8 @@ class BaseConfigManager:
                 if cfg.model.get('type') == 'EncoderDecoder':
                     if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
                         cfg.model.decode_head.num_classes = num_classes
-                        # for loss_decode in cfg.model.decode_head.loss_decode:
-                        #     loss_decode.class_weight = [1.0]*num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
                         
         def _manage_crop_size(cfg, new_crop_size):
             # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:

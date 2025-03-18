@@ -1,6 +1,6 @@
 backbone_weights_map = {
+    't': 't',
     's': 's',
-    'm': 'm',
     'l': 'l',
     'b+': 'b+',
 }

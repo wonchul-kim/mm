@@ -724,7 +724,7 @@ def sam2():
 
     rois = [[220, 60, 1340, 828]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
@@ -766,18 +766,18 @@ def sam2():
     
     args.model= 'sam2'
     # args.backbone = 's'
-    # args.backbone = 't'
-    args.backbone = 'l'
-    args.height = 256
-    args.width = 512
-    args.frozen_stages = -1
+    args.backbone = 't'
+    # args.backbone = 'l'
+    args.height = 768
+    args.width = 1120
+    args.frozen_stages = 1
     
     args.amp = False
     
     args.rois = rois
     args.patch = patch
 
-    args.batch_size = 2
+    args.batch_size = 1
     args.max_iters = 100
     args.val_interval = 50
     
