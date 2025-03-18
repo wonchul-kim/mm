@@ -95,18 +95,18 @@ def main():
     runner.test()
 
 def main2():
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
     weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/train/weights/best_mIoU_iter_69310.pth"
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/test/exp"
+    output_dir = '/HDD/etc/repeatablility/mask2former_epochs140/test/exp'
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/train/weights/best_mIoU_iter_71638.pth"
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
     classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     
-    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
+    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
     # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
-    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
+    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
     rois = [[220, 60, 1340, 828]] #[[]]
     patch = {
         "use_patch": False,
