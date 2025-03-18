@@ -301,9 +301,6 @@ class BaseConfigManager:
         
         
     def manage_gcnet_config(self, num_classes, width, height):
-        from mm.segmentation.configs.models.dinov2 import backbone_weights_map as dinov2_backbone_weights_map
-        from mm.utils.weights import get_weights_from_nexus
-
         def _manage_num_classes(cfg):
             cfg.num_classes = num_classes 
             if 'model' in cfg:
@@ -321,13 +318,11 @@ class BaseConfigManager:
             cfg.data_preprocessor.size = new_crop_size
             cfg.model.data_preprocessor = cfg.data_preprocessor
             
+        
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
     
     def manage_sam2_config(self, num_classes, width, height):
-        from mm.segmentation.configs.models.dinov2 import backbone_weights_map as dinov2_backbone_weights_map
-        from mm.utils.weights import get_weights_from_nexus
-
         def _manage_num_classes(cfg):
             cfg.num_classes = num_classes 
             if 'model' in cfg:
@@ -345,8 +340,18 @@ class BaseConfigManager:
             cfg.data_preprocessor.size = new_crop_size
             cfg.model.data_preprocessor = cfg.data_preprocessor
             
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.sam2 import backbone_weights_map as sam2_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.checkpoint_path = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        sam2_backbone_weights_map[self.args.backbone], 'pt',
+                                                        weights_name=sam2_backbone_weights_map[self.args.backbone])
+            
+            
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
+        _manage_backbone_weights(self._cfg)
         
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):

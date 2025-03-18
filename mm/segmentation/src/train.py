@@ -766,8 +766,8 @@ def sam2():
     
     args.model= 'sam2'
     # args.backbone = 's'
-    args.backbone = 't'
-    # args.backbone = 'l'
+    # args.backbone = 't'
+    args.backbone = 'l'
     args.height = 768
     args.width = 1120
     args.frozen_stages = 1

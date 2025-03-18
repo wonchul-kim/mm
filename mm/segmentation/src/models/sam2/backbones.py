@@ -7,7 +7,6 @@ from .decode_heads.sam2unet_head import Adapter
 
 @MODELS.register_module()
 class SAM2Encoder(BaseModule):
-# class SAM2Encoder(nn.Module):
     def __init__(self, model_cfg: str,
                     exclude_layers: List[str] = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                                                  'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
