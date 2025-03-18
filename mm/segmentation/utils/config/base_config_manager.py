@@ -1,5 +1,6 @@
 
 import os.path as osp
+import warnings
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -469,8 +470,10 @@ class BaseConfigManager:
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
+                    assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
                 else:
-                    raise NotImplementedError(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
+                    warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 
                 self._cfg.model.backbone.frozen_stages = frozen_stages
             else:

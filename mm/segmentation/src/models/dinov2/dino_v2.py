@@ -27,9 +27,10 @@ try:
         NestedTensorBlock as Block,
     )
 except:
-    from . import install_dinov2 
-    install_dinov2()
-    
+    from mm.utils.git import install_by_clone
+    install_by_clone(url="https://github.com/facebookresearch/dinov2.git", dir_name='dinov2')  
+    print("SUCCESSFULLY INSTALLED dinov2 !!!")
+
     from dinov2.layers import (
         Mlp,
         PatchEmbed,

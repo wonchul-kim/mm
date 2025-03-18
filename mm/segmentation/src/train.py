@@ -8,27 +8,24 @@ import os
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
+import mm.segmentation.src.loops
+import mm.segmentation.src.models
+import mm.segmentation.src.datasets
+import mm.segmentation.utils.transforms
+import mm.segmentation.utils.metrics
+import mm.segmentation.utils.hooks
 
 from mmseg.registry import RUNNERS
 from mm.utils.weights import get_weights_from_nexus
-from mm.segmentation.src.datasets.mask_dataset import MaskDataset
-from mm.segmentation.utils.hooks import VisualizeVal
-from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-# from mm.segmentation.src.models.dinov2.vit_dinov2 import DinoVisionBackbone
-from mm.segmentation.src.models.dinov2.dino_v2 import DinoVisionTransformer
-from mm.segmentation.src.models.gcnet.gcnethead import GCNetHead 
-from mm.segmentation.src.models.gcnet.gcnet import GCNet
 from mm.segmentation.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
 from mm.segmentation.configs.models.deeplabv3plus import backbone_weights_map as dlabv3plus_backbone_weights_map
 from mm.segmentation.configs.models.pidnet import backbone_weights_map as pidnet_backbone_weights_map
 from mm.segmentation.configs.models.gcnet import backbone_weights_map as gcnet_backbone_weights_map
-import mm.segmentation.utils.transforms.loading
-import mm.segmentation.src.loops
-import mm.segmentation.src.models
+
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -83,7 +80,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' not in args.model or 'sam2' not in args.model:       
+    if 'dinov2' != args.model and 'sam2' != args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
