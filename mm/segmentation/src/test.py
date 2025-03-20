@@ -95,18 +95,24 @@ def main():
     runner.test()
 
 def main2():
-    # # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/mask2former_epochs140/train/weights/best_mIoU_iter_69310.pth"
-    # # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/test/exp"
     # output_dir = '/HDD/etc/repeatablility/mask2former_epochs140/test/exp'
-    # # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/train/weights/best_mIoU_iter_71638.pth"
-    # # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
-    # # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
-    # classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/pidnet_l_epochs300/train/weights/best_mIoU_iter_71638.pth"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
     
     # # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
     # # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
     # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
+    # weights = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/train/weights/best_mIoU_iter_47901.pth'
+    # # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/test/exp'
+    # output_dir = '/HDD/etc/repeatablility/sam2unet_epochs100/test/exp'
+    # # input_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val'
+
+    
+    # classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
     # rois = [[220, 60, 1340, 828]] #[[]]
     # patch = {
     #     "use_patch": False,
@@ -126,8 +132,8 @@ def main2():
     #     "translate_range_height": 0,
     # }
     
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/gcnet_epochs200/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/gcnet_epochs200/train/weights/best_mIoU_iter_55110.pth"
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/test/exp"
+    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/train/weights/best_mIoU_iter_44220.pth"
     classes = ['background', 'STABBED', 'DUST']
    
     # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
@@ -170,10 +176,12 @@ def main2():
     # args.backbone = 'swin-s'
     # args.model= 'pidnet'
     # args.backbone = 'l'
-    args.model = 'gcnet'
-    args.backbone = 'm'
-    args.height = 768
-    args.width = 1120
+    # args.model = 'gcnet'
+    # args.backbone = 'm'
+    args.model = 'sam2'
+    args.backbone = 's'
+    args.height = 512
+    args.width = 512
     
     args.rois = rois
     args.patch = patch
