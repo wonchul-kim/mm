@@ -52,13 +52,16 @@ model = dict(
     test_cfg=dict(mode='whole')
 )
 
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0005)
-optim_wrapper = dict(type='OptimWrapper', optimizer=optimizer, clip_grad=None)
-# learning policy
+optimizer = dict(type='AdamW', lr=0.001, weight_decay=5e-4)
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=optimizer,
+    clip_grad=dict(max_norm=0.01, norm_type=2),
+)
 param_scheduler = [
     dict(
         type='PolyLR',
-        eta_min=0.,
+        eta_min=1e-7,
         power=0.9,
         begin=0,
         end=max_iters,
