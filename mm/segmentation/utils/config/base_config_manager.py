@@ -59,6 +59,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_gcnet_config
         elif args.model == 'sam2':
             self.manage_model_config = self.manage_sam2_config
+        elif args.model == 'hetnet':
+            self.manage_model_config = self.manage_hetnet_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -352,7 +354,45 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         _manage_backbone_weights(self._cfg)
+    
+    def manage_hetnet_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            if 'decode_head' in cfg.model:
+                if cfg.model.decode_head.type == 'HetNetHead':
+                    cfg.model.decode_head.width = new_crop_size[1]
+                    cfg.model.decode_head.height = new_crop_size[0]
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_train_pipeline(cfg):
+            cfg.train_pipeline.insert(2, dict(type='GenerateEdge', edge_width=4))
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.hetnet import backbone_weights_map as hetnet_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.weights = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        hetnet_backbone_weights_map[self.args.backbone], 'pth',
+                                                        weights_name=hetnet_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_train_pipeline(self._cfg)
+        _manage_backbone_weights(self._cfg)
         
+            
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):
@@ -465,18 +505,18 @@ class BaseConfigManager:
 
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 
                 elif self._cfg.model.backbone.type == 'COSNet':
                     assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'ResNetV1c':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'PIDNet':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
-                elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
-                    assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'HetNetEncoder':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 else:
                     warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 

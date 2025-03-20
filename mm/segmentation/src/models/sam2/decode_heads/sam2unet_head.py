@@ -2,7 +2,6 @@ from typing import Tuple, Union, List
 from torch import Tensor
 import torch.nn as nn
 
-from mmseg.models.utils import resize
 from mmseg.models.decode_heads.decode_head import BaseDecodeHead
 from mmseg.registry import MODELS
 from mmseg.utils import OptConfigType, SampleList, ConfigType

@@ -4,3 +4,4 @@ from .pidnet import *
 from .sam2 import *
 from .gcnet import *
 from .dinov2 import *
+from .hetnet import *
