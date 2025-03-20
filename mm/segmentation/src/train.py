@@ -871,9 +871,9 @@ def hetnet():
     # args.backbone = 's'
     # args.backbone = 't'
     args.backbone = 'resnext101_32x4d'
-    args.height = 256
-    args.width = 512
-    # args.frozen_stages = 1
+    args.height = 768
+    args.width = 1120
+    args.frozen_stages = 2
     
     args.amp = False
     

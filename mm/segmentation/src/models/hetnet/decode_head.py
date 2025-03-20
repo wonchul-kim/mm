@@ -311,6 +311,8 @@ class PyramidPooling(nn.Module):
 class HetNetHead(BaseDecodeHead):
     def __init__(self,
                  num_classes: int,
+                 width: int,
+                 height: int,
                  in_channels: int = 3,
                  channels: int = 64,
                  norm_cfg: OptConfigType = dict(type='BN', requires_grad=True),
@@ -324,6 +326,8 @@ class HetNetHead(BaseDecodeHead):
             act_cfg=act_cfg,
             **kwargs)
         
+        self.width = width 
+        self.height = height 
         
         self.pyramid_pooling = PyramidPooling(2048, 64)
 
@@ -367,8 +371,7 @@ class HetNetHead(BaseDecodeHead):
         self.initialize()
 
     def forward(self, inputs: Union[Tensor, Tuple[Tensor]]) -> Union[Tensor, Tuple[Tensor]]:
-
-        shape = (256, 512)
+        shape = (self.height, self.width)
         bk_stage1, bk_stage2, bk_stage3, bk_stage4, bk_stage5 = inputs
         
         fused4 = self.pyramid_pooling(bk_stage5)

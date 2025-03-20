@@ -21,9 +21,12 @@ model = dict(
     backbone=dict(
         type='HetNetEncoder',
         weights=None, 
+        frozen_stages=-1,
     ),
     decode_head=dict(
         type='HetNetHead',
+        width=crop_size[1],
+        height=crop_size[0],
         num_classes=num_classes,
         norm_cfg=norm_cfg,
         act_cfg=dict(type='ReLU', inplace=True),

@@ -366,8 +366,10 @@ class BaseConfigManager:
                             loss_decode.class_weight = [1.0]*num_classes
                         
         def _manage_crop_size(cfg, new_crop_size):
-            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
-            #     cfg.model.backbone.img_size = new_crop_size
+            if 'decode_head' in cfg.model:
+                if cfg.model.decode_head.type == 'HetNetHead':
+                    cfg.model.decode_head.width = new_crop_size[1]
+                    cfg.model.decode_head.height = new_crop_size[0]
                         
             cfg.crop_size = new_crop_size 
             cfg.data_preprocessor.size = new_crop_size
@@ -503,16 +505,18 @@ class BaseConfigManager:
 
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 
                 elif self._cfg.model.backbone.type == 'COSNet':
                     assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'ResNetV1c':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'PIDNet':
-                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'HetNetEncoder':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 else:
                     warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 
