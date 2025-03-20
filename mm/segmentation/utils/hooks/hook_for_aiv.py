@@ -99,7 +99,7 @@ class HookForAiv(Hook):
                            
         ## evaluate ===================================================================
         metrics = {}
-        if runner.train_loop.evaluator:
+        if hasattr(runner.train_loop, 'evaluator') and runner.train_loop.evaluator:
             runner.train_loop.run_eval_iter(data_batch)
 
             if batch_idx != 0 and batch_idx%len(runner.train_dataloader) == 0:

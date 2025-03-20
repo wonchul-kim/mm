@@ -10,8 +10,9 @@ from torch.utils.data import DataLoader
 from mmengine.evaluator import Evaluator
 from mmengine.logging import HistoryBuffer, print_log
 from mmengine.registry import LOOPS
-
+from mmseg.models.utils import resize
 from mmengine.runner.loops import IterBasedTrainLoop,  _update_losses
+from mmengine.structures import PixelData
 
 @LOOPS.register_module()
 class IterBasedTrainLoopV2(IterBasedTrainLoop):
@@ -62,4 +63,12 @@ class IterBasedTrainLoopV2(IterBasedTrainLoop):
         self.runner.model.eval()
         outputs = self.runner.model.val_step(data_batch)
         outputs, self.train_loss = _update_losses(outputs, self.train_loss)
+        for output in outputs:
+            if output.gt_sem_seg.shape != output.pred_sem_seg.shape:
+                output.gt_sem_seg = PixelData(data=resize(
+                                            output.gt_sem_seg.data.unsqueeze(0).float(),
+                                            size=output.pred_sem_seg.shape,
+                                            mode='bilinear',
+                                            align_corners=False,
+                                            warning=False).squeeze(0))
         self.evaluator.process(data_samples=outputs, data_batch=data_batch)

@@ -59,6 +59,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_gcnet_config
         elif args.model == 'sam2':
             self.manage_model_config = self.manage_sam2_config
+        elif args.model == 'hetnet':
+            self.manage_model_config = self.manage_hetnet_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -352,7 +354,43 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         _manage_backbone_weights(self._cfg)
+    
+    def manage_hetnet_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
+            #     cfg.model.backbone.img_size = new_crop_size
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_train_pipeline(cfg):
+            cfg.train_pipeline.insert(2, dict(type='GenerateEdge', edge_width=4))
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.sam2 import backbone_weights_map as sam2_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.checkpoint_path = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        sam2_backbone_weights_map[self.args.backbone], 'pt',
+                                                        weights_name=sam2_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_train_pipeline(self._cfg)
+        # _manage_backbone_weights(self._cfg)
         
+            
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):
