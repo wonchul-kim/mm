@@ -20,7 +20,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     backbone=dict(
         type='SAM2Encoder',
-        model_cfg="configs/sam2.1/sam2_hiera_b+.yaml",
+        model_cfg="configs/sam2.1/sam2.1_hiera_b+.yaml",
         exclude_layers = ['sam_mask_decoder', 'sam_prompt_encoder', 'memory_encoder',
                         'memory_attention', 'mask_downsample', 'obj_ptr_tpos_proj', 
                         'obj_ptr_proj', 'image_encoder.neck'],
