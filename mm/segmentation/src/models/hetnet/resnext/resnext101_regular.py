@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+import warnings
 from .resnext_101_32x4d_ import resnext_101_32x4d
 
 
@@ -13,6 +13,8 @@ class ResNeXt101(nn.Module):
             #del weights['0.weight']
             net.load_state_dict(weights, strict=True)
             print("Load ResNeXt Weights Succeed!")
+        else:
+            warnings.warn(f"NO Backbone weights are loaded, ARE YOU Sure???")
         self.backbone_path = backbone_path
         net = list(net.children())
 

@@ -6,7 +6,7 @@ from mmengine.model import BaseModule
 
 @MODELS.register_module()
 class HetNetEncoder(BaseModule):
-    def __init__(self, weights='/HDD/weights/hetnet/resnext_101_32x4d.pth'):
+    def __init__(self, weights=None):
         super().__init__()
         self.bkbone = ResNeXt101(weights)
         

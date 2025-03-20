@@ -377,18 +377,18 @@ class BaseConfigManager:
             cfg.train_pipeline.insert(2, dict(type='GenerateEdge', edge_width=4))
             
         def _manage_backbone_weights(cfg):
-            from mm.segmentation.configs.models.sam2 import backbone_weights_map as sam2_backbone_weights_map
+            from mm.segmentation.configs.models.hetnet import backbone_weights_map as hetnet_backbone_weights_map
             from mm.utils.weights import get_weights_from_nexus
-            cfg.model.backbone.checkpoint_path = get_weights_from_nexus('segmentation', 'mmseg', 
+            cfg.model.backbone.weights = get_weights_from_nexus('segmentation', 'mmseg', 
                                                         self.args.model, 
-                                                        sam2_backbone_weights_map[self.args.backbone], 'pt',
-                                                        weights_name=sam2_backbone_weights_map[self.args.backbone])
+                                                        hetnet_backbone_weights_map[self.args.backbone], 'pth',
+                                                        weights_name=hetnet_backbone_weights_map[self.args.backbone])
             
             
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         _manage_train_pipeline(self._cfg)
-        # _manage_backbone_weights(self._cfg)
+        _manage_backbone_weights(self._cfg)
         
             
     # set dataloader ==================================================================================
@@ -511,8 +511,6 @@ class BaseConfigManager:
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'PIDNet':
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
-                elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
-                    assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
                 else:

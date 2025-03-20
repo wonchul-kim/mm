@@ -80,7 +80,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' != args.model and 'sam2' != args.model:       
+    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
@@ -870,7 +870,7 @@ def hetnet():
     args.model= 'hetnet'
     # args.backbone = 's'
     # args.backbone = 't'
-    args.backbone = 'resnext101'
+    args.backbone = 'resnext101_32x4d'
     args.height = 256
     args.width = 512
     # args.frozen_stages = 1
@@ -917,7 +917,7 @@ def hetnet():
     runner.train()
     
 if __name__ == '__main__':
-    # main()
+    main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
@@ -925,4 +925,4 @@ if __name__ == '__main__':
     # dinov2()
     # gcnet()
     # sam2()
-    hetnet()
+    # hetnet()
