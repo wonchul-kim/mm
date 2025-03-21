@@ -3,27 +3,17 @@ import argparse
 import logging
 import os
 import os.path as osp
+from pathlib import Path 
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[1]
 
 from mmdet.utils import setup_cache_size_limit_of_dynamo
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
 
-import pkg_resources
-import shutil
-try:
-    mmyolo_path = pkg_resources.get_distribution('mmyolo').location + '/mmyolo'
-except pkg_resources.DistributionNotFound:
-    print('mmyolo is not installed')
-    
-from pathlib import Path 
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[1]
-
-new_init_path = str(ROOT / 'utils/init/__init__.py')
-existing_init_path = os.path.join(mmyolo_path, '__init__.py')
-shutil.copy(new_init_path, existing_init_path)
-
+from mm.yolo import init_mmyolo
+init_mmyolo()
 from mmyolo.utils import is_metainfo_lower
 from mmyolo.registry import RUNNERS
 
