@@ -14,27 +14,17 @@ from mmengine.runner import Runner
 
 from mm.yolo import init_mmyolo
 init_mmyolo()
-from mmyolo.utils import is_metainfo_lower
 from mmyolo.registry import RUNNERS
 
+from mm.utils.weights import get_weights_from_nexus
+from mm.utils.functions import add_params_to_args
+from mm.yolo.utils.configs import TrainConfigManager
+from mm.yolo.configs.models.yolov8 import backbone_weights_map as yolov8_backbone_weights_map
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('--config', default=ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py')
-    parser.add_argument('--work-dir', default='/HDD/etc/etc/mmyolo/' )
-    parser.add_argument(
-        '--amp',
-        action='store_true',
-        default=False,
-        help='enable automatic-mixed-precision training')
-    parser.add_argument(
-        '--resume',
-        nargs='?',
-        type=str,
-        const='auto',
-        help='If specify checkpoint path, resume from it, while if not '
-        'specify, try to auto resume from the latest checkpoint '
-        'in the work directory.')
+    parser.add_argument('--args-filename')
+    
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -60,56 +50,92 @@ def parse_args():
 
     return args
 
-
-def main():
+def yolov8():
     args = parse_args()
+    add_params_to_args(args, ROOT / 'configs/recipe/train.yaml')
+    
+    from datetime import datetime 
+    now = datetime.now()
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/detection/mmyolo/train_unit/yolov8/outputs/DETECTION'
+    input_dir = "/DeepLearning/_athena_tests/datasets/rectangle1/split_dataset_unit"
+    classes = ['NUMBER_OK', 'NUMBER_NG', 'LOT_OK', 'LOT_NG']
+    
+    rois = [[220, 60, 1340, 828]]
+    patch = {
+        "use_patch": True,
+        "include_point_positive": True,
+        "centric": False,
+        "sliding": True,
+        "width": 512,
+        "height": 256,
+        "overlap_ratio": 0.2,
+        "num_involved_pixel": 10,
+        "sliding_bg_ratio": 0,
+        "bg_ratio_by_image": 0,
+        "bg_start_train_epoch_by_image": 0,
+        "bg_start_val_epoch_by_image": 0,
+        "translate": 0,
+        "translate_range_width": 0,
+        "translate_range_height": 0,
+    }
+    
+    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
+    if not osp.exists(output_dir):
+        os.mkdir(output_dir)
+        
+    val_dir = osp.join(output_dir, 'val')
+    os.mkdir(val_dir)
+    
+    debug_dir = osp.join(output_dir, 'debug')
+    os.mkdir(debug_dir)
+    
+    logs_dir = osp.join(output_dir, 'logs')
+    os.mkdir(logs_dir)
+    
+    weights_dir = osp.join(output_dir, 'weights')
+    os.mkdir(weights_dir)
+    
+    args.output_dir = output_dir
+    args.data_root = input_dir
+    args.classes = classes
+    args.num_classes = len(classes)
+    
+    args.model= 'yolov8'
+    args.backbone = 'n'
+    args.height = 640
+    args.width = 640
+    
+    args.rois = rois
+    args.patch = patch
+
+    args.epochs = 0
+    args.max_iters = 100
+    args.val_interval = 50
+    
+    args.custom_hooks['visualize_val']['output_dir'] = val_dir
+    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
+    args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
+    args.custom_hooks['checkpoint']['output_dir'] = weights_dir
+    
+    args.load_from = get_weights_from_nexus('detection', 'mmyolo', args.model, 
+                                            yolov8_backbone_weights_map[args.backbone], 'pth')
+
+    # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
+    config_manager = TrainConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_schedule_config(args.max_iters, args.val_interval)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
+    # config_manager.manage_default_hooks_config(args.default_hooks)
+    # config_manager.manage_custom_hooks_config(args.custom_hooks)
+    cfg = config_manager.cfg
 
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
-
-    # load config
-    cfg = Config.fromfile(args.config)
-    # replace the ${key} with the value of cfg.key
-    # cfg = replace_cfg_vals(cfg)
-    cfg.launcher = args.launcher
-    if args.cfg_options is not None:
-        cfg.merge_from_dict(args.cfg_options)
-
-    # work_dir is determined in this priority: CLI > segment in file > filename
-    if args.work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
-        cfg.work_dir = args.work_dir
-    elif cfg.get('work_dir', None) is None:
-        # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
-
-    # enable automatic-mixed-precision training
-    if args.amp is True:
-        optim_wrapper = cfg.optim_wrapper.type
-        if optim_wrapper == 'AmpOptimWrapper':
-            print_log(
-                'AMP training is already enabled in your config.',
-                logger='current',
-                level=logging.WARNING)
-        else:
-            assert optim_wrapper == 'OptimWrapper', (
-                '`--amp` is only supported when the optimizer wrapper type is '
-                f'`OptimWrapper` but got {optim_wrapper}.')
-            cfg.optim_wrapper.type = 'AmpOptimWrapper'
-            cfg.optim_wrapper.loss_scale = 'dynamic'
-
-    # resume is determined in this priority: resume from > auto_resume
-    if args.resume == 'auto':
-        cfg.resume = True
-        cfg.load_from = None
-    elif args.resume is not None:
-        cfg.resume = True
-        cfg.load_from = args.resume
-
-    # Determine whether the custom metainfo fields are all lowercase
-    is_metainfo_lower(cfg)
 
     # build the runner from config
     if 'runner_type' not in cfg:
@@ -125,4 +151,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    yolov8()

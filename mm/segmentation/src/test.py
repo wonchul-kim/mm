@@ -11,7 +11,7 @@ from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeTest
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TestConfigManager
-from mm.segmentation.utils.functions import add_params_to_args, trigger_visualization_hook
+from mm.utils.functions import add_params_to_args, trigger_visualization_hook
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
 

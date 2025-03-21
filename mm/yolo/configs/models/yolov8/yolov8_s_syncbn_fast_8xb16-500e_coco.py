@@ -295,7 +295,7 @@ default_hooks = dict(
         type='YOLOv5ParamSchedulerHook',
         scheduler_type='linear',
         lr_factor=lr_factor,
-        max_epochs=max_epochs),
+        max_epochs=max_epochs), ### max_epochs
     checkpoint=dict(
         type='CheckpointHook',
         interval=save_epoch_intervals,
@@ -312,7 +312,7 @@ custom_hooks = [
         priority=49),
     dict(
         type='mmdet.PipelineSwitchHook',
-        switch_epoch=max_epochs - close_mosaic_epochs,
+        switch_epoch=max_epochs - close_mosaic_epochs, ### max_epochs
         switch_pipeline=train_pipeline_stage2)
 ]
 
@@ -325,9 +325,9 @@ test_evaluator = val_evaluator
 
 train_cfg = dict(
     type='EpochBasedTrainLoop',
-    max_epochs=max_epochs,
+    max_epochs=max_epochs, ### max_epochs
     val_interval=save_epoch_intervals,
-    dynamic_intervals=[((max_epochs - close_mosaic_epochs),
+    dynamic_intervals=[((max_epochs - close_mosaic_epochs), ### max_epochs
                         val_interval_stage2)])
 
 val_cfg = dict(type='ValLoop')
