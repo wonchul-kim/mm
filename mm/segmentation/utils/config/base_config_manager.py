@@ -120,11 +120,14 @@ class BaseConfigManager:
         def _manage_crop_size(cfg, width, height, patch=None):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
                 for pipeline in cfg.train_pipeline:
-                    if pipeline.get('type') == 'RandomCrop':
-                        pipeline['crop_size'] = (height, width)
-                        
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
+                        
+                    if pipeline.get('type') == 'RandomResize':
+                        pipeline['scale'] = (width, height)
+                        
+                    if pipeline.get('type') == 'RandomCrop':
+                        pipeline['crop_size'] = (height, width)
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
                     cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
