@@ -5,10 +5,16 @@ width = 640
 height = 640
 train_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
-    dict(type='Resize', scale=(width, height), keep_ratio=False),
+    dict(
+        type='RandomResize',
+        scale=(width, height),
+        ratio_range=(0.5, 1.5),
+        keep_ratio=True),
+    dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
+    dict(type='Resize', scale=(width, height), keep_ratio=True),
     dict(type='RandomFlip', prob=0.3),
     dict(type='PhotoMetricDistortion'),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'is_parent_path',
                                           'img_shape', 'pad_shape', 'scale_factor', 
                                           'flip', 'flip_direction', 'reduce_zero_label', 
                                           'classes', 'roi', 'patch'])
@@ -16,11 +22,11 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
-    dict(type='Resize', scale=(width, height), keep_ratio=False),
+    dict(type='Resize', scale=(width, height), keep_ratio=True),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'is_parent_path',
                                           'img_shape', 'pad_shape', 'scale_factor', 
                                           'flip', 'flip_direction', 'reduce_zero_label', 
                                           'classes', 'roi', 'patch'])
@@ -32,7 +38,7 @@ test_pipeline = [
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
-    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 
+    dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'img_shape', 'is_parent_path',
                                           'pad_shape', 'scale_factor', 'flip', 'flip_direction', 
                                           'reduce_zero_label', 
                                           'classes', 
@@ -84,15 +90,14 @@ test_dataloader = dict(
         seg_map_suffix='.png',
         pipeline=val_pipeline))
 
-val_evaluator = dict(type='IoUMetricV2', iou_metrics=['mIoU', 'mDice', 'mFscore'],
+train_evaluator = dict(type='IoUMetricV2', iou_metrics=['mIoU', 'mDice', 'mFscore'],
                      keep_results=True, classwise=True)
+val_evaluator = train_evaluator
 test_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore'],
                      keep_results=True, classwise=True)
 
 train_cfg = dict(
     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=50, 
-    evaluator=val_evaluator)
-# train_cfg = dict(
-#     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=5000)
+    evaluator=train_evaluator)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoopV2')

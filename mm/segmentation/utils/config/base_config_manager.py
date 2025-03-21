@@ -1,5 +1,6 @@
 
 import os.path as osp
+import warnings
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -50,6 +51,16 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_cosnet_config
         elif args.model == 'deeplabv3plus':
             self.manage_model_config = self.manage_deeplabv3plus_config
+        elif args.model == 'pidnet':
+            self.manage_model_config = self.manage_pidnet_config
+        elif args.model == 'dinov2':
+            self.manage_model_config = self.manage_dinov2_config
+        elif args.model == 'gcnet':
+            self.manage_model_config = self.manage_gcnet_config
+        elif args.model == 'sam2':
+            self.manage_model_config = self.manage_sam2_config
+        elif args.model == 'hetnet':
+            self.manage_model_config = self.manage_hetnet_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -109,11 +120,14 @@ class BaseConfigManager:
         def _manage_crop_size(cfg, width, height, patch=None):
             if 'train_pipeline' in cfg and isinstance(cfg.train_pipeline, list):
                 for pipeline in cfg.train_pipeline:
-                    if pipeline.get('type') == 'RandomCrop':
-                        pipeline['crop_size'] = (height, width)
-                        
                     if pipeline.get('type') == 'Resize':
                         pipeline['scale'] = (width, height)
+                        
+                    if pipeline.get('type') == 'RandomResize':
+                        pipeline['scale'] = (width, height)
+                        
+                    if pipeline.get('type') == 'RandomCrop':
+                        pipeline['crop_size'] = (height, width)
                     
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.train_pipeline):
                     cfg.train_pipeline.insert(1, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
@@ -145,13 +159,20 @@ class BaseConfigManager:
                 else:
                     cfg.test_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
-            cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
-            cfg.val_dataloader.dataset.pipeline = cfg.val_pipeline
-            cfg.test_dataloader.dataset.pipeline = cfg.test_pipeline
+            if hasattr(self._cfg, 'train_dataloader'):
+                cfg.train_dataloader.dataset.pipeline = cfg.train_pipeline
+            if hasattr(self._cfg, 'val_dataloader'):
+                cfg.val_dataloader.dataset.pipeline = cfg.val_pipeline
+            if hasattr(self._cfg, 'test_dataloader'):
+                cfg.test_dataloader.dataset.pipeline = cfg.test_pipeline
 
-        _manage_train_dataloader(self._cfg)
-        _manage_val_dataloader(self._cfg)            
-        _manage_test_dataloader(self._cfg)
+        if hasattr(self._cfg, 'train_dataloader'):
+            _manage_train_dataloader(self._cfg)
+        if hasattr(self._cfg, 'val_dataloader'):
+            _manage_val_dataloader(self._cfg)            
+        if hasattr(self._cfg, 'test_dataloader'):
+            _manage_test_dataloader(self._cfg)
+            
         if hasattr(self._cfg, 'height'):
             self._cfg.height = height
         if hasattr(self._cfg, 'width'):
@@ -225,6 +246,156 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         
+    def manage_pidnet_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_dict in cfg.model.decode_head.loss_decode:
+                            if loss_dict.get('type') != 'BoundaryLoss':
+                                loss_dict.class_weight = [1.0] * num_classes
+                                                
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+
+        def _manage_train_pipeline(cfg):
+            cfg.train_pipeline.insert(2, dict(type='GenerateEdge', edge_width=4))
+
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_train_pipeline(self._cfg)
+    
+    def manage_dinov2_config(self, num_classes, width, height):
+        from mm.segmentation.configs.models.dinov2 import backbone_weights_map as dinov2_backbone_weights_map
+        from mm.utils.weights import get_weights_from_nexus
+
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        cfg.model.decode_head.loss_cls.class_weight = [1.0] * num_classes + [0.1]
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
+            #     cfg.model.backbone.img_size = new_crop_size
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_backbone_weights(cfg):
+            cfg.model.backbone.init_cfg = dict(
+                                                type="Pretrained",
+                                                checkpoint=get_weights_from_nexus('segmentation', 'mmseg', 
+                                                                                  self.args.model, 
+                                                                                  dinov2_backbone_weights_map[self.args.backbone], 'pth'),
+                                            )
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_backbone_weights(self._cfg)
+        
+        
+    def manage_gcnet_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
+            #     cfg.model.backbone.img_size = new_crop_size
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+    
+    def manage_sam2_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'backbone' in cfg.model and 'img_size' in cfg.model.backbone:
+            #     cfg.model.backbone.img_size = new_crop_size
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.sam2 import backbone_weights_map as sam2_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.checkpoint_path = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        sam2_backbone_weights_map[self.args.backbone], 'pt',
+                                                        weights_name=sam2_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_backbone_weights(self._cfg)
+    
+    def manage_hetnet_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
+                        cfg.model.decode_head.num_classes = num_classes
+                        for loss_decode in cfg.model.decode_head.loss_decode:
+                            loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            if 'decode_head' in cfg.model:
+                if cfg.model.decode_head.type == 'HetNetHead':
+                    cfg.model.decode_head.width = new_crop_size[1]
+                    cfg.model.decode_head.height = new_crop_size[0]
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+        def _manage_train_pipeline(cfg):
+            cfg.train_pipeline.insert(2, dict(type='GenerateEdge', edge_width=4))
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.hetnet import backbone_weights_map as hetnet_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.weights = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        hetnet_backbone_weights_map[self.args.backbone], 'pth',
+                                                        weights_name=hetnet_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        _manage_train_pipeline(self._cfg)
+        _manage_backbone_weights(self._cfg)
+        
+            
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):
@@ -306,7 +477,8 @@ class BaseConfigManager:
                     
                 _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
                                           annotate=val.get('annotate', False), 
-                                          contour_thres=val.get('contour_thres', 50)))
+                                          contour_thres=val.get('contour_thres', 10),
+                                          contour_conf=val.get('contour_conf', 0.5)))
             
             elif key == 'aiv':
                 if val.get('use', False):
@@ -336,7 +508,20 @@ class BaseConfigManager:
 
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                
+                elif self._cfg.model.backbone.type == 'COSNet':
                     assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'ResNetV1c':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'PIDNet':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'DinoVisionTransformer':
+                    assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'HetNetEncoder':
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                else:
+                    warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 
                 self._cfg.model.backbone.frozen_stages = frozen_stages
             else:

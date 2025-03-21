@@ -2,13 +2,13 @@ import torch
 import os.path as osp
 from .base_config_manager import BaseConfigManager
 from mmdeploy.utils import load_config
+from mmengine.config import Config
 
 class ExportConfigManager(BaseConfigManager):
     def __init__(self, cfg=None):
         super().__init__(cfg=cfg)
         
     def build(self, args, config_file):
-                
         # args.batch_size = to_list(args.batch_size)
         # args.width = to_list(args.width)
         # args.height = to_list(args.height)
@@ -20,18 +20,31 @@ class ExportConfigManager(BaseConfigManager):
         
         self._cfg['model_inputs'] = torch.zeros(args.batch_size, 3, args.height, args.width)
         
+        # codebase_config ========================================================================= 
         for key, val in args.codebase_config.items():
             self._cfg['codebase_config'][key] = val
         
+        # tta =========================================================================        
+        if args.tta != {} and 'use' in args.tta and args.tta['use']:
+            self._cfg.tta = args.tta
+        else:
+            self._cfg.tta = {}
+        
+        # onnx_config ========================================================================= 
         for key, val in args.onnx_config.items():
             self._cfg['onnx_config'][key] = val
             
         self._cfg['onnx_config']['input_shape'] = [args.width, args.height]
-        self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}')
+        if self._cfg.tta == {}:
+            self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}')
+        else:
+            self._cfg['onnx_config']['save_file'] = osp.join(args.work_dir, f'{args.model}_{args.backbone}_b{args.batch_size}_w{args.width}_h{args.height}_tta')
             
         for key, val in args.backend_config.items():
-            self._cfg['backend_config'][key] = val
-            
+            if key == 'fp16_mode' and val:
+                self._cfg['backend_config']['common_config'][key] = val
+                self._cfg['onnx_config']['save_file'] += '_fp16'
+                
         for idx in range(len(self._cfg['onnx_config']['output_names'])):
             self._cfg['backend_config']['model_inputs'][idx] = dict(
                     input_shapes=dict(

@@ -12,6 +12,16 @@ seg_map_suffix: '.json'
 # rois ====================================================
 rois: [[]]
 
+# tta ======================================================
+tta:
+  use: false
+  augs: 
+    HorizontalFlip: false
+    VerticalFlip: false
+    Rotate: 0
+    Translate: 0,0
+
+
 # patch ===================================================
 patch:
   use_patch: false
@@ -43,7 +53,6 @@ out: null
 batch_size: 1
 
 # etc. ===================================================
-tta: False
 # wait_time: 2
 # show: False
 
@@ -52,4 +61,5 @@ custom_hooks:
   visualize_test:
     output_dir: null
     annotate: False
-    contour_thres: 50
+    contour_thres: 10
+    contour_conf: 0.5

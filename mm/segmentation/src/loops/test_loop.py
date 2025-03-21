@@ -1,11 +1,9 @@
-from typing import Dict, List, Optional, Sequence, Tuple, Union
-
+from typing import Sequence
 import torch
-
 from mmengine.registry import LOOPS
 from mmengine.runner.amp import autocast
 from mmengine.runner.loops import TestLoop, _parse_losses, _update_losses
-
+from mm.segmentation.src.models.tta_model import TTASegModel
 
 @LOOPS.register_module()
 class TestLoopV2(TestLoop):
@@ -18,10 +16,16 @@ class TestLoopV2(TestLoop):
         self.test_loss.clear()
         for idx, data_batch in enumerate(self.dataloader):
             if hasattr(data_batch['data_samples'][0], 'patch') and data_batch['data_samples'][0].patch:
+                if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                    self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
                 _size = self.run_iter_patch(idx, data_batch)
                 metrics = self.evaluator.evaluate(_size)
             else:
-                self.run_iter(idx, data_batch)
+                if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                    self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
+                    self.run_iter_tta(idx, data_batch)
+                else:
+                    self.run_iter(idx, data_batch)
                 metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
         if self.test_loss:
@@ -50,6 +54,7 @@ class TestLoopV2(TestLoop):
                 output_dir = custom_hook['output_dir']
                 annotate = custom_hook['annotate']
                 contour_thres = custom_hook['contour_thres']
+                contour_conf = custom_hook['contour_conf']
                 
         if not osp.exists(output_dir):
             os.mkdir(output_dir)    
@@ -58,6 +63,7 @@ class TestLoopV2(TestLoop):
         inputs, data_samples = [], []
         batch_size = len(data_batch['inputs'])
         eval_cnt = 0
+        classes = set()
         for input_image, data_sample in zip(data_batch['inputs'], data_batch['data_samples']):
                        
             patch_info = data_sample.patch
@@ -73,7 +79,7 @@ class TestLoopV2(TestLoop):
             vis_gt, vis_pred = np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3)), np.zeros((roi[3] - roi[1], roi[2] - roi[0], 3))
 
             # annotate
-            if annotate and not osp.exists(data_sample.seg_map_path):
+            if annotate or not osp.exists(data_sample.seg_map_path):
                 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 
                 annotation_dir = osp.join(output_dir, '..', 'labels')
@@ -115,11 +121,15 @@ class TestLoopV2(TestLoop):
                         patch_data_batch = {'inputs': inputs, 'data_samples': data_samples}   
                     
                         with autocast(enabled=self.fp16):
-                            outputs = self.runner.model.test_step(patch_data_batch)
+                            if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
+                                outputs = self.run_tta_batch(patch_data_batch)
+                            else:
+                                outputs = self.runner.model.test_step(patch_data_batch)
 
                         outputs, self.test_loss = _update_losses(outputs, self.test_loss)
                         eval_outputs, eval_inputs, eval_data_samples = [], [], []
                         for jdx, output in enumerate(outputs):
+                            classes.update(output.classes[1:])
                             if osp.exists(output.seg_map_path):
                                 eval_outputs.append(output)
                                 eval_inputs.append(patch_data_batch['inputs'][jdx])
@@ -128,11 +138,12 @@ class TestLoopV2(TestLoop):
                                 
                             if _labelme:
                                 _labelme = get_points_from_image(output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy(), 
-                                                                 output.classes,
+                                                                 list(classes),
                                                                  roi,
                                                                  [x, y],
                                                                  _labelme,
                                                                  contour_thres,
+                                                                 conf=contour_conf,
                                                             )
                         self.evaluator.process(data_samples=eval_outputs, 
                                                        data_batch={'inputs': eval_inputs, 
@@ -154,14 +165,47 @@ class TestLoopV2(TestLoop):
                         
             cv2.rectangle(vis_gt, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
             cv2.rectangle(vis_pred, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
-            cv2.imwrite(osp.join(output_dir, filename + '.png'), np.hstack((vis_gt, vis_pred)))
+            
+            vis_legend = np.zeros((roi[3] - roi[1], 300, 3), dtype="uint8")
+            for idx, _class in enumerate(('background', ) + tuple(classes)):
+                color = [int(c) for c in color_map[idx]]
+                cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
+            
+            cv2.imwrite(osp.join(output_dir, filename + '.png'), np.hstack((vis_gt, vis_pred, vis_legend)))
             
             if _labelme:
                 import json
                 
                 with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
                     json.dump(_labelme, jsf)
-                
-
 
         return eval_cnt
+    
+    @torch.no_grad()
+    def run_iter_tta(self, idx, data_batch: Sequence[dict]) -> None:
+        """Iterate one mini-batch.
+
+        Args:
+            data_batch (Sequence[dict]): Batch of data from dataloader.
+        """
+        self.runner.call_hook(
+            'before_test_iter', batch_idx=idx, data_batch=data_batch)
+                
+        with autocast(enabled=self.fp16):
+            outputs = self.run_tta_batch(data_batch)
+            # outputs = self.runner.model.test_step(data_batch)
+
+        outputs, self.test_loss = _update_losses(outputs, self.test_loss)
+
+        self.evaluator.process(data_samples=outputs, data_batch=data_batch)
+        self.runner.call_hook(
+            'after_test_iter',
+            batch_idx=idx,
+            data_batch=data_batch,
+            outputs=outputs)
+    
+                            
+    @torch.no_grad()
+    def run_tta_batch(self, data_batch):               
+        return self.runner.model.run_tta_batch(data_batch)

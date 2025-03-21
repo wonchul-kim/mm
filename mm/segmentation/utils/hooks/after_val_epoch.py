@@ -13,16 +13,4 @@ class HookAfterValEpoch(Hook):
 
     def after_val_epoch(self, runner, metrics) -> None:
 
-        classes = metrics['Class']
-        val_log = {}
-        for key, val in metrics.items():
-            if isinstance(val, (float, int)):
-                val_log[key] = val
-            elif isinstance(val, (np.ndarray, list)):
-                for _val, _class in zip(val, classes):
-                    val_log[f'{key}_{_class}'] = _val
-                    
-        runner.val_log = val_log
-        if hasattr(runner, 'aiv_val_monitor'):
-            runner.aiv_val_monitor.log(val_log)
-            runner.aiv_val_monitor.save()
+        pass

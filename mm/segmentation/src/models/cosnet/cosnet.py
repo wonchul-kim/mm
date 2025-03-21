@@ -9,9 +9,12 @@ from mmseg.models.builder import BACKBONES
 class COSNet(nn.Module):
     def __init__(self, in_chans=3, num_classes=1000, img_size=224,
                  depths=[3, 3, 12, 3], dim=72, expan_ratio=4, num_stages=4, s_kernel_size=[5,5,3,3], 
-                 drop_path_rate=0.2, layer_scale_init_value=1e-6, head_init_scale=1., **kwargs):
+                 drop_path_rate=0.2, layer_scale_init_value=1e-6, head_init_scale=1., 
+                 frozen_stages=-1, 
+                 **kwargs):
         super().__init__()
         
+        self.frozen_stages = frozen_stages
         self.num_stages = num_stages
         self.num_classes = num_classes
         self.dims = []
@@ -44,6 +47,7 @@ class COSNet(nn.Module):
         #self.hdr_layer = BEM(self.dims[-2])
 
         self.apply(self._init_weights)
+        self._freeze_stages()
 
         '''
         if kwargs["classifier_dropout"] is not None:
@@ -104,7 +108,16 @@ class COSNet(nn.Module):
 
         return [f1, f2, f3, f4]
 
+    def _freeze_stages(self):
+        for frozen_idx in range(self.frozen_stages + 1):
+            # freeze downsample_layers
+            for param in self.downsample_layers[frozen_idx].parameters():
+                param.requires_grad = False
 
+            # freeze stages
+            self.stages[frozen_idx].eval()
+            for param in self.stages[frozen_idx].parameters():
+                param.requires_grad = False
 
 ###############################################################################
 if __name__ == "__main__":
@@ -112,7 +125,7 @@ if __name__ == "__main__":
     model = COSNet(in_chans=3, num_classes=1000, img_size=224,
                  depths=[3, 3, 12, 3], dim=72, expan_ratio=4, num_stages=4, s_kernel_size=[5,5,3,3], 
                  drop_path_rate=0.2, layer_scale_init_value=1e-6, head_init_scale=1, classifier_dropout = 0.)
-    #print(model)
+    print(model)
 
     def count_parameters(model):
         total_trainable_params = 0
@@ -122,6 +135,9 @@ if __name__ == "__main__":
             params = parameter.numel()
             total_trainable_params += params
         return total_trainable_params
+
+    from torchsummary import summary 
+    summary(model, (3, 224, 224), device='cpu')
 
     total_params = count_parameters(model)
 
@@ -135,3 +151,19 @@ if __name__ == "__main__":
     #model.eval()
     flops = FlopCountAnalysis(model, input)
     print(flop_count_table(flops))
+    
+    ###########################################
+    # input_torch = torch.randn((1, 3, 224, 224))
+    # output = model(input_torch)
+    
+    
+    ###########################################
+    for frozen_idx in range(4):
+        # freeze downsample_layers
+        for param in model.downsample_layers[frozen_idx].parameters():
+            print(param.requires_grad)
+
+        # freeze stages
+        model.stages[frozen_idx].eval()
+        for param in model.stages[frozen_idx].parameters():
+            print(param.requires_grad)

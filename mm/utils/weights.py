@@ -123,6 +123,7 @@ def get_weights_from_nexus(
     progress=True,
     check_hash=False,
     file_name=None,
+    weights_name=None,
 ):
     hub_dir = get_dir()
     output_dir = os.path.join(hub_dir, "checkpoints")
@@ -137,7 +138,10 @@ def get_weights_from_nexus(
             # Unexpected OSError, re-raise.
             raise
 
-    url = f"{NEXUS_WEIGHTS_URL}/{task}/{ml_framework}_{model_name}/{model_name}_{backbone}.{ext}"
+    if weights_name:
+        url = f"{NEXUS_WEIGHTS_URL}/{task}/{ml_framework}_{model_name}/{weights_name}.{ext}"
+    else:
+        url = f"{NEXUS_WEIGHTS_URL}/{task}/{ml_framework}_{model_name}/{model_name}_{backbone}.{ext}"
     filename = f"{model_name}_{backbone}.{ext}"
     if file_name is not None:
         filename = file_name
