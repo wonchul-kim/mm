@@ -9,16 +9,28 @@ from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
 
-from mmyolo.registry import RUNNERS
-from mmyolo.utils import is_metainfo_lower
-
+import pkg_resources
+import shutil
+try:
+    mmyolo_path = pkg_resources.get_distribution('mmyolo').location + '/mmyolo'
+except pkg_resources.DistributionNotFound:
+    print('mmyolo is not installed')
+    
 from pathlib import Path 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]
 
+new_init_path = str(ROOT / 'utils/init/__init__.py')
+existing_init_path = os.path.join(mmyolo_path, '__init__.py')
+shutil.copy(new_init_path, existing_init_path)
+
+from mmyolo.utils import is_metainfo_lower
+from mmyolo.registry import RUNNERS
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('--config', default=ROOT / 'configs/models/yolov8/yolov8_m_mask-refine_syncbn_fast_8xb16-500e_coco.py')
+    parser.add_argument('--config', default=ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py')
     parser.add_argument('--work-dir', default='/HDD/etc/etc/mmyolo/' )
     parser.add_argument(
         '--amp',
