@@ -98,12 +98,14 @@ def yolov8():
     args.output_dir = output_dir
     args.data_root = input_dir
     args.classes = classes
-    args.num_classes = len(classes)
+    # args.num_classes = len(classes)
+    args.num_classes = 80
     
     args.model= 'yolov8'
     args.backbone = 'n'
     args.height = 640
     args.width = 640
+    args.frozen_stages = -1
     
     args.rois = rois
     args.patch = patch
