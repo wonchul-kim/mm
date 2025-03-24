@@ -2,6 +2,7 @@
 import os.path as osp
 from mmyolo.utils import is_metainfo_lower
 from mmengine.config import Config
+from mmengine.logging import print_log
 from .base_config_manager import BaseConfigManager, create_custom_dataset
 
 class TrainConfigManager(BaseConfigManager):

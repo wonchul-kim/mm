@@ -8,8 +8,7 @@ FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]
 
 from mmdet.utils import setup_cache_size_limit_of_dynamo
-from mmengine.config import Config, DictAction
-from mmengine.logging import print_log
+from mmengine.config import DictAction
 from mmengine.runner import Runner
 
 from mm.yolo import init_mmyolo
