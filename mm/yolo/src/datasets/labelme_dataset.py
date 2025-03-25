@@ -1,19 +1,11 @@
-from typing import Any, Optional
-
-from mmdet.datasets import BaseDetDataset, CocoDataset
-
-from mmyolo.registry import DATASETS, TASK_UTILS
-
-import copy
+# Copyright (c) OpenMMLab. All rights reserved.
+from glob import glob 
 import os.path as osp
 from typing import List, Union
-
-from mmengine.fileio import get_local_path
+import json 
 
 from mmdet.registry import DATASETS
-from .api_wrappers import COCO
-from .base_det_dataset import BaseDetDataset
-from mmyolo.datasets.yolov5_coco import BatchShapePolicyDataset
+from mmdet.datasets.base_det_dataset import BaseDetDataset
 
 
 @DATASETS.register_module()
@@ -57,10 +49,8 @@ class LabelmeDataset(BaseDetDataset):
                  [71, 0, 255], [122, 0, 255], [0, 255, 184], [0, 92, 255],
                  [184, 255, 0], [0, 133, 255], [255, 214, 0], [25, 194, 194],
                  [102, 255, 0], [92, 0, 255]]
-    ANN_ID_UNIQUE = True
-    
+
     def __init__(self,
-                 *args,
                  classes, 
                  mode,
                  patch=None,
@@ -68,18 +58,16 @@ class LabelmeDataset(BaseDetDataset):
                  annotate=False,
                  logs_dir=None,
                  img_suffix='.bmp',
-                 seg_map_suffix: str = '.json',
-                 proposal_file: Optional[str] = None,
-                 file_client_args: dict = None,
-                 backend_args: dict = None,
-                 return_classes: bool = False,
-                 caption_prompt: Optional[dict] = None,
+                 ann_suffix='.json',
                  **kwargs) -> None:
-
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
         self.CLASSES = tuple(classes)
         self.PALETTE = self._palette[:len(tuple(classes))]
+        self.class2label = {val: key for key, val in enumerate(self.CLASSES)}
         self._mode = mode 
+        self._img_suffix = img_suffix 
+        self._ann_suffix = ann_suffix
+
         
         assert self._mode in ['train', 'val', 'test'], ValueError(f'[ERROR] There is no such mode for dataset: {self._mode}')
         
@@ -88,122 +76,108 @@ class LabelmeDataset(BaseDetDataset):
         self._annotate = annotate
         self._logs_dir = logs_dir
         
-        super().__init__(
-            *args,
-            seg_map_suffix=seg_map_suffix,
-            proposal_file=proposal_file,
-            file_client_args=file_client_args,
-            backend_args=backend_args,
-            return_classes=return_classes,
-            caption_prompt=caption_prompt,
-            **kwargs
-        )
-
-
+        super().__init__(**kwargs)
+        
+    @property 
+    def mode(self):
+        return self._mode
+    
+    @property 
+    def img_suffix(self):
+        return self._img_suffix
+    
+    @property 
+    def ann_suffix(self):
+        return self._ann_suffix
+        
+    @property 
+    def rois(self):
+        return self._rois
+    
+    @property 
+    def patch(self):
+        return self._patch
+        
+    @property 
+    def annotate(self):
+        return self._annotate
+    
+    @property 
+    def logs_dir(self):
+        return self._logs_dir
+    
     def load_data_list(self) -> List[dict]:
         """Load annotations from an annotation file named as ``self.ann_file``
 
         Returns:
             List[dict]: A list of annotation.
-        """  # noqa: E501
-        with get_local_path(
-                self.ann_file, backend_args=self.backend_args) as local_path:
-            self.coco = self.COCOAPI(local_path)
-        # The order of returned `cat_ids` will not
-        # change with the order of the `classes`
-        self.cat_ids = self.coco.get_cat_ids(
-            cat_names=self.metainfo['classes'])
-        self.cat2label = {cat_id: i for i, cat_id in enumerate(self.cat_ids)}
-        self.cat_img_map = copy.deepcopy(self.coco.cat_img_map)
-
-        img_ids = self.coco.get_img_ids()
+        """  
+        self.img_files = glob(osp.join(self.data_prefix['img'], f'*{self.img_suffix}'))
         data_list = []
         total_ann_ids = []
-        for img_id in img_ids:
-            raw_img_info = self.coco.load_imgs([img_id])[0]
-            raw_img_info['img_id'] = img_id
-
-            ann_ids = self.coco.get_ann_ids(img_ids=[img_id])
-            raw_ann_info = self.coco.load_anns(ann_ids)
-            total_ann_ids.extend(ann_ids)
-
+        img_info = {}
+        for img_file in self.img_files:
+            ann_file = osp.splitext(img_file)[0] + self.ann_suffix
+            assert osp.exists(ann_file), RuntimeError(f"There is no such annotation file: {ann_file}")
+            
+            with open(ann_file, 'r') as jf:
+                ann_info = json.load(jf)
+            
+            img_info['img_path'] = img_file 
+            img_info['height'] = ann_info['imageHeight']
+            img_info['width'] = ann_info['imageWidth']
+            
             parsed_data_info = self.parse_data_info({
-                'raw_ann_info':
-                raw_ann_info,
-                'raw_img_info':
-                raw_img_info
+                'raw_ann_info': ann_info,
+                'raw_img_info': img_info
             })
             data_list.append(parsed_data_info)
-        if self.ANN_ID_UNIQUE:
-            assert len(set(total_ann_ids)) == len(
-                total_ann_ids
-            ), f"Annotation ids in '{self.ann_file}' are not unique!"
-
-        del self.coco
 
         return data_list
 
     def parse_data_info(self, raw_data_info: dict) -> Union[dict, List[dict]]:
-        """Parse raw annotation to target format.
-
-        Args:
-            raw_data_info (dict): Raw data information load from ``ann_file``
-
-        Returns:
-            Union[dict, List[dict]]: Parsed annotation.
-        """
         img_info = raw_data_info['raw_img_info']
         ann_info = raw_data_info['raw_ann_info']
 
         data_info = {}
 
         # TODO: need to change data_prefix['img'] to data_prefix['img_path']
-        img_path = osp.join(self.data_prefix['img'], img_info['file_name'])
-        if self.data_prefix.get('seg', None):
-            seg_map_path = osp.join(
-                self.data_prefix['seg'],
-                img_info['file_name'].rsplit('.', 1)[0] + self.seg_map_suffix)
-        else:
-            seg_map_path = None
-        data_info['img_path'] = img_path
-        data_info['img_id'] = img_info['img_id']
+        seg_map_path = None
+        data_info['img_path'] = img_info['img_path']
+        # data_info['img_id'] = img_info['img_id']
         data_info['seg_map_path'] = seg_map_path
         data_info['height'] = img_info['height']
         data_info['width'] = img_info['width']
 
-        if self.return_classes:
-            data_info['text'] = self.metainfo['classes']
-            data_info['caption_prompt'] = self.caption_prompt
-            data_info['custom_entities'] = True
-
         instances = []
-        for i, ann in enumerate(ann_info):
+        for i, ann in enumerate(ann_info['shapes']):
             instance = {}
 
-            if ann.get('ignore', False):
-                continue
-            x1, y1, w, h = ann['bbox']
-            inter_w = max(0, min(x1 + w, img_info['width']) - max(x1, 0))
-            inter_h = max(0, min(y1 + h, img_info['height']) - max(y1, 0))
-            if inter_w * inter_h == 0:
-                continue
-            if ann['area'] <= 0 or w < 1 or h < 1:
-                continue
-            if ann['category_id'] not in self.cat_ids:
-                continue
-            bbox = [x1, y1, x1 + w, y1 + h]
-
-            if ann.get('iscrowd', False):
-                instance['ignore_flag'] = 1
-            else:
+            label = ann['label']
+            if label in self.CLASSES or label.lower() in self.CLASSES:
+                shape_type = ann['shape_type']
+                points = ann['points']
+                
+                if shape_type in ['polygon', 'watershed', 'point', 'rotatedrect', 'rectangle', 'circle']:
+                    
+                    if shape_type in ['polygon', 'watershed', 'point'] and len(points) <= 2:
+                        continue 
+                    else:
+                        xs, ys = [], []
+                        for point in points:
+                            xs.append(point[0])
+                            ys.append(point[1])
+                        
+                        x1, y1, w, h = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+                else:
+                    raise NotImplementedError(f'NOT yet Considered shape-type: {shape_type}')
+                    
+                instance['bbox'] = [x1, y1, x1 + w, y1 + h]
+                instance['bbox_label'] = int(self.class2label[label])
                 instance['ignore_flag'] = 0
-            instance['bbox'] = bbox
-            instance['bbox_label'] = self.cat2label[ann['category_id']]
-
-            if ann.get('segmentation', None):
-                instance['mask'] = ann['segmentation']
-
-            instances.append(instance)
+            
+                instances.append(instance)
+                
         data_info['instances'] = instances
         return data_info
 
@@ -243,13 +217,3 @@ class LabelmeDataset(BaseDetDataset):
                 valid_data_infos.append(data_info)
 
         return valid_data_infos
-
-
-@DATASETS.register_module()
-class YOLOv5LabelmeDataset(BatchShapePolicyDataset, CocoDataset):
-    """Dataset for YOLOv5 COCO Dataset.
-
-    We only add `BatchShapePolicy` function compared with CocoDataset. See
-    `mmyolo/datasets/utils.py#BatchShapePolicy` for details
-    """
-    pass

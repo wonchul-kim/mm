@@ -70,9 +70,32 @@ class BaseConfigManager:
         _manage_train_loop(self._cfg)
                    
     
-    def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, 
+    def manage_dataset_config(self, data_root, img_suffix, ann_suffix, 
                                     classes, batch_size, width, height, 
                                     rois, patch):
+        
+        self._cfg.train_batch_size_per_gpu = batch_size 
+        self._cfg.val_batch_size_per_gpu = 1
+        
+        
+        def _manage_train_dataloader(cfg):
+            cfg.train_dataloader.batch_size = batch_size
+            cfg.train_dataloader.dataset['data_root'] = data_root
+            cfg.train_dataloader.dataset['ann_suffix'] = ann_suffix
+            cfg.train_dataloader.dataset['classes'] = classes
+            cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.train_dataloader.dataset['rois'] = rois
+            cfg.train_dataloader.dataset['patch'] = patch
+            
+        def _manage_val_dataloader(cfg):
+            cfg.val_dataloader.batch_size = batch_size
+            cfg.val_dataloader.dataset['data_root'] = data_root
+            cfg.val_dataloader.dataset['classes'] = classes
+            cfg.val_dataloader.dataset['img_suffix'] = img_suffix
+            cfg.val_dataloader.dataset['ann_suffix'] = ann_suffix
+            cfg.val_dataloader.dataset['rois'] = rois
+            cfg.val_dataloader.dataset['patch'] = patch
+            
         img_scale = (width, height)
         for pipeline in self._cfg.train_pipeline:
             if 'img_scale' in pipeline.keys():
@@ -104,8 +127,15 @@ class BaseConfigManager:
             if custom_hook.get('type') == 'mmdet.PipelineSwitchHook':
                 custom_hook.switch_pipeline = self._cfg.train_pipeline_stage2
             
-            
+        _manage_train_dataloader(self._cfg)
+        _manage_val_dataloader(self._cfg)
                    
+    def manage_optim_config(self, batch_size):
+        if hasattr(self._cfg, 'optim_wrapper'):
+            if 'batch_size_per_gpu' in self._cfg.optim_wrapper.optimizer:
+                self._cfg.optim_wrapper.optimizer['batch_size_per_gpu'] = batch_size
+        
+        
     # # set dataset ====================================================================================================
     # def manage_dataset_config(self, data_root, img_suffix, seg_map_suffix, 
     #                                 classes, batch_size, width, height, 

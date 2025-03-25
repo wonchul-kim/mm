@@ -19,6 +19,7 @@ from mm.utils.weights import get_weights_from_nexus
 from mm.utils.functions import add_params_to_args
 from mm.yolo.utils.configs import TrainConfigManager
 from mm.yolo.configs.models.yolov8 import backbone_weights_map as yolov8_backbone_weights_map
+import mm.yolo.src 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
@@ -61,7 +62,7 @@ def yolov8():
     
     rois = [[220, 60, 1340, 828]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
@@ -97,8 +98,7 @@ def yolov8():
     args.output_dir = output_dir
     args.data_root = input_dir
     args.classes = classes
-    # args.num_classes = len(classes)
-    args.num_classes = 80
+    args.num_classes = len(classes)
     
     args.model= 'yolov8'
     args.backbone = 'n'
@@ -122,7 +122,8 @@ def yolov8():
                                             yolov8_backbone_weights_map[args.backbone], 'pth')
 
     # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
-    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16-500e_coco.py'
+    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16.py'
+
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
@@ -130,6 +131,7 @@ def yolov8():
     config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
                                          args.classes, args.batch_size, args.width, args.height,
                                          args.rois, args.patch)
+    config_manager.manage_optim_config(args.batch_size)
     # config_manager.manage_default_hooks_config(args.default_hooks)
     # config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
