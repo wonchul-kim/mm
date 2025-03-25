@@ -116,7 +116,7 @@ class LabelmeDataset(BaseDetDataset):
         data_list = []
         total_ann_ids = []
         img_info = {}
-        for img_file in self.img_files:
+        for img_id, img_file in enumerate(self.img_files):
             ann_file = osp.splitext(img_file)[0] + self.ann_suffix
             assert osp.exists(ann_file), RuntimeError(f"There is no such annotation file: {ann_file}")
             
@@ -124,6 +124,7 @@ class LabelmeDataset(BaseDetDataset):
                 ann_info = json.load(jf)
             
             img_info['img_path'] = img_file 
+            img_info['img_id'] = img_id
             img_info['height'] = ann_info['imageHeight']
             img_info['width'] = ann_info['imageWidth']
             
@@ -144,7 +145,7 @@ class LabelmeDataset(BaseDetDataset):
         # TODO: need to change data_prefix['img'] to data_prefix['img_path']
         seg_map_path = None
         data_info['img_path'] = img_info['img_path']
-        # data_info['img_id'] = img_info['img_id']
+        data_info['img_id'] = img_info['img_id']
         data_info['seg_map_path'] = seg_map_path
         data_info['height'] = img_info['height']
         data_info['width'] = img_info['width']
@@ -154,30 +155,56 @@ class LabelmeDataset(BaseDetDataset):
             instance = {}
 
             label = ann['label']
-            if label in self.CLASSES or label.lower() in self.CLASSES:
-                shape_type = ann['shape_type']
-                points = ann['points']
-                
-                if shape_type in ['polygon', 'watershed', 'point', 'rotatedrect', 'rectangle', 'circle']:
+            for _class in self.CLASSES:
+                if label == _class or label.lower() == _class:
+                    shape_type = ann['shape_type']
+                    points = ann['points']
                     
-                    if shape_type in ['polygon', 'watershed', 'point'] and len(points) <= 2:
-                        continue 
-                    else:
-                        xs, ys = [], []
-                        for point in points:
-                            xs.append(point[0])
-                            ys.append(point[1])
+                    if shape_type in ['polygon', 'watershed', 'point', 'rotatedrect', 'rectangle', 'circle']:
                         
-                        x1, y1, w, h = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
-                else:
-                    raise NotImplementedError(f'NOT yet Considered shape-type: {shape_type}')
-                    
-                instance['bbox'] = [x1, y1, x1 + w, y1 + h]
-                instance['bbox_label'] = int(self.class2label[label])
-                instance['ignore_flag'] = 0
-            
-                instances.append(instance)
+                        if shape_type in ['polygon', 'watershed', 'point'] and len(points) <= 2:
+                            continue 
+                        else:
+                            for roi in self.rois:
+                                xs, ys = [], []
+                                for point in points:
+                                    if roi == []:
+                                        xs.append(point[0])
+                                        ys.append(point[1])
+                                    else:
+                                        if point[0] >= roi[0] and point[0] <= roi[2]:
+                                            xs.append(point[0] - roi[0])
+                                        elif point[0] < roi[0]:
+                                            xs.append(0)
+                                        elif point[0] > roi[2]:
+                                            xs.append(roi[2] - roi[0])
+                                        else:
+                                            raise RuntimeError(
+                                                f"Not considered x: point is {point} and roi is {roi}"
+                                            )
+
+                                        if point[1] >= roi[1] and point[1] <= roi[3]:
+                                            ys.append(point[1] - roi[1])
+                                        elif point[1] < roi[1]:
+                                            ys.append(0)
+                                        elif point[1] > roi[3]:
+                                            ys.append(roi[3] - roi[1])
+                                        else:
+                                            raise RuntimeError(
+                                                f"Not considered y: point is {point} and roi is {roi}"
+                                            )
+                                    
+                                x1, y1, w, h = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+                                    
+                    else:
+                        raise NotImplementedError(f'NOT yet Considered shape-type: {shape_type}')
+                        
+                    instance['bbox'] = [x1, y1, x1 + w, y1 + h]
+                    instance['bbox_label'] = int(self.class2label[label])
+                    instance['ignore_flag'] = 0
                 
+                    instances.append(instance)
+                    
         data_info['instances'] = instances
         return data_info
 
