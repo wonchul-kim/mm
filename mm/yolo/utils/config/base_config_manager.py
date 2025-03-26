@@ -129,6 +129,68 @@ class BaseConfigManager:
             
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
+        
+    def manage_coco_dataset_config(self, data_root, img_suffix, ann_suffix, 
+                                    classes, batch_size, width, height, 
+                                    rois, patch):
+        
+        self._cfg.val_evaluator.ann_file = osp.join(data_root, self._cfg.val_ann_file)
+        
+        self._cfg.train_batch_size_per_gpu = batch_size 
+        self._cfg.val_batch_size_per_gpu = 1
+        
+        
+        def _manage_train_dataloader(cfg):
+            cfg.train_dataloader.batch_size = batch_size
+            cfg.train_dataloader.dataset['data_root'] = data_root
+            # cfg.train_dataloader.dataset['ann_suffix'] = ann_suffix
+            # cfg.train_dataloader.dataset['classes'] = classes
+            # cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+            # cfg.train_dataloader.dataset['rois'] = rois
+            # cfg.train_dataloader.dataset['patch'] = patch
+            
+        def _manage_val_dataloader(cfg):
+            cfg.val_dataloader.batch_size = batch_size
+            cfg.val_dataloader.dataset['data_root'] = data_root
+            # cfg.val_dataloader.dataset['classes'] = classes
+            # cfg.val_dataloader.dataset['img_suffix'] = img_suffix
+            # cfg.val_dataloader.dataset['ann_suffix'] = ann_suffix
+            # cfg.val_dataloader.dataset['rois'] = rois
+            # cfg.val_dataloader.dataset['patch'] = patch
+            
+        img_scale = (width, height)
+        for pipeline in self._cfg.train_pipeline:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') == 'YOLOv5RandomAffine':
+                pipeline.border = (-img_scale[0] // 2, -img_scale[1] // 2)
+            
+        for pipeline in self._cfg.train_pipeline_stage2:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
+                pipeline.scale = img_scale
+                
+        for pipeline in self._cfg.test_pipeline:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
+                pipeline.scale = img_scale
+            
+                
+        self._cfg.train_dataloader.dataset.pipeline = self._cfg.train_pipeline
+        self._cfg.val_dataloader.dataset.pipeline = self._cfg.test_pipeline
+        self._cfg.test_dataloader = self._cfg.val_dataloader
+        
+        for custom_hook in self._cfg.custom_hooks:
+            if custom_hook.get('type') == 'mmdet.PipelineSwitchHook':
+                custom_hook.switch_pipeline = self._cfg.train_pipeline_stage2
+            
+        _manage_train_dataloader(self._cfg)
+        _manage_val_dataloader(self._cfg)
                    
     def manage_optim_config(self, batch_size):
         if hasattr(self._cfg, 'optim_wrapper'):
@@ -239,6 +301,8 @@ class BaseConfigManager:
                 if cfg.model.get('type') == 'YOLODetector':
                     cfg.model.bbox_head.head_module.num_classes = num_classes
                     cfg.model.train_cfg.assigner.num_classes = num_classes 
+                    
+                    cfg.model.bbox_head.head_module.num_classes = num_classes
                         
         def _manage_img_scale(cfg, new_img_scale): # img_scale: (width, height)
             cfg.img_scale = new_img_scale 

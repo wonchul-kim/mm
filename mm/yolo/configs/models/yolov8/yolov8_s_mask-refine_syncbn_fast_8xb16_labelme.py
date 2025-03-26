@@ -1,4 +1,4 @@
-_base_ = './yolov8_s_syncbn_fast_8xb16.py'
+_base_ = './yolov8_s_syncbn_fast_8xb16_labelme.py'
 
 # This config will refine bbox by mask while loading annotations and
 # transforming after `YOLOv5RandomAffine`

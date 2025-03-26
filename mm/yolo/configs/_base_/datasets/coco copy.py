@@ -1,21 +1,21 @@
 
 dataset_type = 'YOLOv5CocoDataset'
 
-data_root = ''  # Root path of data
+data_root = '/HDD/datasets/public/coco/'  # Root path of data
 # Path of train annotation file
-train_ann_file = 'train.json'
-train_data_prefix = 'train'  # Prefix of train image path
+train_ann_file = 'annotations/instances_train2017.json'
+train_data_prefix = 'train2017/'  # Prefix of train image path
 # Path of val annotation file
-val_ann_file = 'val.json'
-val_data_prefix = 'val'  # Prefix of val image path
+val_ann_file = 'annotations/instances_val2017.json'
+val_data_prefix = 'val2017/'  # Prefix of val image path
 
-num_classes = None  # Number of classes for classification
-img_scale = (0, 0)  # width, height
+num_classes = 80  # Number of classes for classification
+img_scale = (640, 640)  # width, height
 
-train_batch_size_per_gpu = None # Batch size of a single GPU during training
+train_batch_size_per_gpu = 2 # Batch size of a single GPU during training
 train_num_workers = 8 # Worker to pre-fetch data for each single GPU during training
 
-val_batch_size_per_gpu = None # Batch size of a single GPU during validation
+val_batch_size_per_gpu = 1 # Batch size of a single GPU during validation
 val_num_workers = 2 # Worker to pre-fetch data for each single GPU during validation
 
 # Config of batch shapes. Only on val.
