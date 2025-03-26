@@ -17,7 +17,7 @@ from mmyolo.registry import RUNNERS
 
 from mm.utils.weights import get_weights_from_nexus
 from mm.utils.functions import add_params_to_args
-from mm.yolo.utils.configs import TrainConfigManager
+from mm.yolo.utils.config import TrainConfigManager
 from mm.yolo.configs.models.yolov8 import backbone_weights_map as yolov8_backbone_weights_map
 import mm.yolo.src 
 

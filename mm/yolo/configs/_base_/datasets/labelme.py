@@ -162,8 +162,13 @@ val_dataloader = dict(
 test_dataloader = val_dataloader
 
 # FIXME
+# val_evaluator = dict(
+#     type='mmdet.CocoMetric',
+#     proposal_nums=(100, 1, 10),
+#     ann_file=data_root,
+#     metric='bbox')
 val_evaluator = dict(
-    type='mmdet.CocoMetric',
+    type='mmdet.LabelmeCocoMetric',
     proposal_nums=(100, 1, 10),
     ann_file=data_root,
     metric='bbox')
