@@ -164,6 +164,7 @@ val_evaluator = dict(
     type='mmdet.CocoMetric',
     proposal_nums=(100, 1, 10),
     ann_file=data_root + val_ann_file,
-    metric='bbox')
+    metric='bbox',
+    classwise=True)
 test_evaluator = val_evaluator
 

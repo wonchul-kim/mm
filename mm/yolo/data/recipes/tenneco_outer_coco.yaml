@@ -6,8 +6,9 @@ output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/DE
 load_from: null
 
 # data =========================
-classes: ['MARK', 'LINE', 'CHAMFER_MARK']
-num_classes: 3
+# classes: ['MARK', 'LINE', 'CHAMFER_MARK']
+classes: ['MARK', 'CHAMFER_MARK']
+num_classes: 2
 img_suffix: '.bmp'
 seg_map_suffix: '.json'
 
