@@ -56,7 +56,7 @@ resume: False
 custom_hooks:
   visualize_val:
     freq_epoch: 1
-    ratio: 0.5
+    ratio: 1
     output_dir: null
 
   before_train:

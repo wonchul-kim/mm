@@ -352,14 +352,14 @@ class BaseConfigManager:
             #                             out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
             #                         )
             
-            # elif key == 'visualize_val':
-            #     if 'output_dir' not in val.keys() or val['output_dir'] == None:
-            #         output_dir = osp.join(self._cfg.work_dir, 'val')
-            #     else:
-            #         output_dir = val['output_dir']
-            #     _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
-            #                                        ratio=val.get('ratio', 0.25), 
-            #                                        output_dir=output_dir))
+            elif key == 'visualize_val':
+                if 'output_dir' not in val.keys() or val['output_dir'] == None:
+                    output_dir = osp.join(self._cfg.work_dir, 'val')
+                else:
+                    output_dir = val['output_dir']
+                _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
+                                                   ratio=val.get('ratio', 0.25), 
+                                                   output_dir=output_dir))
             
 
             # elif key == 'after_train_epoch':
