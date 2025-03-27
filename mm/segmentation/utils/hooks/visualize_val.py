@@ -23,7 +23,7 @@ class VisualizeVal(Hook):
         
         
         current_iter = runner.iter
-        iters_per_epoch = len(runner.train_dataloader)
+        iters_per_epoch = len(runner.val_dataloader)
         current_epoch = current_iter // iters_per_epoch
             
         if current_epoch%self.freq_epoch == 0:
