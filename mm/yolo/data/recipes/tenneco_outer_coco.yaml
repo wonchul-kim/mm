@@ -1,7 +1,7 @@
 dataset_type: labelme
 # data_root: '/storage/projects/Tenneco/Metalbearing/OUTER/250211/split_coco_dataset'
 # output_dir: "/storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION"
-data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_coco_dataset"
+data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_coco_dataset_unit"
 output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/DETECTION'
 load_from: null
 

@@ -11,32 +11,31 @@ def add_params_to_args(args, params_file):
         setattr(args, key, value)
         
         
-def create_output_dirs(output_dir):
+def create_output_dirs(args):
     now = datetime.now()
-    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
-    if not osp.exists(output_dir):
-        os.mkdir(output_dir)
-        print(f" - Created {output_dir}")
+    args.output_dir = osp.join(args.output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
+    if not osp.exists(args.output_dir):
+        os.mkdir(args.output_dir)
+        print(f" - Created {args.output_dir}")
+    
+    args.val_dir = osp.join(args.output_dir, 'val')
+    if not osp.exists(args.val_dir):
+        os.mkdir(args.val_dir)
+        print(f" - Created {args.val_dir}")
+    
+    args.debug_dir = osp.join(args.output_dir, 'debug')
+    if not osp.exists(args.debug_dir):
+        os.mkdir(args.debug_dir)
+        print(f" - Created {args.debug_dir}")
+    
+    args.logs_dir = osp.join(args.output_dir, 'logs')
+    if not osp.exists(args.logs_dir):
+        os.mkdir(args.logs_dir)
+        print(f" - Created {args.logs_dir}")
+    
+    args.weights_dir = osp.join(args.output_dir, 'weights')
+    if not osp.exists(args.weights_dir):
+        os.mkdir(args.weights_dir)
+        print(f" - Created {args.weights_dir}")
         
-    val_dir = osp.join(output_dir, 'val')
-    if not osp.exists(val_dir):
-        os.mkdir(val_dir)
-        print(f" - Created {val_dir}")
-    
-    debug_dir = osp.join(output_dir, 'debug')
-    if not osp.exists(debug_dir):
-        os.mkdir(debug_dir)
-        print(f" - Created {debug_dir}")
-    
-    logs_dir = osp.join(output_dir, 'logs')
-    if not osp.exists(logs_dir):
-        os.mkdir(logs_dir)
-        print(f" - Created {logs_dir}")
-    
-    weights_dir = osp.join(output_dir, 'weights')
-    if not osp.exists(weights_dir):
-        os.mkdir(weights_dir)
-        print(f" - Created {weights_dir}")
-        
-    return output_dir
     

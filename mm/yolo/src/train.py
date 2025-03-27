@@ -20,6 +20,7 @@ from mm.utils.functions import add_params_to_args
 from mm.yolo.utils.config import TrainConfigManager
 from mm.yolo.configs.models.yolov8 import backbone_weights_map as yolov8_backbone_weights_map
 import mm.yolo.src 
+import mm.yolo.utils.hooks
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
@@ -52,13 +53,13 @@ def parse_args():
 
 def main():
     args = parse_args()
-    add_params_to_args(args, args.args_filename)
-    # add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/recipes/tenneco_outer_coco.yaml')
-    # args.create_output_dirs = True
+    # add_params_to_args(args, args.args_filename)
+    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/recipes/tenneco_outer_coco.yaml')
+    args.create_output_dirs = True
     
     if args.create_output_dirs:
         from mm.utils.functions import create_output_dirs
-        args.output_dir = create_output_dirs(args.output_dir)
+        create_output_dirs(args)
         print(f"CREATED output-dirs: {args.output_dir}")
     
     # args.custom_hooks['visualize_val']['output_dir'] = val_dir
@@ -81,7 +82,7 @@ def main():
                                          args.rois, args.patch)
     config_manager.manage_optim_config(args.batch_size)
     # config_manager.manage_default_hooks_config(args.default_hooks)
-    # config_manager.manage_custom_hooks_config(args.custom_hooks)
+    config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
 
     # Reduce the number of repeated compilations and improve

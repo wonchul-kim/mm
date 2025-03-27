@@ -49,7 +49,8 @@ albu_train_transforms = [
 pre_transform = [
     # dict(type='LoadImageFromFile', backend_args=_base_.backend_args),
     dict(type='LoadImageFromFile', backend_args=None),
-    dict(type='LoadAnnotations', with_bbox=True)
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type="MultiROICrop", rois=[(220, 60, 1340, 828)]),
 ]
 
 last_transform = [
@@ -69,7 +70,7 @@ last_transform = [
     dict(
         type='mmdet.PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape', 'flip',
-                   'flip_direction'))
+                   'flip_direction', 'classes'))
 ]
 
 train_pipeline = [
@@ -117,6 +118,7 @@ train_dataloader = dict(
     collate_fn=dict(type='yolov5_collate'),
     dataset=dict(
         type=dataset_type,
+        metainfo={"classes": None},
         data_root=data_root,
         ann_file=train_ann_file,
         data_prefix=dict(img=train_data_prefix),
@@ -136,7 +138,7 @@ test_pipeline = [
     dict(
         type='mmdet.PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'pad_param'))
+                   'scale_factor', 'pad_param', 'classes'))
 ]
 
 val_dataloader = dict(
@@ -148,6 +150,7 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
+        metainfo={"classes": None},
         data_root=data_root,
         test_mode=True,
         data_prefix=dict(img=val_data_prefix),

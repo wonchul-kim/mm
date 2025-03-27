@@ -87,6 +87,7 @@ class BaseConfigManager:
             cfg.train_dataloader.dataset['rois'] = rois
             cfg.train_dataloader.dataset['patch'] = patch
             
+            
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
             cfg.val_dataloader.dataset['data_root'] = data_root
@@ -143,8 +144,10 @@ class BaseConfigManager:
         def _manage_train_dataloader(cfg):
             cfg.train_dataloader.batch_size = batch_size
             cfg.train_dataloader.dataset['data_root'] = data_root
-            # cfg.train_dataloader.dataset['ann_suffix'] = ann_suffix
+            if cfg.dataset_type == 'YOLOv5CocoDataset':
+                cfg.train_dataloader.dataset['metainfo'] = {"classes": tuple(classes)}
             # cfg.train_dataloader.dataset['classes'] = classes
+            # cfg.train_dataloader.dataset['ann_suffix'] = ann_suffix
             # cfg.train_dataloader.dataset['img_suffix'] = img_suffix
             # cfg.train_dataloader.dataset['rois'] = rois
             # cfg.train_dataloader.dataset['patch'] = patch
@@ -152,6 +155,8 @@ class BaseConfigManager:
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
             cfg.val_dataloader.dataset['data_root'] = data_root
+            if cfg.dataset_type == 'YOLOv5CocoDataset':
+                cfg.val_dataloader.dataset['metainfo'] = {"classes": tuple(classes)}
             # cfg.val_dataloader.dataset['classes'] = classes
             # cfg.val_dataloader.dataset['img_suffix'] = img_suffix
             # cfg.val_dataloader.dataset['ann_suffix'] = ann_suffix
@@ -334,46 +339,47 @@ class BaseConfigManager:
     def manage_custom_hooks_config(self, custom_hooks):
         _custom_hooks = []
         for key, val in custom_hooks.items():
-            if key == 'checkpoint':
-                _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
-                                        by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
-                                        max_keep_ckpts=val.get('max_keep_ckpts', 2),
-                                        out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
-                                    )
-            
-            elif key == 'visualize_val':
-                if 'output_dir' not in val.keys() or val['output_dir'] == None:
-                    output_dir = osp.join(self._cfg.work_dir, 'val')
-                else:
-                    output_dir = val['output_dir']
-                _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
-                                                   ratio=val.get('ratio', 0.25), 
-                                                   output_dir=output_dir))
-            
-            elif key == 'before_train':
+            if key == 'before_train':
                 for key2, val2 in val.items():
                     if key2 == 'debug_dataloader':
-                        _custom_hooks.append(dict(type='HookBeforeTrain', ratio=val2.get('ratio', 0.25),
-                                                debug_dir=val2.get('output_dir', osp.join(self._cfg.work_dir, 'debug_dir'))))
+                        _custom_hooks.append(dict(type='HookBeforeTrain', 
+                                ratio=val2.get('ratio') or 0.25,
+                                debug_dir=val2.get('output_dir') or osp.join(self._cfg.work_dir, 'debug')))
+            # elif key == 'checkpoint':
+            #     _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
+            #                             by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
+            #                             max_keep_ckpts=val.get('max_keep_ckpts', 2),
+            #                             out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
+            #                         )
+            
+            # elif key == 'visualize_val':
+            #     if 'output_dir' not in val.keys() or val['output_dir'] == None:
+            #         output_dir = osp.join(self._cfg.work_dir, 'val')
+            #     else:
+            #         output_dir = val['output_dir']
+            #     _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
+            #                                        ratio=val.get('ratio', 0.25), 
+            #                                        output_dir=output_dir))
+            
 
-            elif key == 'after_train_epoch':
-                _custom_hooks.append(dict(type='HookAfterTrainIter'))
-            elif key == 'after_val_epoch':
-                _custom_hooks.append(dict(type='HookAfterValEpoch'))
+            # elif key == 'after_train_epoch':
+            #     _custom_hooks.append(dict(type='HookAfterTrainIter'))
+            # elif key == 'after_val_epoch':
+            #     _custom_hooks.append(dict(type='HookAfterValEpoch'))
                 
-            elif key == 'aiv':
-                if val.get('use', False):
-                    aiv = True
-                    for key2, val2 in val.items():
-                        if key2 == 'logging':
-                            logs_dir = val2.get('output_dir', osp.join(self._cfg.work_dir, 'logs_dir'))
+            # elif key == 'aiv':
+            #     if val.get('use', False):
+            #         aiv = True
+            #         for key2, val2 in val.items():
+            #             if key2 == 'logging':
+            #                 logs_dir = val2.get('output_dir', osp.join(self._cfg.work_dir, 'logs_dir'))
                             
-                            for key3, val3 in val2.items():
-                                if key3 == 'monitor' and val3.get('use', False):
-                                    _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
-                                            monitor=True,
-                                            monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
-                                            monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
+            #                 for key3, val3 in val2.items():
+            #                     if key3 == 'monitor' and val3.get('use', False):
+            #                         _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
+            #                                 monitor=True,
+            #                                 monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
+            #                                 monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
                 
         
         if len(_custom_hooks) != 0:
