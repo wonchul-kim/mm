@@ -436,8 +436,9 @@ class BaseConfigManager:
             elif key == 'before_train':
                 for key2, val2 in val.items():
                     if key2 == 'debug_dataloader':
-                        _custom_hooks.append(dict(type='HookBeforeTrain', ratio=val2.get('ratio', 0.25),
-                                                debug_dir=val2.get('output_dir', osp.join(self._cfg.work_dir, 'debug_dir'))))
+                        _custom_hooks.append(dict(type='HookBeforeTrain', 
+                                ratio=val2.get('ratio') or 0.25,
+                                debug_dir=val2.get('output_dir') or osp.join(self._cfg.work_dir, 'debug_dir')))
 
             elif key == 'after_train_epoch':
                 _custom_hooks.append(dict(type='HookAfterTrainIter'))
