@@ -136,6 +136,7 @@ def yolov8_labelme():
     # config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
 
+    cfg.launcher = 'pytorch'
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
@@ -160,8 +161,8 @@ def yolov8_coco():
     now = datetime.now()
     # output_dir = '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/DETECTION'
     # input_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_coco_dataset"
-    output_dir = '/storage/projects/Tenneco/Metalbearing/OUTER/250211'
-    input_dir = "/storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION"
+    output_dir = "/storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION"
+    input_dir = '/storage/projects/Tenneco/Metalbearing/OUTER/250211/split_coco_dataset'
     classes = ['MARK', 'LINE', 'CHAMFER_MARK']
     
     rois = [[220, 60, 1340, 828]]
@@ -188,16 +189,20 @@ def yolov8_coco():
         os.mkdir(output_dir)
         
     val_dir = osp.join(output_dir, 'val')
-    os.mkdir(val_dir)
+    if not osp.exists(val_dir):
+        os.mkdir(val_dir)
     
     debug_dir = osp.join(output_dir, 'debug')
-    os.mkdir(debug_dir)
+    if not osp.exists(val_dir):
+        os.mkdir(debug_dir)
     
     logs_dir = osp.join(output_dir, 'logs')
-    os.mkdir(logs_dir)
+    if not osp.exists(logs_dir):
+        os.mkdir(logs_dir)
     
     weights_dir = osp.join(output_dir, 'weights')
-    os.mkdir(weights_dir)
+    if not osp.exists(weights_dir):
+        os.mkdir(weights_dir)
     
     args.output_dir = output_dir
     args.data_root = input_dir
