@@ -158,8 +158,10 @@ def yolov8_coco():
     
     from datetime import datetime 
     now = datetime.now()
-    output_dir = '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/DETECTION'
-    input_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_coco_dataset"
+    # output_dir = '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/DETECTION'
+    # input_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_coco_dataset"
+    output_dir = '/storage/projects/Tenneco/Metalbearing/OUTER/250211'
+    input_dir = "/storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION"
     classes = ['MARK', 'LINE', 'CHAMFER_MARK']
     
     rois = [[220, 60, 1340, 828]]
