@@ -134,10 +134,13 @@ val_dataloader = dict(
 test_dataloader = val_dataloader
 
 val_evaluator = dict(
-    type='mmdet.CocoMetric',
+    type='mmdet.CocoMetricV2',
     proposal_nums=(100, 1, 10),
     ann_file=_base_.data_root + _base_.val_ann_file,
-    metric='bbox',
+    metric=['bbox', 'proposal'],
+    metric_items=['mAP', 'mAP_50', 'mAP_75', 
+                  'mAP_s', 'mAP_m', 'mAP_l',
+                  'AR@100', 'AR@300',],
     classwise=True)
 test_evaluator = val_evaluator
 
