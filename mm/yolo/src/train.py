@@ -71,7 +71,7 @@ def main():
                                             yolov8_backbone_weights_map[args.backbone], 'pth')
 
     # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
-    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16_coco.py'
+    config_file = ROOT / f'configs/models/{args.model}/{args.model}_{args.backbone}_mask-refine_syncbn_fast_8xb16_coco.py'
 
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
@@ -174,7 +174,7 @@ def yolov8_labelme():
                                             yolov8_backbone_weights_map[args.backbone], 'pth')
 
     # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
-    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16_coco.py'
+    config_file = ROOT / f'configs/models/{args.model}/{args.model}_{args.backbone}_mask-refine_syncbn_fast_8xb16_coco.py'
 
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)

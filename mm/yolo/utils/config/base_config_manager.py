@@ -111,7 +111,7 @@ class BaseConfigManager:
             
             if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
                 pipeline.scale = img_scale
-                
+
         for pipeline in self._cfg.test_pipeline:
             if 'img_scale' in pipeline.keys():
                 pipeline['img_scale'] = img_scale 
@@ -119,7 +119,6 @@ class BaseConfigManager:
             if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
                 pipeline.scale = img_scale
             
-                
         self._cfg.train_dataloader.dataset.pipeline = self._cfg.train_pipeline
         self._cfg.val_dataloader.dataset.pipeline = self._cfg.test_pipeline
         self._cfg.test_dataloader = self._cfg.val_dataloader
@@ -164,6 +163,15 @@ class BaseConfigManager:
             # cfg.val_dataloader.dataset['patch'] = patch
             
         img_scale = (width, height)
+        
+        if hasattr(self._cfg, 'mosaic_affine_transform'):
+            for pipeline in self._cfg.mosaic_affine_transform:
+                if 'img_scale' in pipeline.keys():
+                    pipeline['img_scale'] = img_scale  
+
+                if pipeline.get('type') == 'YOLOv5RandomAffine':
+                    pipeline.border = (-img_scale[0] // 2, -img_scale[1] // 2)
+        
         for pipeline in self._cfg.train_pipeline:
             if 'img_scale' in pipeline.keys():
                 pipeline['img_scale'] = img_scale 
@@ -177,6 +185,12 @@ class BaseConfigManager:
             
             if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
                 pipeline.scale = img_scale
+                
+        for pipeline in self._cfg.train_pipeline:
+            if pipeline.get('type') == 'YOLOv5MixUp':
+                pipeline.pre_transform = [
+                    *self._cfg.pre_transform, *self._cfg.mosaic_affine_transform
+                ]
                 
         for pipeline in self._cfg.test_pipeline:
             if 'img_scale' in pipeline.keys():
@@ -386,6 +400,9 @@ class BaseConfigManager:
             if not hasattr(self._cfg, 'custom_hooks'):
                 self._cfg.custom_hooks = _custom_hooks
             else:
+                
+                
+                
                 self._cfg.custom_hooks += _custom_hooks
                 
     # set custom_hooks ================================================================================

@@ -14,7 +14,7 @@ seg_map_suffix: '.json'
 
 # set crop-size/model-size =================================================================================
 model: 'yolov8'
-backbone: 'n'
+backbone: 'x'
 height: 640
 width: 640
 frozen_stages: -1
@@ -42,9 +42,9 @@ patch:
 # train ================================
 batch_size: 1
 amp: True
-epochs: 10
-max_iters: 10
-val_interval: 1
+epochs: 100
+max_iters: 100
+val_interval: 5
 
 default_hooks:
 
