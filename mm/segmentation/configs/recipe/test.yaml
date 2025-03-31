@@ -51,6 +51,7 @@ amp: True
 resume: False
 out: null
 batch_size: 1
+filename_indexes: [-2, -1]
 
 # etc. ===================================================
 # wait_time: 2

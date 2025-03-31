@@ -71,7 +71,16 @@ class TestLoopV2(TestLoop):
                        
             patch_info = data_sample.patch
             roi = data_sample.roi
-            filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
+            if self.runner.cfg.filename_indexes is None:
+                filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
+            else:
+                filename_indexes = self.runner.cfg.filename_indexes
+                if len(filename_indexes) == 2:
+                    filename = ''.join(osp.splitext(data_sample.img_path)[-2].split('/')[filename_indexes[0]:filename_indexes[1]])
+                elif len(filename_indexes) == 1 or isinstance(filename_indexes, int):
+                    filename = ''.join(osp.splitext(data_sample.img_path)[-2].split('/')[filename_indexes[0]:])
+                else:
+                    raise RuntimeError(f"[ERROR] NEED to CHECK filename_indexes({filename_indexes}) which must be less then two values")
             
             if len(roi) == 0:
                 roi = [0, 0, data_sample.img_shape[1], data_sample.img_shape[0]]
@@ -179,7 +188,6 @@ class TestLoopV2(TestLoop):
             
             if _labelme:
                 import json
-                
                 with open(os.path.join(annotation_dir, filename + ".json"), "w") as jsf:
                     json.dump(_labelme, jsf)
 

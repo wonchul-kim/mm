@@ -103,9 +103,9 @@ def main2():
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
     
-    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
+    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
     # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
-    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
+    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
     weights = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/SEGMENTATION/sam2_patch512/train/weights/best_mIoU_iter_70448.pth'
     # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/test/exp'
     output_dir = '/HDD/etc/repeatablility/sam2_patch512/test/exp'
@@ -209,10 +209,12 @@ def main2():
     config_manager.manage_custom_test_hooks_config(args.custom_hooks)
 
     cfg = config_manager.cfg
+    
+    cfg.filename_indexes = [-2, -1]
 
     runner = Runner.from_cfg(cfg)
     runner.test()
 
 if __name__ == '__main__':
-    # main()
-    main2()
+    main()
+    # main2()
