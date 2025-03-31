@@ -45,6 +45,7 @@ model: null
 backbone: null
 height: null
 width: null
+filename_indexes: null
 
 # test =================================================================================
 amp: True

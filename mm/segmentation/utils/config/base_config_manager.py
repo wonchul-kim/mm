@@ -66,6 +66,9 @@ class BaseConfigManager:
 
         if hasattr(args, 'frozen_stages'):
             self.manage_frozen_stages(args.frozen_stages)
+        
+        if hasattr(args, 'filename_indexes'):
+            self._cfg.filename_indexes = args.filename_indexes
     
     def manage_schedule_config(self, max_iters, val_interval):
         def _manage_train_loop(cfg):
