@@ -17,7 +17,7 @@ from mm.segmentation.utils.hooks import VisualizeVal
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-from mm.segmentation.utils.functions import add_params_to_args
+from mm.utils.functions import add_params_to_args
 from mm.segmentation.src.models.mask2former import backbone_weights_map
 import mm.segmentation.utils.transforms.loading
 

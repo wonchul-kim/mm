@@ -12,7 +12,7 @@ from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeVal
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-from mm.segmentation.utils.functions import add_params_to_args
+from mm.utils.functions import add_params_to_args
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()

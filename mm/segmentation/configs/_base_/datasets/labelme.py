@@ -11,7 +11,7 @@ train_pipeline = [
         ratio_range=(0.5, 1.5),
         keep_ratio=True),
     dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
-    dict(type='Resize', scale=(width, height), keep_ratio=True),
+    dict(type='Resize', scale=(width, height), keep_ratio=False),
     dict(type='RandomFlip', prob=0.3),
     dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'is_parent_path',
@@ -22,7 +22,7 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFileWithRoi'),
-    dict(type='Resize', scale=(width, height), keep_ratio=True),
+    dict(type='Resize', scale=(width, height), keep_ratio=False),
     # add loading annotation after ``Resize`` because ground truth
     # does not need to do resize data transform
     # dict(type='LoadAnnotations', reduce_zero_label=True),
@@ -99,5 +99,7 @@ test_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU', 'mDice', 'mFscore']
 train_cfg = dict(
     type='IterBasedTrainLoopV2', max_iters=160000, val_interval=50, 
     evaluator=train_evaluator)
+# train_cfg = dict(
+#     type='IterBasedTrainLoop', max_iters=160000, val_interval=50)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoopV2')
