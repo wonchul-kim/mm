@@ -17,14 +17,15 @@ from mmyolo.registry import RUNNERS
 
 from mm.utils.weights import get_weights_from_nexus
 from mm.utils.functions import add_params_to_args
-from mm.yolo.utils.configs import TrainConfigManager
+from mm.yolo.utils.config import TrainConfigManager
 from mm.yolo.configs.models.yolov8 import backbone_weights_map as yolov8_backbone_weights_map
 import mm.yolo.src 
+import mm.yolo.utils.hooks
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
     parser.add_argument('--args-filename')
-    
+    parser.add_argument('--create-output-dirs', action='store_true')
     parser.add_argument(
         '--cfg-options',
         nargs='+',
@@ -50,7 +51,58 @@ def parse_args():
 
     return args
 
-def yolov8():
+def main():
+    args = parse_args()
+    # add_params_to_args(args, args.args_filename)
+    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/recipes/tenneco_outer_coco.yaml')
+    args.create_output_dirs = True
+    
+    if args.create_output_dirs:
+        from mm.utils.functions import create_output_dirs
+        create_output_dirs(args)
+        print(f"CREATED output-dirs: {args.output_dir}")
+    
+    # args.custom_hooks['visualize_val']['output_dir'] = val_dir
+    # args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
+    # args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
+    # args.custom_hooks['checkpoint']['output_dir'] = weights_dir
+    
+    args.load_from = get_weights_from_nexus('detection', 'mmyolo', args.model, 
+                                            yolov8_backbone_weights_map[args.backbone], 'pth')
+
+    # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    config_file = ROOT / f'configs/models/{args.model}/{args.model}_{args.backbone}_mask-refine_syncbn_fast_8xb16_coco.py'
+
+    config_manager = TrainConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_schedule_config(args.max_iters, args.val_interval)
+    config_manager.manage_coco_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
+    config_manager.manage_optim_config(args.batch_size)
+    # config_manager.manage_default_hooks_config(args.default_hooks)
+    config_manager.manage_custom_hooks_config(args.custom_hooks)
+    cfg = config_manager.cfg
+
+    # Reduce the number of repeated compilations and improve
+    # training speed.
+    setup_cache_size_limit_of_dynamo()
+
+    # build the runner from config
+    if 'runner_type' not in cfg:
+        # build the default runner
+        runner = Runner.from_cfg(cfg)
+    else:
+        # build customized runner from the registry
+        # if 'runner_type' is set in the cfg
+        runner = RUNNERS.build(cfg)
+
+    # start training
+    runner.train()
+
+
+def yolov8_labelme():
     args = parse_args()
     add_params_to_args(args, ROOT / 'configs/recipe/train.yaml')
     
@@ -122,7 +174,7 @@ def yolov8():
                                             yolov8_backbone_weights_map[args.backbone], 'pth')
 
     # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
-    config_file = ROOT / 'configs/models/yolov8/yolov8_n_mask-refine_syncbn_fast_8xb16.py'
+    config_file = ROOT / f'configs/models/{args.model}/{args.model}_{args.backbone}_mask-refine_syncbn_fast_8xb16_coco.py'
 
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
@@ -136,6 +188,7 @@ def yolov8():
     # config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
 
+    cfg.launcher = 'pytorch'
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
@@ -154,4 +207,6 @@ def yolov8():
 
 
 if __name__ == '__main__':
-    yolov8()
+    # yolov8_labelme()
+    # yolov8_coco()
+    main()

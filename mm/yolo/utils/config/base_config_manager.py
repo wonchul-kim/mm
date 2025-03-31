@@ -87,6 +87,7 @@ class BaseConfigManager:
             cfg.train_dataloader.dataset['rois'] = rois
             cfg.train_dataloader.dataset['patch'] = patch
             
+            
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
             cfg.val_dataloader.dataset['data_root'] = data_root
@@ -110,6 +111,86 @@ class BaseConfigManager:
             
             if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
                 pipeline.scale = img_scale
+
+        for pipeline in self._cfg.test_pipeline:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
+                pipeline.scale = img_scale
+            
+        self._cfg.train_dataloader.dataset.pipeline = self._cfg.train_pipeline
+        self._cfg.val_dataloader.dataset.pipeline = self._cfg.test_pipeline
+        self._cfg.test_dataloader = self._cfg.val_dataloader
+        
+        for custom_hook in self._cfg.custom_hooks:
+            if custom_hook.get('type') == 'mmdet.PipelineSwitchHook':
+                custom_hook.switch_pipeline = self._cfg.train_pipeline_stage2
+            
+        _manage_train_dataloader(self._cfg)
+        _manage_val_dataloader(self._cfg)
+        
+    def manage_coco_dataset_config(self, data_root, img_suffix, ann_suffix, 
+                                    classes, batch_size, width, height, 
+                                    rois, patch):
+        
+        self._cfg.val_evaluator.ann_file = osp.join(data_root, self._cfg.val_ann_file)
+        
+        self._cfg.train_batch_size_per_gpu = batch_size 
+        self._cfg.val_batch_size_per_gpu = 1
+        
+        
+        def _manage_train_dataloader(cfg):
+            cfg.train_dataloader.batch_size = batch_size
+            cfg.train_dataloader.dataset['data_root'] = data_root
+            if cfg.dataset_type == 'YOLOv5CocoDataset':
+                cfg.train_dataloader.dataset['metainfo'] = {"classes": tuple(classes)}
+            # cfg.train_dataloader.dataset['classes'] = classes
+            # cfg.train_dataloader.dataset['ann_suffix'] = ann_suffix
+            # cfg.train_dataloader.dataset['img_suffix'] = img_suffix
+            # cfg.train_dataloader.dataset['rois'] = rois
+            # cfg.train_dataloader.dataset['patch'] = patch
+            
+        def _manage_val_dataloader(cfg):
+            cfg.val_dataloader.batch_size = batch_size
+            cfg.val_dataloader.dataset['data_root'] = data_root
+            if cfg.dataset_type == 'YOLOv5CocoDataset':
+                cfg.val_dataloader.dataset['metainfo'] = {"classes": tuple(classes)}
+            # cfg.val_dataloader.dataset['classes'] = classes
+            # cfg.val_dataloader.dataset['img_suffix'] = img_suffix
+            # cfg.val_dataloader.dataset['ann_suffix'] = ann_suffix
+            # cfg.val_dataloader.dataset['rois'] = rois
+            # cfg.val_dataloader.dataset['patch'] = patch
+            
+        img_scale = (width, height)
+        
+        if hasattr(self._cfg, 'mosaic_affine_transform'):
+            for pipeline in self._cfg.mosaic_affine_transform:
+                if 'img_scale' in pipeline.keys():
+                    pipeline['img_scale'] = img_scale  
+
+                if pipeline.get('type') == 'YOLOv5RandomAffine':
+                    pipeline.border = (-img_scale[0] // 2, -img_scale[1] // 2)
+        
+        for pipeline in self._cfg.train_pipeline:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') == 'YOLOv5RandomAffine':
+                pipeline.border = (-img_scale[0] // 2, -img_scale[1] // 2)
+            
+        for pipeline in self._cfg.train_pipeline_stage2:
+            if 'img_scale' in pipeline.keys():
+                pipeline['img_scale'] = img_scale 
+            
+            if pipeline.get('type') in ['YOLOv5KeepRatioResize', 'LetterResize']:
+                pipeline.scale = img_scale
+                
+        for pipeline in self._cfg.train_pipeline:
+            if pipeline.get('type') == 'YOLOv5MixUp':
+                pipeline.pre_transform = [
+                    *self._cfg.pre_transform, *self._cfg.mosaic_affine_transform
+                ]
                 
         for pipeline in self._cfg.test_pipeline:
             if 'img_scale' in pipeline.keys():
@@ -239,6 +320,8 @@ class BaseConfigManager:
                 if cfg.model.get('type') == 'YOLODetector':
                     cfg.model.bbox_head.head_module.num_classes = num_classes
                     cfg.model.train_cfg.assigner.num_classes = num_classes 
+                    
+                    cfg.model.bbox_head.head_module.num_classes = num_classes
                         
         def _manage_img_scale(cfg, new_img_scale): # img_scale: (width, height)
             cfg.img_scale = new_img_scale 
@@ -270,12 +353,18 @@ class BaseConfigManager:
     def manage_custom_hooks_config(self, custom_hooks):
         _custom_hooks = []
         for key, val in custom_hooks.items():
-            if key == 'checkpoint':
-                _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
-                                        by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
-                                        max_keep_ckpts=val.get('max_keep_ckpts', 2),
-                                        out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
-                                    )
+            if key == 'before_train':
+                for key2, val2 in val.items():
+                    if key2 == 'debug_dataloader':
+                        _custom_hooks.append(dict(type='HookBeforeTrain', 
+                                ratio=val2.get('ratio') or 0.25,
+                                debug_dir=val2.get('output_dir') or osp.join(self._cfg.work_dir, 'debug')))
+            # elif key == 'checkpoint':
+            #     _custom_hooks.append(dict(type='CustomCheckpointHook', interval=val.get('interval', 100),
+            #                             by_epoch=val.get('by_epoch', False), save_best=val.get('save_best', 'mIoU'),
+            #                             max_keep_ckpts=val.get('max_keep_ckpts', 2),
+            #                             out_dir=val.get('output_dir', osp.join(self._cfg.work_dir, 'weights')))
+            #                         )
             
             elif key == 'visualize_val':
                 if 'output_dir' not in val.keys() or val['output_dir'] == None:
@@ -286,36 +375,34 @@ class BaseConfigManager:
                                                    ratio=val.get('ratio', 0.25), 
                                                    output_dir=output_dir))
             
-            elif key == 'before_train':
-                for key2, val2 in val.items():
-                    if key2 == 'debug_dataloader':
-                        _custom_hooks.append(dict(type='HookBeforeTrain', ratio=val2.get('ratio', 0.25),
-                                                debug_dir=val2.get('output_dir', osp.join(self._cfg.work_dir, 'debug_dir'))))
 
-            elif key == 'after_train_epoch':
-                _custom_hooks.append(dict(type='HookAfterTrainIter'))
-            elif key == 'after_val_epoch':
-                _custom_hooks.append(dict(type='HookAfterValEpoch'))
+            # elif key == 'after_train_epoch':
+            #     _custom_hooks.append(dict(type='HookAfterTrainIter'))
+            # elif key == 'after_val_epoch':
+            #     _custom_hooks.append(dict(type='HookAfterValEpoch'))
                 
-            elif key == 'aiv':
-                if val.get('use', False):
-                    aiv = True
-                    for key2, val2 in val.items():
-                        if key2 == 'logging':
-                            logs_dir = val2.get('output_dir', osp.join(self._cfg.work_dir, 'logs_dir'))
+            # elif key == 'aiv':
+            #     if val.get('use', False):
+            #         aiv = True
+            #         for key2, val2 in val.items():
+            #             if key2 == 'logging':
+            #                 logs_dir = val2.get('output_dir', osp.join(self._cfg.work_dir, 'logs_dir'))
                             
-                            for key3, val3 in val2.items():
-                                if key3 == 'monitor' and val3.get('use', False):
-                                    _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
-                                            monitor=True,
-                                            monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
-                                            monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
+            #                 for key3, val3 in val2.items():
+            #                     if key3 == 'monitor' and val3.get('use', False):
+            #                         _custom_hooks.append(dict(type='HookForAiv', aiv=aiv,
+            #                                 monitor=True,
+            #                                 monitor_csv=val3.get('monitor_csv', False), monitor_figs=val3.get('monitor_figs', False),
+            #                                 monitor_freq=val3.get('monitor_freq', 1), logs_dir=logs_dir))
                 
         
         if len(_custom_hooks) != 0:
             if not hasattr(self._cfg, 'custom_hooks'):
                 self._cfg.custom_hooks = _custom_hooks
             else:
+                
+                
+                
                 self._cfg.custom_hooks += _custom_hooks
                 
     # set custom_hooks ================================================================================

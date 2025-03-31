@@ -1,15 +1,21 @@
 
-dataset_type = 'YOLOv5LabelmeDataset'
+dataset_type = 'YOLOv5CocoDataset'
 
-data_root = None
-classes = None
-num_classes = None  # Number of classes for classification
-img_scale = (0, 0)  # width, height
+data_root = '/HDD/datasets/public/coco/'  # Root path of data
+# Path of train annotation file
+train_ann_file = 'annotations/instances_train2017.json'
+train_data_prefix = 'train2017/'  # Prefix of train image path
+# Path of val annotation file
+val_ann_file = 'annotations/instances_val2017.json'
+val_data_prefix = 'val2017/'  # Prefix of val image path
 
-train_batch_size_per_gpu = None # Batch size of a single GPU during training
+num_classes = 80  # Number of classes for classification
+img_scale = (640, 640)  # width, height
+
+train_batch_size_per_gpu = 2 # Batch size of a single GPU during training
 train_num_workers = 8 # Worker to pre-fetch data for each single GPU during training
 
-val_batch_size_per_gpu = None # Batch size of a single GPU during validation
+val_batch_size_per_gpu = 1 # Batch size of a single GPU during validation
 val_num_workers = 2 # Worker to pre-fetch data for each single GPU during validation
 
 # Config of batch shapes. Only on val.
@@ -109,19 +115,13 @@ train_dataloader = dict(
     pin_memory=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     collate_fn=dict(type='yolov5_collate'),
-    dataset=dict( ############################# Dataset ----------------
+    dataset=dict(
         type=dataset_type,
-        mode='train',
         data_root=data_root,
-        data_prefix=dict(img='train'),
-        classes=classes,
-        rois=None,
-        img_suffix='.bmp',
-        ann_suffix='.json',
+        ann_file=train_ann_file,
+        data_prefix=dict(img=train_data_prefix),
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
-        pipeline=train_pipeline,
-    )
-)
+        pipeline=train_pipeline))
 
 test_pipeline = [
     # dict(type='LoadImageFromFile', backend_args=_base_.backend_args),
@@ -146,31 +146,21 @@ val_dataloader = dict(
     pin_memory=True,
     drop_last=False,
     sampler=dict(type='DefaultSampler', shuffle=False),
-    dataset=dict( ############################# Dataset ----------------
+    dataset=dict(
         type=dataset_type,
-        mode='val',
         data_root=data_root,
-        classes=classes,
-        rois=None, 
-        img_suffix='.bmp',
-        ann_suffix='.json',
         test_mode=True,
-        data_prefix=dict(img='val'),
+        data_prefix=dict(img=val_data_prefix),
+        ann_file=val_ann_file,
         pipeline=test_pipeline,
         batch_shapes_cfg=batch_shapes_cfg))
 
 test_dataloader = val_dataloader
 
-# FIXME
-# val_evaluator = dict(
-#     type='mmdet.CocoMetric',
-#     proposal_nums=(100, 1, 10),
-#     ann_file=data_root,
-#     metric='bbox')
 val_evaluator = dict(
-    type='mmdet.LabelmeCocoMetric',
+    type='mmdet.CocoMetric',
     proposal_nums=(100, 1, 10),
-    ann_file=data_root,
+    ann_file=data_root + val_ann_file,
     metric='bbox')
 test_evaluator = val_evaluator
 
