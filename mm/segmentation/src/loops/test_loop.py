@@ -19,7 +19,10 @@ class TestLoopV2(TestLoop):
                 if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
                     self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
                 _size = self.run_iter_patch(idx, data_batch)
-                metrics = self.evaluator.evaluate(_size)
+                if _size != 0:
+                    metrics = self.evaluator.evaluate(_size)
+                else: 
+                    metrics = None
             else:
                 if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
                     self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
@@ -28,7 +31,7 @@ class TestLoopV2(TestLoop):
                     self.run_iter(idx, data_batch)
                 metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
-        if self.test_loss:
+        if self.test_loss and metrics:
             loss_dict = _parse_losses(self.test_loss, 'test')
             metrics.update(loss_dict)
 
@@ -136,6 +139,7 @@ class TestLoopV2(TestLoop):
                                 eval_data_samples.append(patch_data_batch['data_samples'][jdx])
                                 eval_cnt += 1
                                 
+                                
                             if _labelme:
                                 _labelme = get_points_from_image(output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy(), 
                                                                  list(classes),
@@ -149,7 +153,6 @@ class TestLoopV2(TestLoop):
                                                        data_batch={'inputs': eval_inputs, 
                                                                    'data_samples': eval_data_samples}
                                                 )
-                        
                                 
                         self.runner.call_hook(
                                 'after_test_iter',

@@ -11,7 +11,7 @@ from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeTest
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TestConfigManager
-from mm.utils.functions import add_params_to_args, trigger_visualization_hook
+from mm.utils.functions import add_params_to_args
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
 
@@ -103,42 +103,17 @@ def main2():
     # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/test/exp"
     # weights = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/output_repeatability/gcnet_epochs100/train/weights/best_mIoU_iter_47901.pth"
     
-    # # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
-    # # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
+    input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot01"
+    # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot02"
     # input_dir = "/DeepLearning/research/data/benchmarks/benchmarks_production/tenneco/repeatibility/v01/final_data/OUTER_shot03"
-    # weights = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/train/weights/best_mIoU_iter_47901.pth'
-    # # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/test/exp'
-    # output_dir = '/HDD/etc/repeatablility/sam2unet_epochs100/test/exp'
-    # # input_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val'
+    weights = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/SEGMENTATION/sam2_patch512/train/weights/best_mIoU_iter_70448.pth'
+    # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2unet_epochs100/test/exp'
+    output_dir = '/HDD/etc/repeatablility/sam2_patch512/test/exp'
+    # input_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/val'
 
     
-    # classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
-    # rois = [[220, 60, 1340, 828]] #[[]]
-    # patch = {
-    #     "use_patch": False,
-    #     "include_point_positive": True,
-    #     "centric": False,
-    #     "sliding": True,
-    #     "width": 512,
-    #     "height": 256,
-    #     "overlap_ratio": 0.2,
-    #     "num_involved_pixel": 10,
-    #     "sliding_bg_ratio": 0,
-    #     "bg_ratio_by_image": 0,
-    #     "bg_start_train_epoch_by_image": 0,
-    #     "bg_start_val_epoch_by_image": 0,
-    #     "translate": 0,
-    #     "translate_range_width": 0,
-    #     "translate_range_height": 0,
-    # }
-    
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/test/exp"
-    weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/train/weights/best_mIoU_iter_44220.pth"
-    classes = ['background', 'STABBED', 'DUST']
-   
-    # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
-    input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/val"
-    rois = [[]]
+    classes = ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+    rois = [[220, 60, 1340, 828]] #[[]]
     patch = {
         "use_patch": True,
         "include_point_positive": True,
@@ -156,6 +131,31 @@ def main2():
         "translate_range_width": 0,
         "translate_range_height": 0,
     }
+    
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/test/exp"
+    # weights = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/outputs/SEGMENTATION/sam2_epochs300/train/weights/best_mIoU_iter_44220.pth"
+    # classes = ['background', 'STABBED', 'DUST']
+   
+    # # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/top/val"
+    # input_dir = "/DeepLearning/etc/_athena_tests/benchmark/mr/plate/bottom/val"
+    # rois = [[]]
+    # patch = {
+    #     "use_patch": True,
+    #     "include_point_positive": True,
+    #     "centric": False,
+    #     "sliding": True,
+    #     "width": 512,
+    #     "height": 512,
+    #     "overlap_ratio": 0.2,
+    #     "num_involved_pixel": 10,
+    #     "sliding_bg_ratio": 0,
+    #     "bg_ratio_by_image": 0,
+    #     "bg_start_train_epoch_by_image": 0,
+    #     "bg_start_val_epoch_by_image": 0,
+    #     "translate": 0,
+    #     "translate_range_width": 0,
+    #     "translate_range_height": 0,
+    # }
 
     
     parser = argparse.ArgumentParser(
@@ -214,5 +214,5 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()
