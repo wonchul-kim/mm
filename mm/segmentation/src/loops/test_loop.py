@@ -19,7 +19,10 @@ class TestLoopV2(TestLoop):
                 if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
                     self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
                 _size = self.run_iter_patch(idx, data_batch)
-                metrics = self.evaluator.evaluate(_size)
+                if _size != 0:
+                    metrics = self.evaluator.evaluate(_size)
+                else: 
+                    metrics = None
             else:
                 if hasattr(self.runner.cfg, 'tta') and self.runner.cfg.tta['use']:
                     self.runner.model = TTASegModel(self.runner.model, self.runner.cfg.tta['augs'])
@@ -28,7 +31,7 @@ class TestLoopV2(TestLoop):
                     self.run_iter(idx, data_batch)
                 metrics = self.evaluator.evaluate(len(self.dataloader.dataset))
 
-        if self.test_loss:
+        if self.test_loss and metrics:
             loss_dict = _parse_losses(self.test_loss, 'test')
             metrics.update(loss_dict)
 
@@ -68,7 +71,16 @@ class TestLoopV2(TestLoop):
                        
             patch_info = data_sample.patch
             roi = data_sample.roi
-            filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
+            if hasattr(self.runner.cfg, 'filename_indexes') and self.runner.cfg.filename_indexes is None:
+                filename = osp.split(osp.splitext(data_sample.img_path)[0])[-1]
+            else:
+                filename_indexes = self.runner.cfg.filename_indexes
+                if len(filename_indexes) == 2:
+                    filename = ''.join(osp.splitext(data_sample.img_path)[-2].split('/')[filename_indexes[0]:filename_indexes[1]])
+                elif len(filename_indexes) == 1 or isinstance(filename_indexes, int):
+                    filename = ''.join(osp.splitext(data_sample.img_path)[-2].split('/')[filename_indexes[0]:])
+                else:
+                    raise RuntimeError(f"[ERROR] NEED to CHECK filename_indexes({filename_indexes}) which must be less then two values")
             
             if len(roi) == 0:
                 roi = [0, 0, data_sample.img_shape[1], data_sample.img_shape[0]]
