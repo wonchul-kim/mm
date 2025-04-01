@@ -51,11 +51,22 @@ optim_wrapper = dict(type='OptimWrapper', optimizer=optimizer,
                                                  'norm': dict(decay_mult=0.),
                                                  'head': dict(lr_mult=10.)
                                                  }))
-lr_config = dict(policy='poly',
-                 warmup='linear',
-                 warmup_iters=1500,
-                 warmup_ratio=1e-6,
-                 power=1.0, min_lr=0.0, by_epoch=False)
 
+# learning policy
+param_scheduler = [
+    dict(
+        type='LinearLR',
+        start_factor=1e-6,
+        by_epoch=False,
+        begin=0,
+        end=1500  # warmup_iters
+    ),
+    dict(
+        type='PolyLR',
+        power=1.0,
+        eta_min=1e-8,
+        by_epoch=False
+    )
+]
 
 evaluation = dict(interval=4000, metric='mIoU',save_best='mIoU')
