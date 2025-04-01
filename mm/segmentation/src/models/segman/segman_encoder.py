@@ -901,9 +901,9 @@ def stem(in_chans=3, embed_dim=96):
 
 class SegMANEncoder(nn.Module):
     def __init__(self,
+                 num_classes, 
                  image_size=224,
                  in_chans=3, 
-                 num_classes=3, 
                  embed_dims=[64, 128, 256, 512],
                  depths=[2, 2, 6, 2],
                  num_heads=[2, 4, 8, 16],

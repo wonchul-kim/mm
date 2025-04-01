@@ -428,17 +428,17 @@ class BaseConfigManager:
             
             
         def _manage_backbone_weights(cfg):
-            from mm.segmentation.configs.models.hetnet import backbone_weights_map as hetnet_backbone_weights_map
+            from mm.segmentation.configs.models.segman import backbone_weights_map as segman_backbone_weights_map
             from mm.utils.weights import get_weights_from_nexus
             cfg.model.backbone.weights = get_weights_from_nexus('segmentation', 'mmseg', 
                                                         self.args.model, 
-                                                        hetnet_backbone_weights_map[self.args.backbone], 'pth',
-                                                        weights_name=hetnet_backbone_weights_map[self.args.backbone])
+                                                        segman_backbone_weights_map[self.args.backbone], 'pth.tar',
+                                                        weights_name=segman_backbone_weights_map[self.args.backbone])
             
             
         _manage_num_classes(self._cfg, (height, width))
         _manage_crop_size(self._cfg, (height, width))
-        # _manage_backbone_weights(self._cfg)
+        _manage_backbone_weights(self._cfg)
           
             
     # set dataloader ==================================================================================

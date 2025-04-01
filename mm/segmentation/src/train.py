@@ -925,7 +925,7 @@ def segman():
     from datetime import datetime 
     now = datetime.now()
     output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/segman/outputs/SEGMENTATION'
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
+    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset_unit"
     classes = ['background', 'line', 'stabbed']
 
     rois = [[220, 60, 1340, 828]]
@@ -983,7 +983,7 @@ def segman():
     args.rois = rois
     args.patch = patch
 
-    args.batch_size = 8
+    args.batch_size = 2
     args.max_iters = 10000
     args.val_interval = 100
     
