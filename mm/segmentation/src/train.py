@@ -925,7 +925,7 @@ def segman():
     from datetime import datetime 
     now = datetime.now()
     output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/segman/outputs/SEGMENTATION'
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset_unit"
+    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset"
     classes = ['background', 'line', 'stabbed']
 
     rois = [[220, 60, 1340, 828]]
@@ -953,16 +953,20 @@ def segman():
         os.makedirs(output_dir)
         
     val_dir = osp.join(output_dir, 'val')
-    os.mkdir(val_dir)
+    if not osp.exists(val_dir):
+        os.mkdir(val_dir)
     
     debug_dir = osp.join(output_dir, 'debug')
-    os.mkdir(debug_dir)
+    if not osp.exists(debug_dir):
+        os.mkdir(debug_dir)
     
     logs_dir = osp.join(output_dir, 'logs')
-    os.mkdir(logs_dir)
+    if not osp.exists(logs_dir):
+        os.mkdir(logs_dir)
     
     weights_dir = osp.join(output_dir, 'weights')
-    os.mkdir(weights_dir)
+    if not osp.exists(weights_dir):
+        os.mkdir(weights_dir)
     
     args.output_dir = output_dir
     args.data_root = input_dir
@@ -983,9 +987,9 @@ def segman():
     args.rois = rois
     args.patch = patch
 
-    args.batch_size = 2
-    args.max_iters = 10000
-    args.val_interval = 100
+    args.batch_size = 8
+    args.max_iters = 30000
+    args.val_interval = 500
     
     args.custom_hooks['visualize_val']['output_dir'] = val_dir
     args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
