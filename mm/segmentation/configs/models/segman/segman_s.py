@@ -23,7 +23,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     backbone=dict(
     type='SegMANEncoder_s',
-    pretrained='/path/to/SegMAN_Encoder_s.pth.tar',
+    pretrained='/HDD/weights/segman/SegMAN_Encoder_s.pth.tar',
     style='pytorch',
     num_classes=None,
     ),
