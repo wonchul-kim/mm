@@ -56,3 +56,22 @@ docker build -t mmsegmentation docker/
 docker pull onedang2/mmengine-0.10.5-mmcv2.0.1-mmdet3.3.0-mmseg1.2.2
 ```
 
+
+
+### Models
+
+#### SegMAN
+
+* Required libraries to install
+    - [VMamba](https://github.com/MzeroMiko/VMamba)
+        ```
+        git clone git@github.com:MzeroMiko/VMamba.git
+        cd cd VMamba/kernels/selective_scan
+        pip install .
+        ```
+    - [Natten](https://github.com/SHI-Labs/NATTEN)
+        ```
+        pip install natten==0.17.3+torch210cu118 -f https://shi-labs.com/natten/wheels/cu118/torch2.1.0/natten-0.17.3+torch210cu118-cp310-cp310-linux_x86_64.whl
+        ```
+
+        > If you have any other version of torch and cuda, NEED to check and synch them by checking https://shi-labs.com/natten/wheels/.
