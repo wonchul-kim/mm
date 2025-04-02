@@ -23,7 +23,9 @@ model = dict(
     backbone=dict(
         type='SegMANEncoder_b',
         pretrained='/HDD/weights/segman/SegMAN_Encoder_b.pth.tar',
-        style='pytorch'),
+        style='pytorch',
+        frozen_stages=-1,
+    ),
     decode_head=dict(
         type='SegMANDecoder', 
         in_channels=[96, 160, 364, 560],

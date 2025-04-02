@@ -554,7 +554,6 @@ class BaseConfigManager:
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
-                
                 elif self._cfg.model.backbone.type == 'COSNet':
                     assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 3, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'ResNetV1c':
@@ -565,6 +564,8 @@ class BaseConfigManager:
                     assert frozen_stages >= 0 and frozen_stages <= 24, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 24, not {frozen_stages}')
                 elif self._cfg.model.backbone.type == 'HetNetEncoder':
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                elif 'SegMANEncoder' in self._cfg.model.backbone.type:
+                    assert frozen_stages >= 0 and frozen_stages <= 8, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 else:
                     warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 

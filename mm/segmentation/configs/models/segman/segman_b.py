@@ -26,7 +26,7 @@ model = dict(
         pretrained='/HDD/weights/segman/SegMAN_Encoder_b.pth.tar',
         style='pytorch',
         num_classes=None,
-        # image_size=(None, None)
+        frozen_stages=-1,
     ),
     decode_head=dict(
         type='SegMANDecoder', 

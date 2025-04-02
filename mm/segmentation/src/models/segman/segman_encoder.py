@@ -924,9 +924,11 @@ class SegMANEncoder(nn.Module):
                  ssm_ratio=1.0,
                  pretrained=None,
                  _layer=BasicLayer,
+                 frozen_stages=-1,
                  **kwargs):
         super().__init__()
 
+        self.frozen_stages = frozen_stages
         self.num_classes = num_classes
         self.num_layers = len(depths)
         self.embed_dim = embed_dims[0]
@@ -995,7 +997,12 @@ class SegMANEncoder(nn.Module):
         
         if torch.distributed.is_initialized():
             self = nn.SyncBatchNorm.convert_sync_batchnorm(self)
-
+            
+        self._freeze_stages()
+        print("*** frozen_stages: ", self.frozen_stages)
+        for name, param in self.named_parameters():
+            print(f"{name}: {param.requires_grad}")
+            
     def _init_weights(self, m):
         if isinstance(m, nn.Conv2d):
             nn.init.trunc_normal_(m.weight, std=0.02)
@@ -1097,6 +1104,23 @@ class SegMANEncoder(nn.Module):
         return (sum(Gflops.values()), params, FPS)
 
 
+    def _freeze_stages(self):
+        if self.frozen_stages != -1:
+            self.eval()
+            if self.frozen_stages == len(self.layers):
+                for param in self.parameters():
+                    param.requires_grad = False
+            else:
+                for frozen_idx in range(self.frozen_stages):
+                    if frozen_idx == 0:
+                        self.patch_embed.eval()
+                        for param in self.patch_embed.parameters():
+                            param.requires_grad = False
+                    
+                    self.layers[frozen_idx].eval()
+                    for name, param in self.layers[frozen_idx].named_parameters():
+                        param.requires_grad = False
+                        
 
 def _cfg(url=None, **kwargs):
     return {

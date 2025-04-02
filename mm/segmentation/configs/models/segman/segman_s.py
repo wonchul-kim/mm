@@ -22,10 +22,11 @@ model = dict(
     type='EncoderDecoder',
     data_preprocessor=data_preprocessor,
     backbone=dict(
-    type='SegMANEncoder_s',
-    pretrained='/HDD/weights/segman/SegMAN_Encoder_s.pth.tar',
-    style='pytorch',
-    num_classes=None,
+        type='SegMANEncoder_s',
+        pretrained='/HDD/weights/segman/SegMAN_Encoder_s.pth.tar',
+        style='pytorch',
+        num_classes=None,
+        frozen_stages=-1,
     ),
     decode_head=dict(
         type='SegMANDecoder',

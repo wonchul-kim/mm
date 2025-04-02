@@ -975,21 +975,21 @@ def segman():
 
     
     args.model= 'segman'
-    # args.backbone = 's'
+    args.backbone = 's'
     # args.backbone = 'b'
-    args.backbone = 't'
+    # args.backbone = 't'
     args.height = 768
     args.width = 1120
-    args.frozen_stages = -1
+    args.frozen_stages = 8
     
     args.amp = False
     
     args.rois = rois
     args.patch = patch
 
-    args.batch_size = 8
-    args.max_iters = 30000
-    args.val_interval = 500
+    args.batch_size = 2
+    args.max_iters = 1000
+    args.val_interval = 5
     
     args.custom_hooks['visualize_val']['output_dir'] = val_dir
     args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
@@ -1023,7 +1023,7 @@ def segman():
     # start training
     runner.train()
 if __name__ == '__main__':
-    main()
+    # main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
@@ -1032,4 +1032,4 @@ if __name__ == '__main__':
     # gcnet()
     # sam2()
     # hetnet()
-    # segman()
+    segman()
