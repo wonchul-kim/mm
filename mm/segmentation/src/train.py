@@ -1023,7 +1023,7 @@ def segman():
     # start training
     runner.train()
 if __name__ == '__main__':
-    # main()
+    main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
@@ -1032,4 +1032,4 @@ if __name__ == '__main__':
     # gcnet()
     # sam2()
     # hetnet()
-    segman()
+    # segman()
