@@ -430,7 +430,7 @@ class BaseConfigManager:
         def _manage_backbone_weights(cfg):
             from mm.segmentation.configs.models.segman import backbone_weights_map as segman_backbone_weights_map
             from mm.utils.weights import get_weights_from_nexus
-            cfg.model.backbone.weights = get_weights_from_nexus('segmentation', 'mmseg', 
+            cfg.model.backbone.pretrained = get_weights_from_nexus('segmentation', 'mmseg', 
                                                         self.args.model, 
                                                         segman_backbone_weights_map[self.args.backbone], 'pth.tar',
                                                         weights_name=segman_backbone_weights_map[self.args.backbone])
