@@ -10,6 +10,15 @@ pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorc
 ## Models
 
 ### ADE20K
+
+#### SegMAN
+
+| Method        | Backbone         | Crop Size   | Params (M)| Mem (GB)  | Inf time (fps)   | Device   | mIoU    | mIoU(ms+flip)  | config  |
+| :-----------: | :--------------: | :---------: | :-------: | :-------: | :--------------: | :------: | :-----: | :------------: | :-----: | 
+| SegMAN        | T                | 512x512     | 6.4       |           |                  |          | 43.0    |              - |         | 
+| SegMAN        | S                | 512x512     | 29.4      |           |                  |          | 51.3    |              - |         | 
+| SegMAN        | B                | 512x512     | 51.8      |           |                  |          | 52.6    |              - |         | 
+
 #### Mask2Former
 
 | Method        | Backbone         | Crop Size   | Lr schd   | Mem (GB)  | Inf time (fps)   | Device   | mIoU    | mIoU(ms+flip)  | config  |
@@ -35,15 +44,34 @@ pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorc
 ------------------------------------------------------------------------------------------------
 ### Cityscapes 
 
+#### SegMAN
+
+| Method        | Backbone         | Crop Size   | Params (M)| Mem (GB)  | Inf time (fps)   | Device   | mIoU    | mIoU(ms+flip)  | config  |
+| :-----------: | :--------------: | :---------: | :-------: | :-------: | :--------------: | :------: | :-----: | :------------: | :-----: | 
+| SegMAN        | T                | 512x512     | 6.4       |           |                  |          | 80.3    |              - |         | 
+| SegMAN        | S                | 512x512     | 29.4      |           |                  |          | 83.2    |              - |         | 
+| SegMAN        | B                | 512x512     | 51.8      |           |                  |          | 83.8    |              - |         | 
+
 #### Mask2Former
 | Method       | Backbone         | Crop Size   | Lr schd   | Mem (GB)  | Inf time (fps)   | Device   | mIoU    | mIoU(ms+flip)  | config |
 | :----------: | :--------------: | :---------: | :-------: | :-------: | :--------------: | :------: | :-----: | :------------: | :----: |
 | Mask2Former | R-50-D32       | 512x1024  | 90000   |     5.67 | 9.17           | A100   | 80.44 |             - |                      [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_r50_8xb2-90k_cityscapes-512x1024.py) | 
 | Mask2Former | R-101-D32      | 512x1024  | 90000   |     6.81 | 7.11           | A100   | 80.80 |             - |                     [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_r101_8xb2-90k_cityscapes-512x1024.py) | 
-Former | Swin-T         | 512x1024  | 90000   |     6.36 | 7.18           | A100   | 81.71 |             - |                   [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_swin-t_8xb2-90k_cityscapes-512x1024.py) | 
+| Mask2Former | Swin-T         | 512x1024  | 90000   |     6.36 | 7.18           | A100   | 81.71 |             - |                   [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_swin-t_8xb2-90k_cityscapes-512x1024.py) | 
 | Mask2Former | Swin-S         | 512x1024  | 90000   |     8.09 | 5.57           | A100   | 82.57 |             - |                   [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_swin-s_8xb2-90k_cityscapes-512x1024.py) | 
 | Mask2Former | Swin-B (in22k) | 512x1024  | 90000   |    10.89 | 4.32           | A100   | 83.52 |             - | [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_swin-b-in22k-384x384-pre_8xb2-90k_cityscapes-512x1024.py) | 
 | Mask2Former | Swin-L (in22k) | 512x1024  | 90000   |    15.83 | 2.86           | A100   | 83.65 |             - | [config](https://github.com/open-mmlab/mmsegmentation/blob/main/configs/mask2former/mask2former_swin-l-in22k-384x384-pre_8xb2-90k_cityscapes-512x1024.py) | 
+
+
+### COCO-stuff 
+
+#### SegMAN
+
+| Method        | Backbone         | Crop Size   | Params (M)| Mem (GB)  | Inf time (fps)   | Device   | mIoU    | mIoU(ms+flip)  | config  |
+| :-----------: | :--------------: | :---------: | :-------: | :-------: | :--------------: | :------: | :-----: | :------------: | :-----: | 
+| SegMAN        | T                | 512x512     | 6.4       |           |                  |          | 41.3    |              - |         | 
+| SegMAN        | S                | 512x512     | 29.4      |           |                  |          | 47.5    |              - |         | 
+| SegMAN        | B                | 512x512     | 51.8      |           |                  |          | 48.3    |              - |         | 
 
 
 ### Build docker image from `Dockerfile`
