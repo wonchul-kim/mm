@@ -169,10 +169,13 @@ def mask2former():
     args.backbone = 'swin-s'
     args.width = 1120
     args.height = 768
+    args.frozen_stages = -1
+    args.gradient_checkpointing = 1
     
     args.rois = rois
     args.patch = patch
 
+    args.batch_size = 1
     args.epochs = 0
     args.max_iters = 100
     args.val_interval = 50
@@ -1029,8 +1032,8 @@ def segman():
     runner.train()
 if __name__ == '__main__':
     # main()
-    # mask2former()
-    cosnet()
+    mask2former()
+    # cosnet()
     # deeplabv3plus()
     # pidnet()
     # dinov2()

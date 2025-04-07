@@ -194,7 +194,7 @@ class BaseConfigManager:
         def _manage_num_classes(cfg):
             cfg.num_classes = num_classes 
             if 'model' in cfg:
-                if cfg.model.get('type') == 'EncoderDecoder':
+                if cfg.model.get('type') == 'EncoderDecoder':                   
                     if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
                         cfg.model.decode_head.num_classes = num_classes
                         cfg.model.decode_head.loss_cls.class_weight = [1.0] * num_classes + [0.1]
@@ -580,6 +580,7 @@ class BaseConfigManager:
                 
     def manage_gradient_checkpointing(self, gradient_checkpointing):
         
-        if hasattr(self._cfg.model.backbone, 'gradient_checkpointing'):
-            if self._cfg.model.backbone.type == 'COSNet':
-                self._cfg.model.backbone.gradient_checkpointing = gradient_checkpointing
+        if self._cfg.model.backbone.type == 'COSNet' and hasattr(self._cfg.model.backbone, 'gradient_checkpointing'):
+            self._cfg.model.backbone.gradient_checkpointing = gradient_checkpointing
+        elif self._cfg.model.backbone.type == 'SwinTransformer' and hasattr(self._cfg.model.backbone, 'with_cp'):
+            self._cfg.model.backbone.with_cp = 0 if gradient_checkpointing <= 0 else 1
