@@ -126,7 +126,7 @@ def mask2former():
 
     rois = [[220, 60, 1340, 828]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
@@ -167,8 +167,8 @@ def mask2former():
     
     args.model= 'mask2former'
     args.backbone = 'swin-s'
-    args.height = 256
-    args.width = 512
+    args.width = 1120
+    args.height = 768
     
     args.rois = rois
     args.patch = patch
@@ -176,6 +176,7 @@ def mask2former():
     args.epochs = 0
     args.max_iters = 100
     args.val_interval = 50
+    args.amp = False
     
     args.custom_hooks['visualize_val']['output_dir'] = val_dir
     args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
@@ -205,6 +206,9 @@ def mask2former():
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
+    import torch
+    torch.backends.cudnn.benchmark = True  # 최적의 GPU 커널 선택
+    torch.backends.cudnn.enabled = True  # cuDNN 최적화 활성화
 
     # start training
     runner.train()
@@ -224,7 +228,7 @@ def cosnet():
 
     rois = [[220, 60, 1340, 828]]
     patch = {
-        "use_patch": True,
+        "use_patch": False,
         "include_point_positive": True,
         "centric": False,
         "sliding": True,
@@ -265,9 +269,10 @@ def cosnet():
     
     args.model= 'cosnet'
     args.backbone = 'upernet-r50'
-    args.height = 768
-    args.width = 1120
-    args.frozen_stages = 3
+    args.height = 256
+    args.width = 512
+    args.frozen_stages = -1
+    args.gradient_checkpointing = 0
     
     args.rois = rois
     args.patch = patch
@@ -1023,9 +1028,9 @@ def segman():
     # start training
     runner.train()
 if __name__ == '__main__':
-    main()
+    # main()
     # mask2former()
-    # cosnet()
+    cosnet()
     # deeplabv3plus()
     # pidnet()
     # dinov2()

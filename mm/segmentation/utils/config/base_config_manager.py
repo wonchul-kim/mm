@@ -68,6 +68,9 @@ class BaseConfigManager:
 
         if hasattr(args, 'frozen_stages'):
             self.manage_frozen_stages(args.frozen_stages)
+            
+        if hasattr(args, 'gradient_checkpointing'):
+            self.manage_gradient_checkpointing(args.gradient_checkpointing)
         
         if hasattr(args, 'filename_indexes'):
             self._cfg.filename_indexes = args.filename_indexes
@@ -550,7 +553,6 @@ class BaseConfigManager:
     def manage_frozen_stages(self, frozen_stages):
         
         if frozen_stages != -1:
-
             if hasattr(self._cfg.model.backbone, 'frozen_stages'):
                 if self._cfg.model.backbone.type == 'SwinTransformer':
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
@@ -574,5 +576,10 @@ class BaseConfigManager:
                 raise RuntimeError(f"There is no `frozen_stages` in backbone, YOU NEED TO CHECK!")
             
         
+        
                 
-    
+    def manage_gradient_checkpointing(self, gradient_checkpointing):
+        
+        if hasattr(self._cfg.model.backbone, 'gradient_checkpointing'):
+            if self._cfg.model.backbone.type == 'COSNet':
+                self._cfg.model.backbone.gradient_checkpointing = gradient_checkpointing

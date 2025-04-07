@@ -12,7 +12,8 @@ model = dict(
     backbone=dict(
         type='COSNet',
         depths=[3, 3, 12, 3],
-        style='pytorch'),
+        style='pytorch'
+    ),
     decode_head=dict(num_classes=3,
                      in_channels=[72, 72*2, 72*4, 72*8],
                      channels=256,

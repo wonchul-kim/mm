@@ -4,16 +4,19 @@ import torch.nn.functional as F
 from timm.models.layers import trunc_normal_
 from .cosnet_modules import FSB, BEM, LayerNorm
 from mmseg.models.builder import BACKBONES
+import numpy as np
+from torch.utils.checkpoint import checkpoint as gradient_checkpointing
 
 @BACKBONES.register_module()
 class COSNet(nn.Module):
     def __init__(self, in_chans=3, num_classes=1000, img_size=224,
                  depths=[3, 3, 12, 3], dim=72, expan_ratio=4, num_stages=4, s_kernel_size=[5,5,3,3], 
                  drop_path_rate=0.2, layer_scale_init_value=1e-6, head_init_scale=1., 
-                 frozen_stages=-1, 
+                 frozen_stages=-1, gradient_checkpointing=0,
                  **kwargs):
         super().__init__()
         
+        self.gradient_checkpointing = gradient_checkpointing
         self.frozen_stages = frozen_stages
         self.num_stages = num_stages
         self.num_classes = num_classes
@@ -48,7 +51,6 @@ class COSNet(nn.Module):
 
         self.apply(self._init_weights)
         self._freeze_stages()
-
         '''
         if kwargs["classifier_dropout"] is not None:
             self.head_dropout = nn.Dropout(kwargs["classifier_dropout"])
@@ -58,7 +60,8 @@ class COSNet(nn.Module):
         self.head.weight.data.mul_(head_init_scale)
         self.head.bias.data.mul_(head_init_scale)
         '''
-
+        self._apply_gradient_checkpointing()
+        
     def _init_weights(self, m):
 
         if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -89,11 +92,22 @@ class COSNet(nn.Module):
             msg = self.load_state_dict(checkpoint["state_dict"], strict=False)
             print(msg)
 
-    def forward_features(self, x):
+    def forward_features(self, x):       
         feats = []
         for i in range(self.num_stages):
-            x = self.downsample_layers[i](x)
-            x = self.stages[i](x)
+            if self._gradient_checkpointing_applied_layers:
+                if i in self._gradient_checkpointing_applied_layers['downsample_layers']:
+                    x = gradient_checkpointing(self.downsample_layers[i], x)
+                else:
+                    x = self.downsample_layers[i](x)
+                if i in self._gradient_checkpointing_applied_layers['stages']:
+                    x = gradient_checkpointing(self.stages[i], x)
+                else:
+                    x = self.stages[i](x)
+            else:
+                x = self.downsample_layers[i](x)
+                x = self.stages[i](x)
+                
             feats.append(x)
 
         return feats
@@ -118,6 +132,24 @@ class COSNet(nn.Module):
             self.stages[frozen_idx].eval()
             for param in self.stages[frozen_idx].parameters():
                 param.requires_grad = False
+                
+    def _apply_gradient_checkpointing(self):
+        if self.gradient_checkpointing != 0:
+            self._gradient_checkpointing_applied_layers = {'downsample_layers': [],
+                                                           'stages': []}
+            for layer_idx in range(len(self.downsample_layers)):
+                if self.gradient_checkpointing > np.random.random():
+                    self._gradient_checkpointing_applied_layers['downsample_layers'].append(layer_idx)
+
+            for layer_idx in range(len(self.stages)):
+                if self.gradient_checkpointing > np.random.random():
+                    self._gradient_checkpointing_applied_layers['stages'].append(layer_idx)
+                    
+            print(f"Gradient checkpointing is applied: {self._gradient_checkpointing_applied_layers}")
+        else:
+            self._gradient_checkpointing_applied_layers = None
+            print(f"Gradient checkpointing is applied: {self._gradient_checkpointing_applied_layers}")
+                
 
 ###############################################################################
 if __name__ == "__main__":
