@@ -1031,8 +1031,8 @@ def segman():
     # start training
     runner.train()
 if __name__ == '__main__':
-    # main()
-    mask2former()
+    main()
+    # mask2former()
     # cosnet()
     # deeplabv3plus()
     # pidnet()
