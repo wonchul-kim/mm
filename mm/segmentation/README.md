@@ -3,8 +3,16 @@
 ## Envs.
 
 #### pytorch
-```
+```shell
 pip install torch==2.1.2 torchvision==0.16.2 --index-url https://download.pytorch.org/whl/cu118
+```
+
+#### mim list
+```shell
+mmcv            2.1.0      https://github.com/open-mmlab/mmcv
+mmdet           3.3.0      https://github.com/open-mmlab/mmdetection
+mmengine        0.10.6     https://github.com/open-mmlab/mmengine
+mmsegmentation  1.2.2      https://github.com/open-mmlab/mmsegmentation
 ```
 
 ## Models
@@ -92,13 +100,13 @@ docker pull onedang2/mmengine-0.10.5-mmcv2.0.1-mmdet3.3.0-mmseg1.2.2
 
 * Required libraries to install
     - [VMamba](https://github.com/MzeroMiko/VMamba)
-        ```
+        ```shell
         git clone git@github.com:MzeroMiko/VMamba.git
         cd cd VMamba/kernels/selective_scan
         pip install .
         ```
     - [Natten](https://github.com/SHI-Labs/NATTEN)
-        ```
+        ```shell
         pip install natten==0.17.3+torch210cu118 -f https://shi-labs.com/natten/wheels/cu118/torch2.1.0/natten-0.17.3+torch210cu118-cp310-cp310-linux_x86_64.whl
         ```
 
