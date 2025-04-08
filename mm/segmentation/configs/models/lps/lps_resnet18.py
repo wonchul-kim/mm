@@ -28,12 +28,12 @@ model = dict(
         norm_cfg=norm_cfg,
         act_cfg=dict(type='ReLU', inplace=True),
         loss_decode=[
-            # dict(
-            #     type='OhemCrossEntropy',
-            #     thres=0.9,
-            #     min_kept=131072,
-            #     class_weight=[1.]*num_classes,
-            #     loss_weight=0.4),
+            dict(
+                type='OhemCrossEntropy',
+                thres=0.9,
+                min_kept=131072,
+                class_weight=[1.]*num_classes,
+                loss_weight=0.4),
             dict(
                 type='SoftmaxFocalLoss',
                 gamma=2.0,

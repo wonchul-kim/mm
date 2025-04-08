@@ -456,10 +456,13 @@ class BaseConfigManager:
                         # if 'image_size' in cfg.model.backbone:
                         #     cfg.model.backbone.image_size = new_crop_size
                     
-                    if 'decode_head' in cfg.model and 'num_classes' in cfg.model.decode_head:
-                        cfg.model.decode_head.num_classes = num_classes
-                        # for loss_decode in cfg.model.decode_head.loss_decode:
-                        #     loss_decode.class_weight = [1.0]*num_classes
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
                         
         def _manage_crop_size(cfg, new_crop_size):
             # if 'decode_head' in cfg.model:
