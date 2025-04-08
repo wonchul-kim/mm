@@ -81,7 +81,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model:       
+    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
