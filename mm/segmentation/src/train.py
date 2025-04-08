@@ -1040,7 +1040,7 @@ def lps():
 
     from datetime import datetime 
     now = datetime.now()
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/segman/outputs/SEGMENTATION'
+    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/lps/outputs/SEGMENTATION'
     input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset_unit"
     classes = ['background', 'line', 'stabbed']
 
@@ -1103,7 +1103,7 @@ def lps():
 
     args.batch_size = 4
     args.max_iters = 1000
-    args.val_interval = 5
+    args.val_interval = 100
     
     args.custom_hooks['visualize_val']['output_dir'] = val_dir
     args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
@@ -1139,7 +1139,7 @@ def lps():
     
     
 if __name__ == '__main__':
-    # main()
+    main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
@@ -1149,4 +1149,4 @@ if __name__ == '__main__':
     # sam2()
     # hetnet()
     # segman()
-    lps()
+    # lps()
