@@ -11,7 +11,7 @@ from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
 
 from mmdeploy.utils import (get_ir_config, load_config)
-from mm.segmentation.utils.functions import add_params_to_args
+from mm.utils.functions import add_params_to_args
 from mm.segmentation.utils.export.torch2onnx import torch2onnx
 
 from pathlib import Path 

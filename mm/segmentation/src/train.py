@@ -20,7 +20,7 @@ from mmseg.registry import RUNNERS
 from mm.utils.weights import get_weights_from_nexus
 from mm.segmentation.utils.config import TrainConfigManager
 from mm.segmentation.src.runners import RunnerV1
-from mm.segmentation.utils.functions import add_params_to_args
+from mm.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
 from mm.segmentation.configs.models.deeplabv3plus import backbone_weights_map as dlabv3plus_backbone_weights_map
