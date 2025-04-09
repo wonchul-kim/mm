@@ -63,6 +63,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_hetnet_config
         elif args.model == 'segman':
             self.manage_model_config = self.manage_segman_config
+        elif args.model == 'lps':
+            self.manage_model_config = self.manage_lps_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -443,7 +445,50 @@ class BaseConfigManager:
         _manage_crop_size(self._cfg, (height, width))
         _manage_backbone_weights(self._cfg)
           
+    def manage_lps_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg, new_crop_size):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'backbone' in cfg.model:
+                        if 'num_classes' in cfg.model.backbone:
+                            cfg.model.backbone.num_classes = num_classes
+                        # if 'image_size' in cfg.model.backbone:
+                        #     cfg.model.backbone.image_size = new_crop_size
+                    
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'decode_head' in cfg.model:
+            #     if cfg.model.decode_head.type == 'HetNetHead':
+            #         cfg.model.decode_head.width = new_crop_size[1]
+            #         cfg.model.decode_head.height = new_crop_size[0]
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
             
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.segman import backbone_weights_map as segman_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.pretrained = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        segman_backbone_weights_map[self.args.backbone], 'pth.tar',
+                                                        weights_name=segman_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg, (height, width))
+        _manage_crop_size(self._cfg, (height, width))
+        # _manage_backbone_weights(self._cfg)
+        
+        
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):

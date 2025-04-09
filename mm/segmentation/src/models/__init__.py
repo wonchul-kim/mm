@@ -6,3 +6,4 @@ from .gcnet import *
 from .dinov2 import *
 from .hetnet import *
 from .segman import *
+from .lps import *
