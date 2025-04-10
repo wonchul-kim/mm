@@ -11,9 +11,10 @@ from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeTest
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TestConfigManager
-from mm.utils.functions import add_params_to_args
+from mm.utils.functions import add_params_to_args, increment_path
 import mm.segmentation.utils.transforms.loading
 import mm.segmentation.src.loops
+import mm.segmentation.utils.losses
 
 from pathlib import Path 
 FILE = Path(__file__).resolve()
@@ -22,6 +23,7 @@ ROOT = FILE.parents[2]
 
 # TODO: support fuse_conv_bn, visualization, and format_only
 def parse_args():
+    
     parser = argparse.ArgumentParser(
         description='MMSeg test (and eval) a model')
     parser.add_argument('--args-filename')
@@ -50,24 +52,7 @@ def parse_args():
 
     return args
 
-def increment_path(path, exist_ok=False, sep="", mkdir=False):
-    from glob import glob
-    import re 
-    
-    # Increment file or directory path, i.e. runs/exp --> runs/exp{sep}2, runs/exp{sep}3, ... etc.
-    path = Path(path)  # os-agnostic
-    if path.exists() and not exist_ok:
-        path, suffix = (
-            (path.with_suffix(""), path.suffix) if path.is_file() else (path, "")
-        )
-        dirs = glob(f"{path}{sep}*")  # similar paths
-        matches = [re.search(rf"%s{sep}(\d+)" % path.stem, d) for d in dirs]
-        i = [int(m.groups()[0]) for m in matches if m]  # indices
-        n = max(i) + 1 if i else 2  # increment number
-        path = Path(f"{path}{sep}{n}{suffix}")  # increment path
-    if mkdir:
-        path.mkdir(parents=True, exist_ok=True)  # make directory
-    return path
+
 
 def main():
     
@@ -90,6 +75,40 @@ def main():
         cfg.test_dataloader.dataset.pipeline = cfg.tta_pipeline
         cfg.tta_model.module = cfg.model
         cfg.model = cfg.tta_model
+
+    runner = Runner.from_cfg(cfg)
+    runner.test()
+
+def main1():
+    args = parse_args()
+    add_params_to_args(args, ROOT / 'segmentation/configs/recipe/test.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200.yaml')
+    args.create_output_dirs = True
+    
+    if args.create_output_dirs:
+        from mm.utils.functions import create_output_dirs
+        create_output_dirs(args, 'test')
+        print(f"CREATED output-dirs: {args.output_dir}")
+    
+    args.load_from = args.weights
+    args.data_root = args.input_dir
+    args.num_classes = len(args.classes)
+    
+    args.custom_hooks['visualize_test']['annotate'] = True
+    args.custom_hooks['visualize_test']['output_dir'] = osp.join(args.output_dir, 'vis')
+    args.custom_hooks['visualize_test']['contour_thres'] = 10
+    args.custom_hooks['visualize_test']['contour_conf'] = 0.5
+
+    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    config_manager = TestConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
+    config_manager.manage_custom_test_hooks_config(args.custom_hooks)
+
+    cfg = config_manager.cfg
 
     runner = Runner.from_cfg(cfg)
     runner.test()
@@ -218,5 +237,6 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    main()
+    # main()
+    main1()
     # main2()
