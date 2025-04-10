@@ -111,3 +111,5 @@ docker pull onedang2/mmengine-0.10.5-mmcv2.0.1-mmdet3.3.0-mmseg1.2.2
         ```
 
         > If you have any other version of torch and cuda, NEED to check and synch them by checking https://shi-labs.com/natten/wheels/.
+
+#### [Efficient Mirror Detection via Multi-level Heterogeneous Learning (HetNet) (AAAI23, ORAL)](https://arxiv.org/pdf/2211.15644v1)
