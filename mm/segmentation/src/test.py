@@ -52,8 +52,6 @@ def parse_args():
 
     return args
 
-
-
 def main():
     
     args = parse_args()
@@ -237,6 +235,6 @@ def main2():
     runner.test()
 
 if __name__ == '__main__':
-    # main()
-    main1()
+    main()
+    # main1()
     # main2()

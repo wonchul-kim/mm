@@ -1,5 +1,12 @@
-input_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/test_images
-output_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/test/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/benchmark/repeatability/딥러닝 체크/3
+# output_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/딥러닝 체크/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/benchmark/repeatability/얼라인/3
+# output_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/얼라인/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/benchmark/repeatability/경계성/3
+# output_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/경계성/exp
+input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/benchmark/repeatability/same_ok/3
+output_dir: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/same_ok/exp
+
 weights: /HDD/etc/repeatablility/3rd/lps_patch512_epochs200/train/weights/best_mIoU_iter_75046.pth
 
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
@@ -27,14 +34,12 @@ backbone: resnet18
 width: 512
 height: 512
 
-
-
 tta: 
     use: false
     augs:
-        HorizontalFlip: true,
-        VerticalFlip: true, 
-        Rotate: 90,
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
         Translate: '50,50'
 
 cfg_options: null
