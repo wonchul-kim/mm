@@ -26,11 +26,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
             parent_path = None
             if output.is_parent_path:
                 parent_path = osp.split(osp.splitext(img_path)[0])[-2]
-                parent_path = '/'.join(parent_path.split("/")[-output.is_parent_path:])
-            
-            # input
-            input_image = np.transpose(input_image.cpu().detach().numpy(), (1, 2, 0))
-            input_height, input_width = input_image.shape[:2]
+                parent_path = '/'.join(parent_path.split("/")[-output.is_parent_path:])        
             
             # output
             classes = output.classes[1:]
@@ -38,17 +34,31 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
             gt_sem_seg = output.gt_sem_seg.data.squeeze(0).cpu().detach().numpy()
             pred_sem_seg = output.pred_sem_seg.data.squeeze(0).cpu().detach().numpy()
             reduce_zero_label = output.reduce_zero_label
-
+            ori_shape = output.ori_shape # (h, w)
+            
             # roi
             if len(output.roi) == 0:
-                roi = [0, 0, input_image.shape[1], input_image.shape[0]]
+                roi = [0, 0, ori_shape[1], ori_shape[0]]
             else:
                 roi = output.roi
+                
+            # resize
+            if ori_shape != output.img_shape:
+                input_image = cv2.imread(output.img_path)
+                input_image = input_image[roi[1]:roi[3], roi[0]:roi[2], :]
+            else:
+                input_image = np.transpose(input_image.cpu().detach().numpy(), (1, 2, 0))
+            input_height, input_width = input_image.shape[:2]
                 
             gt_vis_img = input_image.copy()
             # gt_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[gt_sem_seg], 0.6, 0)
             gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
             # cv2.rectangle(gt_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
+
+            pred_vis_img = input_image.copy()
+            # pred_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[pred_sem_seg], 0.6, 0)
+            pred_vis_img = cv2.addWeighted(input_image, 0.4, color_map[pred_sem_seg], 0.6, 0)
+            # cv2.rectangle(pred_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
 
             # annotate
             if annotate or not osp.exists(output.seg_map_path):
@@ -72,7 +82,7 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
                     for point in points['bbox']:
                         font_scale = 1
                         offset_h = 10
-                        cv2.putText(gt_vis_img, label, get_text_coords([[point[0] - roi[0], point[1] - roi[1]], [point[2] - roi[0], point[3] - roi[1]]], 
+                        cv2.putText(pred_vis_img, label, get_text_coords([[point[0] - roi[0], point[1] - roi[1]], [point[2] - roi[0], point[3] - roi[1]]], 
                                                                        input_width, input_height, offset_h=offset_h), 
                                     cv2.FONT_HERSHEY_SIMPLEX, font_scale, tuple(map(int, color_map[idx + 1])), 3)
                 
@@ -95,11 +105,6 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
             if reduce_zero_label:
                 gt_sem_seg[gt_sem_seg == 255] = -1
                 gt_sem_seg += 1
-                
-            pred_vis_img = input_image.copy()
-            # pred_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[pred_sem_seg], 0.6, 0)
-            pred_vis_img = cv2.addWeighted(input_image, 0.4, color_map[pred_sem_seg], 0.6, 0)
-            # cv2.rectangle(pred_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
 
             vis_legend = np.zeros((input_height, 300, 3), dtype="uint8")
             for idx, _class in enumerate(('background', ) + classes):

@@ -1139,7 +1139,7 @@ def lps():
     
     
 if __name__ == '__main__':
-    main()
+    # main()
     # mask2former()
     # cosnet()
     # deeplabv3plus()
@@ -1149,4 +1149,4 @@ if __name__ == '__main__':
     # sam2()
     # hetnet()
     # segman()
-    # lps()
+    lps()
