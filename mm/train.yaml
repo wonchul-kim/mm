@@ -1,0 +1,156 @@
+data:
+  classes:
+  - CHAMFER_MARK
+  - LINE
+  - MARK
+  input_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250211/split_dataset
+  output_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213
+dataset:
+  annotation_format: labelme
+  dataset_type: null
+  image_loading_lib: opencv
+  image_loading_mode: RGB
+  use_valid: false
+  dataset_name: TorchLabelmeDatasetConfig
+db:
+  athena_db_server_url: 192.168.10.41:8001
+  container_name: aiv-training-0
+  exp_description: ''
+  project_description: ''
+  project_name: ''
+  server_host_name: aivdl2
+  server_ip: 192.168.10.53
+  sub_project_description: ''
+  sub_project_name: ''
+  training_folder_name: aiv_training_0
+logging:
+  LOGGING: true
+  tf_log_level: 0
+  log_stream_level: DEBUG
+  log_file_level: DEBUG
+  output_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213
+  logs_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/logs
+  configs_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/configs
+  weights_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/weights
+  val_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/val
+  debug_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/debug
+  dataset_dir: /storage/projects/Tenneco/Metalbearing/OUTER/250213/outputs/DETECTION/2025_03_30_22_52_20/train/dataset
+  vis_dir: null
+  patches_dir: null
+  labels_dir: null
+  monitor: true
+  monitor_figs: true
+  monitor_csv: true
+  monitor_freq: 1
+  wb: false
+  aivdb: true
+  analyzers: true
+model:
+  anchor_t: 4
+  backbone: w6-(70M)
+  box: 0.005
+  channel: 3
+  cls: 0.5
+  cls_pw: 1
+  fl_gamma: 0
+  height: 512
+  hyps: low
+  iou_t: 0.2
+  loss_ota: 0
+  model_name: pytorch_yolov7
+  momentum: 0.937
+  obj: 1
+  obj_pw: 1
+  seed_model: ''
+  warmup_bias_lr: 0.1
+  warmup_epochs: 3
+  warmup_momentum: 0.8
+  weight_decay: 0.0005
+  width: 512
+  num_classes: 3
+patch:
+  bg_ratio_by_image: 0
+  bg_start_train_epoch_by_image: 0
+  bg_start_val_epoch_by_image: 0
+  centric: false
+  edge_cutout:
+    exception_height: 0
+    exception_width: 0
+    margin_x: 20
+    margin_y: 20
+    rgb: 0,0,0
+    use: false
+  height: 512
+  include_point_positive: true
+  num_involved_pixel: 10
+  overlap_ratio: 0.2
+  ratio_by_class: ''
+  sliding: true
+  sliding_bg_ratio: 0
+  translate: 0.25
+  translate_range_height: 0
+  translate_range_width: 0
+  use_patch: true
+  width: 512
+preprocess:
+  normalize:
+    type: max
+    use: true
+  resize:
+    keep_ratio: false
+    use: true
+    height: 512
+    width: 512
+roi:
+  from_json: false
+  height: '768'
+  top_left_x: '220'
+  top_left_y: '60'
+  use_roi: true
+  width: '1120'
+train:
+  amp: false
+  anchors: ''
+  autobatch: false
+  batch_size: 16
+  debug_dataset_ratio: 1
+  device: gpu
+  device_ids:
+  - '0'
+  - '1'
+  - '2'
+  - '3'
+  end_lr: 0.0001
+  epochs: 300
+  focal_loss: false
+  freeze: 0
+  image_weights: false
+  init_lr: 0.01
+  label_smoothing: 0.1
+  loss_fn: null
+  lr_type: cycle
+  noautoanchor: false
+  num_hold: 0
+  num_warmup: 10
+  optimizer: sgd
+  patience: 0
+  scheduler: lambda
+  ml_framework: pytorch
+val:
+  save_img_conf: 0.1
+  save_img_freq_epoch: 10
+  save_img_iou: 0.25
+  save_img_ratio: 0.5
+  save_model: true
+  save_model_freq_epoch: 9
+  save_model_metrics:
+  - avg_iou
+  - avg_acc
+resume:
+  use_resume: false
+  update_config: false
+  latest_output_dir: null
+  load_optimizer: true
+  load_learning_rate: true
+  create_directory: true
+  previous_output_dir: ''

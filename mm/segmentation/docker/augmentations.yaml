@@ -1,0 +1,25 @@
+augmentations:
+  Albumentations:
+    Blur: 0.01
+    CLAHE: 0.01
+    MedianBlur: 0.01
+    RandomBrightnessContrast: 0
+    RandomGamma: 0
+    ToGray: 0.01
+  Customs:
+    copy_paste: 0
+    degrees: 0
+    flipdiagonal: 0
+    fliplr: 0.5
+    flipud: 0
+    hsv_h: 0.015
+    hsv_s: 0.7
+    hsv_v: 0.4
+    mixup: 0
+    mosaic: 1
+    paste_in: 0
+    perspective: 0
+    scale: 0.5
+    shear: 0
+    translate: 0.1
+  use: true
