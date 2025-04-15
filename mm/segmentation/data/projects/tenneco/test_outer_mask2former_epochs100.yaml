@@ -1,0 +1,55 @@
+# input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_python
+# output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
+input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_talos
+output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
+# input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/2nd/images_diff_from_python
+# output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
+# input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/2nd/images_diff_from_talos
+# output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
+
+weights: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/train/weights/best_mIoU_iter_47800.pth
+
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+rois: [[220, 60, 1340, 828]] #[[]]
+patch: {
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 256,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: mask2former
+backbone: swin-s
+width: 1120
+height: 768
+
+tta: 
+    use: false
+    augs:
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
+        Translate: '50,50'
+
+cfg_options: null
+launcher: 'none'
+
+custom_hooks:
+  visualize_test:
+    output_dir: null
+    annotate: True
+    contour_thres: 10
+    contour_conf: 0.5
+    save_raw: True
+    

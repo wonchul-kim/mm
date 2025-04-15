@@ -7,13 +7,19 @@ import cv2
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 from visionsuite.utils.helpers import get_text_coords
 
-def vis_test(outputs, output_dir, data_batch, idx, annotate=False, 
-             contour_thres=10, contour_conf=0.5, create_parent_path=False):
+def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False, 
+             contour_thres=10, contour_conf=0.5, create_parent_path=False,
+             save_raw=False):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
         if not osp.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
+            
+        if save_raw:
+            raw_dir = osp.join(output_dir, '../raw')
+            if not osp.exists(raw_dir):
+                os.mkdir(raw_dir)
             
         logits_dir = osp.join(output_dir, '../logits')
         if not osp.exists(logits_dir):
@@ -36,6 +42,10 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
             reduce_zero_label = output.reduce_zero_label
             ori_shape = output.ori_shape # (h, w)
             
+            # raw
+            if save_raw:
+                np.save(osp.join(raw_dir, filename + f'_{batch_idx}_{jdx}.npy'), seg_logits)
+
             # roi
             if len(output.roi) == 0:
                 roi = [0, 0, ori_shape[1], ori_shape[0]]
@@ -122,11 +132,11 @@ def vis_test(outputs, output_dir, data_batch, idx, annotate=False,
                 if create_parent_path:
                     if not osp.exists(osp.join(output_dir, parent_path)):
                         os.makedirs(osp.join(output_dir, parent_path))
-                    cv2.imwrite(osp.join(output_dir, parent_path, filename + f'_{idx}_{jdx}.png'), vis_img)
+                    cv2.imwrite(osp.join(output_dir, parent_path, filename + f'_{batch_idx}_{jdx}.png'), vis_img)
                 else:
-                    cv2.imwrite(osp.join(output_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{idx}_{jdx}.png'), vis_img)
+                    cv2.imwrite(osp.join(output_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{batch_idx}_{jdx}.png'), vis_img)
             else:
-                cv2.imwrite(osp.join(output_dir, filename + f'_{idx}_{jdx}.png'), vis_img)
+                cv2.imwrite(osp.join(output_dir, filename + f'_{batch_idx}_{jdx}.png'), vis_img)
                 
             heatmaps = []
             for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, classes)):

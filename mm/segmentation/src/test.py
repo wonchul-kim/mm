@@ -83,7 +83,8 @@ def main1():
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segman_epochs200.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_m2f_epochs100.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_sam2unet_epochs300.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_sam2unet_epochs300.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_epochs100.yaml')
     
     args.create_output_dirs = True
     
@@ -96,10 +97,7 @@ def main1():
     args.data_root = args.input_dir
     args.num_classes = len(args.classes)
     
-    args.custom_hooks['visualize_test']['annotate'] = True
     args.custom_hooks['visualize_test']['output_dir'] = osp.join(args.output_dir, 'vis')
-    args.custom_hooks['visualize_test']['contour_thres'] = 10
-    args.custom_hooks['visualize_test']['contour_conf'] = 0.5
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
     config_manager = TestConfigManager()

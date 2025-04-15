@@ -16,12 +16,14 @@ from mm.segmentation.utils.visualizers.vis_test import vis_test
 
 @HOOKS.register_module()
 class VisualizeTest(Hook):
-    def __init__(self, output_dir, annotate=False, contour_thres=10, contour_conf=0.5):
+    def __init__(self, output_dir, annotate=False, contour_thres=10, contour_conf=0.5, 
+                 save_raw=False):
         self._visualizer: Visualizer = Visualizer.get_current_instance()
         self.output_dir = output_dir
         self.annotate = annotate 
         self.contour_thres = contour_thres
         self.contour_conf = contour_conf
+        self.save_raw = save_raw
 
     def _after_iter(self,
                     runner: Runner,
@@ -39,7 +41,8 @@ class VisualizeTest(Hook):
             mode (str): mode (str): Current mode of runner. Defaults to 'val'.
         """
         vis_test(outputs, self.output_dir, data_batch, batch_idx, 
-                 annotate=self.annotate, contour_thres=self.contour_thres, contour_conf=self.contour_conf)
+                 annotate=self.annotate, contour_thres=self.contour_thres, 
+                 contour_conf=self.contour_conf, save_raw=self.save_raw)
 
 
 

@@ -64,3 +64,5 @@ custom_hooks:
     annotate: False
     contour_thres: 10
     contour_conf: 0.5
+    save_raw: false
+    
