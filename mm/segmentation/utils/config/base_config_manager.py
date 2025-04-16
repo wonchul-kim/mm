@@ -577,6 +577,7 @@ class BaseConfigManager:
                                           contour_thres=val.get('contour_thres', 10),
                                           contour_conf=val.get('contour_conf', 0.5),
                                           save_raw=val.get('save_raw', False),
+                                          legend=val.get('legend', True),
                                         )
                                      )
             

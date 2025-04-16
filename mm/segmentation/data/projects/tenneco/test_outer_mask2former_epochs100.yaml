@@ -1,7 +1,7 @@
-# input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_python
-# output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
-input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_talos
+input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_python
 output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
+# input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/1st/images_diff_from_talos
+# output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
 # input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/2nd/images_diff_from_python
 # output_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/python/mask2former/test/exp
 # input_dir: /DeepLearning/etc/_athena_tests/benchmark/talos/2nd/images_diff_from_talos
@@ -52,4 +52,5 @@ custom_hooks:
     contour_thres: 10
     contour_conf: 0.5
     save_raw: True
+    legend: False
     

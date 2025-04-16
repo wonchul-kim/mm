@@ -9,7 +9,7 @@ from visionsuite.utils.helpers import get_text_coords
 
 def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False, 
              contour_thres=10, contour_conf=0.5, create_parent_path=False,
-             save_raw=False):
+             save_raw=False, legend=True):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
@@ -60,10 +60,11 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
                 input_image = np.transpose(input_image.cpu().detach().numpy(), (1, 2, 0))
             input_height, input_width = input_image.shape[:2]
                 
-            gt_vis_img = input_image.copy()
-            # gt_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[gt_sem_seg], 0.6, 0)
-            gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
-            # cv2.rectangle(gt_vis_img, (roi[0], roi[1]), (roi[2], roi[3]), (0, 0, 255), 2)
+            if osp.exists(output.seg_map_path):
+                gt_vis_img = input_image.copy()
+                gt_vis_img = cv2.addWeighted(input_image, 0.4, color_map[gt_sem_seg], 0.6, 0)
+            else:
+                gt_vis_img = None
 
             pred_vis_img = input_image.copy()
             # pred_vis_img[roi[1]:roi[3], roi[0]:roi[2]] = cv2.addWeighted(input_image[roi[1]:roi[3], roi[0]:roi[2]], 0.4, color_map[pred_sem_seg], 0.6, 0)
@@ -116,17 +117,26 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
                 gt_sem_seg[gt_sem_seg == 255] = -1
                 gt_sem_seg += 1
 
-            vis_legend = np.zeros((input_height, 300, 3), dtype="uint8")
-            for idx, _class in enumerate(('background', ) + classes):
-                color = [int(c) for c in color_map[idx]]
-                cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
-            # vis_legend = cv2.vconcat([text_legends, vis_legend])
+            if legend:
+                vis_legend = np.zeros((input_height, 300, 3), dtype="uint8")
+                for idx, _class in enumerate(('background', ) + classes):
+                    color = [int(c) for c in color_map[idx]]
+                    cv2.putText(vis_legend, _class, (5, (idx * 25) + 17), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    cv2.rectangle(vis_legend, (150, (idx * 25)), (300, (idx * 25) + 25), tuple(color), -1)
+                # vis_legend = cv2.vconcat([text_legends, vis_legend])
+            else:
+                vis_legend = None
 
             if gt_vis_img is not None:
-                vis_img = np.hstack((gt_vis_img, pred_vis_img, vis_legend))
+                if vis_legend is not None:
+                    vis_img = np.hstack((gt_vis_img, pred_vis_img, vis_legend))
+                else:
+                    vis_img = np.hstack((gt_vis_img, pred_vis_img))
             else:
-                vis_img = np.hstack((pred_vis_img, vis_legend))
+                if vis_legend is not None:
+                    vis_img = np.hstack((pred_vis_img, vis_legend))
+                else:
+                    vis_img = pred_vis_img
                 
             if parent_path:
                 if create_parent_path:
