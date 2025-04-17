@@ -32,9 +32,10 @@ def vis_dataset(dataset, mode, ratio=0.5, output_dir='/HDD/etc/outputs/mm'):
             labels = gt_instances.labels.cpu().detach().numpy()
             for bbox, label in zip(bboxes, labels):
                 cv2.rectangle(_input, tuple(map(int, bbox[:2])), tuple(map(int, bbox[2:])), 
-                              color=tuple(map(int, color_map[label])), thickness=2)
+                            color=tuple(map(int, color_map[label])), thickness=2)
                 cv2.putText(_input, str(label), (int(bbox[0] - 10), int(bbox[1] - 10)), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, tuple(map(int, color_map[label])), 2)
 
             cv2.imwrite(osp.join(output_dir, filename + '.png'), _input)
-            
+    
+                

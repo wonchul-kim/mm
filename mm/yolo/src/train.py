@@ -78,7 +78,10 @@ def main():
     # config_manager.manage_default_hooks_config(args.default_hooks)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
-
+    cfg.model_wrapper_cfg=dict(
+            type='MMDistributedDataParallel',
+            find_unused_parameters=True
+        )
     # Reduce the number of repeated compilations and improve
     # training speed.
     setup_cache_size_limit_of_dynamo()
@@ -99,7 +102,7 @@ def main():
 def main1():
     args = parse_args()
     # add_params_to_args(args, args.args_filename)
-    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/projects/tenneco/tenneco_outer_coco.yaml')
+    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/projects/tenneco/tenneco_outer_coco_unit.yaml')
     args.create_output_dirs = True
     
     if args.create_output_dirs:
@@ -246,5 +249,7 @@ def yolov8_labelme():
 
 
 if __name__ == '__main__':
-    # yolov8_labelme()
     main()
+    # yolov8_labelme()
+    
+    # main1()
