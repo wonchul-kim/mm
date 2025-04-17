@@ -373,7 +373,7 @@ class BaseConfigManager:
                     output_dir = val['output_dir']
                 _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
                                                    ratio=val.get('ratio', 0.25), 
-                                                   output_dir=output_dir))
+                                                   output_dir=output_dir, confidence_threshold=val.get('confidence_threshold', 0.25)))
             
 
             # elif key == 'after_train_epoch':

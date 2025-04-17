@@ -8,10 +8,12 @@ DATA_BATCH = Optional[Union[dict, tuple, list]]
 
 @HOOKS.register_module()
 class VisualizeVal(Hook):
-    def __init__(self, freq_epoch, ratio, output_dir, **kwargs):
+    def __init__(self, freq_epoch, ratio, output_dir, 
+                        confidence_threshold=0.25, **kwargs):
         self.freq_epoch = freq_epoch
         self.ratio = ratio 
         self.output_dir = output_dir
+        self.confidence_threshold = confidence_threshold
         
 
     def after_val_iter(self,

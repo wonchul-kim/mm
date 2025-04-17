@@ -55,6 +55,7 @@ custom_hooks:
     freq_epoch: 10
     ratio: 0.2
     output_dir: null
+    confidence_threshold: 0.25
 
   before_train:
     debug_dataloader:
