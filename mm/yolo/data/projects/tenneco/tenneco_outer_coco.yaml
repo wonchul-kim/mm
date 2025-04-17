@@ -40,7 +40,7 @@ patch:
 batch_size: 8
 amp: True
 epochs: 500
-max_iters: 100
+max_iters: 500
 val_interval: 10
 
 default_hooks:
@@ -58,7 +58,7 @@ custom_hooks:
 
   before_train:
     debug_dataloader:
-      ratio: 0
+      ratio: 0.05
       output_dir: null
 
   after_train_epoch:
