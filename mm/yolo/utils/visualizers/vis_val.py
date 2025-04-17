@@ -55,7 +55,7 @@ def vis_val(outputs, data_batch, ratio, output_dir, current_epoch, idx):
             for bbox, label, score in zip(pred_bboxes, pred_labels, pred_scores):
                 cv2.rectangle(pred_input, tuple(map(int, bbox[:2])), tuple(map(int, bbox[2:])), 
                               color=tuple(map(int, color_map[label])), thickness=2)
-                cv2.putText(pred_input, f"{label}_{score}", (int(bbox[0] - 10), int(bbox[1] - 10)), 
+                cv2.putText(pred_input, f"{label}_{score:.2f}", (int(bbox[0] - 10), int(bbox[1] - 10)), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, tuple(map(int, color_map[label])), 2)
                 
             gt_bboxes = gt_instances.bboxes.cpu().detach().numpy()
