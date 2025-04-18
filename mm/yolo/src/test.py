@@ -76,7 +76,8 @@ def main():
     args = parse_args()
     add_params_to_args(args, ROOT / 'yolo/configs/recipe/test.yaml')
     # add_params_to_args(args, args.args_filename)
-    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/projects/tenneco/test_tenneco_outer_coco_unit.yaml')
+    # add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/projects/tenneco/test_tenneco_outer_coco_unit.yaml')
+    add_params_to_args(args, '/HDD/_projects/github/mm/mm/yolo/data/projects/tenneco/test_tenneco_outer_coco.yaml')
 
     args.create_output_dirs = True
     

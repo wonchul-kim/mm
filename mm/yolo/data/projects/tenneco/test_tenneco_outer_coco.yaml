@@ -1,0 +1,46 @@
+dataset_type: CocoDataset
+input_dir: /DeepLearning/etc/_athena_tests/benchmark/tenneco/outer_repeat_unit/datasets/3
+output_dir: /DeepLearning/etc/_athena_tests/benchmark/tenneco/outer_repeat_unit/detection/mmseg_yolov8_m_epochs500/test/exp
+weights: /DeepLearning/etc/_athena_tests/benchmark/tenneco/outer_repeat_unit/detection/mmseg_yolov8_m_epochs500/train/best_coco_MARK_precision_epoch_490.pth
+
+# data =========================
+classes: ['MARK', 'LINE', 'CHAMFER_MARK']
+# classes: ['MARK', 'CHAMFER_MARK']
+num_classes: 3
+img_suffix: '.bmp'
+seg_map_suffix: '.json'
+
+# set crop-size/model-size =================================================================================
+model: 'yolov8'
+backbone: 'm'
+height: 768
+width: 1120
+
+# patch: {
+#     "use_patch": False,
+#     "include_point_positive": True,
+#     "centric": False,
+#     "sliding": True,
+#     "width": 512,
+#     "height": 256,
+#     "overlap_ratio": 0.2,
+#     "num_involved_pixel": 10,
+#     "sliding_bg_ratio": 0,
+#     "bg_ratio_by_image": 0,
+#     "bg_start_train_epoch_by_image": 0,
+#     "bg_start_val_epoch_by_image": 0,
+#     "translate": 0,
+#     "translate_range_width": 0,
+#     "translate_range_height": 0,
+# }
+
+tta: 
+    use: false
+    augs:
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
+        Translate: '50,50'
+
+cfg_options: null
+launcher: 'none'
