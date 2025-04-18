@@ -135,6 +135,7 @@ class BaseConfigManager:
                                     rois, patch):
         
         self._cfg.val_evaluator.ann_file = osp.join(data_root, self._cfg.val_ann_file)
+        self._cfg.test_evaluator.ann_file = osp.join(data_root, self._cfg.val_ann_file)
         
         self._cfg.train_batch_size_per_gpu = batch_size 
         self._cfg.val_batch_size_per_gpu = 1
@@ -161,6 +162,17 @@ class BaseConfigManager:
             # cfg.val_dataloader.dataset['ann_suffix'] = ann_suffix
             # cfg.val_dataloader.dataset['rois'] = rois
             # cfg.val_dataloader.dataset['patch'] = patch
+        
+        def _manage_test_dataloader(cfg):
+            cfg.test_dataloader.batch_size = batch_size
+            cfg.test_dataloader.dataset['data_root'] = data_root
+            if cfg.dataset_type == 'YOLOv5CocoDataset':
+                cfg.test_dataloader.dataset['metainfo'] = {"classes": tuple(classes)}
+            # cfg.test_dataloader.dataset['classes'] = classes
+            # cfg.test_dataloader.dataset['img_suffix'] = img_suffix
+            # cfg.test_dataloader.dataset['ann_suffix'] = ann_suffix
+            # cfg.test_dataloader.dataset['rois'] = rois
+            # cfg.test_dataloader.dataset['patch'] = patch
             
         img_scale = (width, height)
         
@@ -210,6 +222,7 @@ class BaseConfigManager:
             
         _manage_train_dataloader(self._cfg)
         _manage_val_dataloader(self._cfg)
+        _manage_test_dataloader(self._cfg)
                    
     def manage_optim_config(self, batch_size):
         if hasattr(self._cfg, 'optim_wrapper'):
@@ -417,8 +430,10 @@ class BaseConfigManager:
                     
                 _custom_hooks.append(dict(type='VisualizeTest', output_dir=output_dir, 
                                           annotate=val.get('annotate', False), 
-                                          contour_thres=val.get('contour_thres', 10),
-                                          contour_conf=val.get('contour_conf', 0.5)))
+                                          conf_threshold=val.get('conf_threshold', 0.2),
+                                          save_raw=val.get('save_raw', False),
+                                        )
+                                     )
             
             elif key == 'aiv':
                 if val.get('use', False):

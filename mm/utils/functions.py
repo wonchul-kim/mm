@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 import os
 import os.path as osp 
+import numpy as np
 
 def add_params_to_args(args, params_file):
     with open(params_file) as yf:
@@ -64,3 +65,8 @@ def increment_path(path, exist_ok=False, sep="", mkdir=False):
     if mkdir:
         path.mkdir(parents=True, exist_ok=True)  # make directory
     return path
+
+def numpy_converter(obj):
+    if isinstance(obj, (np.float32, np.float64, np.int64, np.integer, np.floating)):
+        return obj.item()  # convert to Python native type
+    raise TypeError(f"Type {type(obj)} not serializable")
