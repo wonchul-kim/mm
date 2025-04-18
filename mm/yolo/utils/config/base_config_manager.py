@@ -413,9 +413,6 @@ class BaseConfigManager:
             if not hasattr(self._cfg, 'custom_hooks'):
                 self._cfg.custom_hooks = _custom_hooks
             else:
-                
-                
-                
                 self._cfg.custom_hooks += _custom_hooks
                 
     # set custom_hooks ================================================================================
