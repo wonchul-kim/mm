@@ -80,11 +80,11 @@ def main():
 def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/test.yaml')
-    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200_unit.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segman_epochs200.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_m2f_epochs100.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_sam2unet_epochs300.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_epochs100.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_epochs100.yaml')
     
     args.create_output_dirs = True
     
