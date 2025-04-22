@@ -1,0 +1,73 @@
+output_dir: '/storage/projects/MRInfraAuto/PLATE/TOP/25.04.22/outputs/SEGMENTATION'
+data_root: "/storage/projects/MRInfraAuto/PLATE/TOP/25.04.22/split_dataset"
+classes: ['background', 'stabbed', 'dust', 'edge_stabbed']
+num_classes: 4
+
+
+rois: [[]]
+patch: {
+    "use_patch": True,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 512,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: 'gcnet'
+# backbone: 's'
+# backbone: 'm'
+backbone: 'l'
+height: 512
+width: 512
+frozen_stages: -1
+
+amp: False
+
+batch_size: 12
+max_iters: 5000
+val_interval: 100
+
+
+custom_hooks:
+  visualize_val:
+    freq_epoch: 1
+    ratio: 0.5
+    output_dir: null
+    confidence_threshold: 0.25
+
+  before_train:
+    debug_dataloader:
+      ratio: 0.5
+      output_dir: null
+
+  after_train_epoch:
+
+  after_val_epoch:
+  
+  aiv:
+    use: true
+    logging: 
+      output_dir: null
+
+      monitor: 
+        use: true 
+        monitor_csv: true 
+        monitor_figs: true 
+        monitor_freq: 1
+
+  checkpoint:
+    interval: 1000
+    by_epoch: false 
+    save_best: 'mIoU'
+    output_dir: null
+    max_keep_ckpts: 2
