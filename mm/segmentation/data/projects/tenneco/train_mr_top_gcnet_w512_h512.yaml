@@ -33,21 +33,21 @@ frozen_stages: -1
 
 amp: False
 
-batch_size: 12
-max_iters: 5000
+batch_size: 16
+max_iters: 3000
 val_interval: 100
 
 
 custom_hooks:
   visualize_val:
     freq_epoch: 1
-    ratio: 0.5
+    ratio: 0.1
     output_dir: null
     confidence_threshold: 0.25
 
   before_train:
     debug_dataloader:
-      ratio: 0.5
+      ratio: 0.1
       output_dir: null
 
   after_train_epoch:
