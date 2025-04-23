@@ -34,8 +34,8 @@ frozen_stages: -1
 amp: False
 
 batch_size: 16
-max_iters: 3000
-val_interval: 100
+max_iters: 30000
+val_interval: 1000
 
 
 custom_hooks:

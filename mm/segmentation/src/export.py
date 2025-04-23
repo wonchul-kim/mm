@@ -56,9 +56,14 @@ def main2():
     # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/export'
     # model_cfg =  '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/mask2former_swin-s.py'
     # checkpoint = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth'
-    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/export"
-    model_cfg = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/pidnet_l.py" 
-    checkpoint = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
+    # output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/export"
+    # model_cfg = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/pidnet_l.py" 
+    # checkpoint = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/pidnet_epochs100/train/weights/best_mIoU_iter_23800.pth"
+    
+    output_dir = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/export"
+    model_cfg = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/sam2_s.py" 
+    checkpoint = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/weights/best_mIoU_iter_134318.pth"
+    
     
     parser = argparse.ArgumentParser(description='MMSeg export a model')
     args = parser.parse_args()
@@ -70,17 +75,19 @@ def main2():
     # export
     args.device = 'cuda'
     args.batch_size = 1
-    args.onnx_config["opset_version"] = 13
+    args.onnx_config["opset_version"] = 14
     
     # model
     # args.model = 'mask2former'
     # args.backbone = 'swin-s'
-    args.model = 'pidnet'
-    args.backbone = 'l'
+    # args.model = 'pidnet'
+    # args.backbone = 'l'
+    args.model = 'sam2'
+    args.backbone = 's'
     args.height = 768
     args.width = 1120
     
-    args.tta = {'use': True, 'augs':{
+    args.tta = {'use': False, 'augs':{
                                         'HorizontalFlip': True,
                                         'VerticalFlip': True, 
                                         'Rotate': 90,
@@ -104,5 +111,5 @@ def main2():
 
 
 if __name__ == '__main__':
-    main()
-    # main2()
+    # main()
+    main2()
