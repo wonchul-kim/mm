@@ -1,5 +1,6 @@
 
 import numpy as np
+import torch
 import multiprocessing as mp
 
 def get_class_frequency(mask, num_classes):
@@ -40,6 +41,42 @@ def get_class_weights(class_frequency, ignore_background=True):
         return np.concatenate([[ignore_background], weights])
     else:
         return weights
+    
+def apply_class_weights_to_loss_decode(runner, class_weights):
+    if hasattr(runner.model.decode_head, 'loss_decode'):
+        if isinstance(runner.model.decode_head.loss_decode, (list, tuple, torch.nn.modules.container.ModuleList)):
+            for loss_decode in runner.model.decode_head.loss_decode:
+                if hasattr(loss_decode, 'class_weight'):
+                    loss_decode.class_weight = class_weights
+                    print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+        else:
+            if hasattr(loss_decode, 'class_weight'):
+                loss_decode.class_weight = class_weights
+                print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+
+def change_class_weights_to_loss_decode(runner, class_weights):
+    
+    def _change_class_weights(class_weights, loss_decode):
+        if len(class_weights) == 1:
+            loss_decode.class_weight[0] = class_weights[0]
+        elif isinstance(class_weights, (int, float)):
+            loss_decode.class_weight[0] = class_weights
+        elif len(class_weights) == len(loss_decode.class_weight):
+            loss_decode.class_weight = class_weights
+        else:
+            NotImplementedError(f'NOT Considered this case of class-weight to change class-weights: {class_weights}')
+    
+    if hasattr(runner.model.decode_head, 'loss_decode'):
+        if isinstance(runner.model.decode_head.loss_decode, (list, tuple, torch.nn.modules.container.ModuleList)):
+            for loss_decode in runner.model.decode_head.loss_decode:
+                if hasattr(loss_decode, 'class_weight'):
+                    _change_class_weights(class_weights, loss_decode)
+                    print(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+        else:
+            if hasattr(loss_decode, 'class_weight'):
+                _change_class_weights(class_weights, loss_decode)
+                print(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+        
     
 if __name__ == '__main__':
 

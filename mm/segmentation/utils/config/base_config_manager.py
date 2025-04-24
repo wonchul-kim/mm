@@ -535,7 +535,14 @@ class BaseConfigManager:
                                                 ignore_background=val2.get('ignore_background') or True,
                                             )
                                         )
-                        
+            elif key == 'before_train_iter':
+                for key2, val2 in val.items():
+                    if key2 == 'change_class_weights':
+                        _custom_hooks.append(dict(type='HookBeforeTrainIter', 
+                            change_class_weights=val2.get('change_class_weights') or {'use': False, 'epoch': -1, 'class_weights': None},
+                        )
+                    )
+                                    
             elif key == 'before_train':
                 for key2, val2 in val.items():
                     if key2 == 'debug_dataloader':

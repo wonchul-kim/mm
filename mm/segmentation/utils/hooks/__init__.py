@@ -6,9 +6,10 @@ from .before_train import HookBeforeTrain
 from .checkpoint_hook import CustomCheckpointHook
 from .visualize_test import VisualizeTest
 from .before_run import HookBeforeRun
+from .before_train_iter import HookBeforeTrainIter
 
 
 __all__ = ['VisualizeVal', 'CustomCheckpointHook', 'HookForAiv',
            'HookBeforeTrain', 'HookAfterTrainIter', 'HookAfterValEpoch'
-           'VisualizeTest', 'HookBeforeRun', 
+           'VisualizeTest', 'HookBeforeRun', 'HookBeforeTrainIter', 
 ]

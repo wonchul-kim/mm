@@ -1,12 +1,11 @@
 
 
-from typing import Optional, Sequence, Union
+from typing import Optional, Union
 import numpy as np
-import torch
 from mmseg.registry import HOOKS
 from mmengine.hooks import Hook
-from mm.segmentation.utils.class_weights import get_class_frequency_v2, get_class_weights, get_total_class_frequency
-
+from mm.segmentation.utils.class_weights import (get_class_frequency_v2, get_class_weights, 
+                                                 get_total_class_frequency, apply_class_weights_to_loss_decode)
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
@@ -35,16 +34,7 @@ class HookBeforeRun(Hook):
                 self.class_frequency += class_freq
                 
             self.class_weights = get_class_weights(self.class_frequency, ignore_background=self.ignore_background)
-            
-            if hasattr(runner.model.decode_head, 'loss_decode'):
-                if isinstance(runner.model.decode_head.loss_decode, (list, tuple, torch.nn.modules.container.ModuleList)):
-                    for loss_decode in runner.model.decode_head.loss_decode:
-                        if hasattr(loss_decode, 'class_weight'):
-                            loss_decode.class_weight = self.class_weights
-                            
-                else:
-                    if hasattr(loss_decode, 'class_weight'):
-                        loss_decode.class_weight = self.class_weights
+            apply_class_weights_to_loss_decode(runner, self.class_weights)
 
             
             

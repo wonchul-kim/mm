@@ -51,6 +51,12 @@ custom_hooks:
       class_weights: null
       ignore_background: true
 
+  before_train_iter:
+    change_class_weights:
+      use: false
+      epoch: -1
+      class_weights: null
+
   before_train:
     debug_dataloader:
       ratio: 0.1
