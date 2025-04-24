@@ -50,8 +50,8 @@ def apply_class_weights_to_loss_decode(runner, class_weights):
                     loss_decode.class_weight = class_weights
                     print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
         else:
-            if hasattr(loss_decode, 'class_weight'):
-                loss_decode.class_weight = class_weights
+            if hasattr(runner.model.decode_head.loss_decode, 'class_weight'):
+                runner.model.decode_head.loss_decode.class_weight = class_weights
                 print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
 
 def change_class_weights_to_loss_decode(runner, class_weights):

@@ -15,7 +15,8 @@ class HookBeforeTrainIter(Hook):
     def _before_iter(self,
                          runner,
                          batch_idx: int,
-                         data_batch: DATA_BATCH = None) -> None:     
+                         data_batch: DATA_BATCH = None,
+                         mode: str = 'val') -> None:     
         
         current_iter = runner.iter
         iters_per_epoch = len(runner.train_dataloader)
