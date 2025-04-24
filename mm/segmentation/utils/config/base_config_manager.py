@@ -525,7 +525,17 @@ class BaseConfigManager:
                 _custom_hooks.append(dict(type='VisualizeVal', freq_epoch=val.get('freq_epoch', 1), 
                                                    ratio=val.get('ratio', 0.25), 
                                                    output_dir=output_dir))
-            
+            elif key == 'before_run':
+                for key2, val2 in val.items():
+                    if key2 == 'calculate_class_weights':
+                        _custom_hooks.append(dict(type='HookBeforeRun', 
+                                                apply_class_weights=val2.get('apply_class_weights') or False,
+                                                class_frequency=val2.get('class_frequency') or None,
+                                                class_weights=val2.get('class_weights') or None,
+                                                ignore_background=val2.get('ignore_background') or True,
+                                            )
+                                        )
+                        
             elif key == 'before_train':
                 for key2, val2 in val.items():
                     if key2 == 'debug_dataloader':

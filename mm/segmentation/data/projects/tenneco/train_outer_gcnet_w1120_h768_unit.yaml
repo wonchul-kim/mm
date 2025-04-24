@@ -43,6 +43,14 @@ custom_hooks:
     output_dir: null
     confidence_threshold: 0.25
 
+  before_run:
+    calculate_class_weights:
+      apply_class_weights: true
+      num_classes: null
+      class_frequency: null
+      class_weights: null
+      ignore_background: true
+
   before_train:
     debug_dataloader:
       ratio: 0.1

@@ -1,5 +1,6 @@
 
 import numpy as np
+import multiprocessing as mp
 
 def get_class_frequency(mask, num_classes):
     
@@ -9,6 +10,21 @@ def get_class_frequency(mask, num_classes):
         
     return class_frequency
 
+def get_class_frequency_v2(mask, num_classes):
+    
+    assert mask.ndim == 2, f"mask must be 2D, now ndim={mask.ndim}, shape={mask.shape}"
+
+    flat_mask = mask.flatten()
+    return np.bincount(flat_mask, minlength=num_classes)
+
+def get_total_class_frequency(dataset, num_classes):
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        results = pool.starmap(get_class_frequency_v2, [(batch['data_samples'].gt_sem_seg.data.numpy()[0], num_classes) for batch in dataset])
+    
+    total_freq = np.sum(results, axis=0)
+    return total_freq
+
+
 def get_class_weights(class_frequency, ignore_background=True):
     if ignore_background:
         class_frequency = class_frequency[1:]
@@ -17,8 +33,11 @@ def get_class_weights(class_frequency, ignore_background=True):
     weights = 1.0 / np.log1p(class_frequency)
     weights = len(class_frequency) * weights / np.sum(weights)
 
-    if ignore_background:
-        return np.concatenate([[0], weights])
+    if ignore_background == True:
+        bg_weight = min(np.concatenate([[0.1], weights]))
+        return np.concatenate([[bg_weight], weights])
+    elif isinstance(ignore_background, float) and (1 >= ignore_background and ignore_background >= 0):
+        return np.concatenate([[ignore_background], weights])
     else:
         return weights
     
