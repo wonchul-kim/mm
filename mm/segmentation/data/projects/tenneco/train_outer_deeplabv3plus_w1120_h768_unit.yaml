@@ -23,9 +23,10 @@ patch: {
 }
 
 model: 'deeplabv3plus'
-backbone: 'r101-d8'
-height: 768
-width: 1120
+# backbone: 'r101-d8'
+backbone: 'efficientnetv2-b0'
+height: 512
+width: 512
 frozen_stages: 3
 
 amp: False
