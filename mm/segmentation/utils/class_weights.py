@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 import multiprocessing as mp
+from mmengine.logging import MMLogger, print_log
 
 def get_class_frequency(mask, num_classes):
     
@@ -43,19 +44,22 @@ def get_class_weights(class_frequency, ignore_background=True):
         return weights
     
 def apply_class_weights_to_loss_decode(runner, class_weights):
+    logger: MMLogger = MMLogger.get_current_instance()
+
     if hasattr(runner.model.decode_head, 'loss_decode'):
         if isinstance(runner.model.decode_head.loss_decode, (list, tuple, torch.nn.modules.container.ModuleList)):
             for loss_decode in runner.model.decode_head.loss_decode:
                 if hasattr(loss_decode, 'class_weight'):
                     loss_decode.class_weight = class_weights
-                    print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+                    print_log(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})", logger)
         else:
             if hasattr(runner.model.decode_head.loss_decode, 'class_weight'):
                 runner.model.decode_head.loss_decode.class_weight = class_weights
-                print(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+                print_log(f"APPLIED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})", logger)
 
 def change_class_weights_to_loss_decode(runner, class_weights):
-    
+    logger: MMLogger = MMLogger.get_current_instance()
+
     def _change_class_weights(class_weights, loss_decode):
         if len(class_weights) == 1:
             loss_decode.class_weight[0] = class_weights[0]
@@ -71,11 +75,11 @@ def change_class_weights_to_loss_decode(runner, class_weights):
             for loss_decode in runner.model.decode_head.loss_decode:
                 if hasattr(loss_decode, 'class_weight'):
                     _change_class_weights(class_weights, loss_decode)
-                    print(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+                    print_log(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})", logger)
         else:
             if hasattr(loss_decode, 'class_weight'):
                 _change_class_weights(class_weights, loss_decode)
-                print(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})")
+                print_log(f"CHANGED class-weights ({class_weights}) to model.decode_head.loss_decode ({loss_decode})", logger)
         
     
 if __name__ == '__main__':
