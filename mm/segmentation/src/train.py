@@ -119,7 +119,7 @@ def main1():
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
     # add_params_to_args(args, args.args_filename)
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')    
     
     args.create_output_dirs = True
     
@@ -133,8 +133,8 @@ def main1():
     args.custom_hooks['aiv']['logging']['output_dir'] = args.logs_dir
     args.custom_hooks['checkpoint']['output_dir'] = args.weights_dir
     
-    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
-        args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
+    # if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
+    #     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
