@@ -4,6 +4,7 @@ from typing import Optional, Union
 import numpy as np
 from mmseg.registry import HOOKS
 from mmengine.hooks import Hook
+from mmengine.logging import MMLogger, print_log
 from mm.segmentation.utils.class_weights import (get_class_frequency_v2, get_class_weights, 
                                                  get_total_class_frequency, apply_class_weights_to_loss_decode)
 
@@ -20,20 +21,25 @@ class HookBeforeRun(Hook):
         self.ignore_background = ignore_background
 
     def before_run(self, runner) -> None:
+        logger: MMLogger = MMLogger.get_current_instance()
         
         if not self.apply_class_weights:
             self.class_frequency = None 
             self.class_weights = None
+            print_log("NOT APPLY class frequency", logger)
         else:
             if self.class_frequency is None or self.class_frequency == []:
                 self.class_frequency = np.zeros(len(runner.train_dataloader.dataset.CLASSES), dtype=np.int64)
 
+            print_log("CALCULATING class frequency", logger)
             for batch in runner.train_dataloader.dataset:
                 mask = batch['data_samples'].gt_sem_seg.data.numpy()[0]
                 class_freq = get_class_frequency_v2(mask, len(runner.train_dataloader.dataset.CLASSES))
                 self.class_frequency += class_freq
+            print_log(f"CALCULATED class frequency: {self.class_frequency}", logger)    
                 
             self.class_weights = get_class_weights(self.class_frequency, ignore_background=self.ignore_background)
+            print_log(f"CALCULATED class weights: {self.class_weights}", logger)    
             apply_class_weights_to_loss_decode(runner, self.class_weights)
 
             

@@ -51,7 +51,7 @@ custom_hooks:
 
   before_run:
     calculate_class_weights:
-      apply_class_weights: false
+      apply_class_weights: true
       num_classes: null
       class_frequency: null
       class_weights: null
