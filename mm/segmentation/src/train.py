@@ -119,7 +119,8 @@ def main1():
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
     # add_params_to_args(args, args.args_filename)
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')    
     
     args.create_output_dirs = True
     

@@ -61,8 +61,9 @@ batch_size: 1
 custom_hooks:
   visualize_test:
     output_dir: null
-    annotate: False
-    contour_thres: 10
-    contour_conf: 0.5
-    save_raw: false
+    class_confidences: null # null or 0 -> only argmax, [0.1, 0.2, 0.3] for each class including bg
+    save_raw: false # to save seg_logtis into npy
+    annotate: False # to label
+    contour_thres: 10 # to label
+    contour_conf: 0.5 # to label
     

@@ -1,6 +1,6 @@
-# input_dir: /DeepLearning/etc/_athena_tests/benchmark/tenneco/performances/dataset_w_gt
+input_dir: /DeepLearning/etc/_athena_tests/benchmark/tenneco/performances/dataset_w_gt
 # input_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset/train
-input_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset/val
+# input_dir: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset/val
 output_dir: /DeepLearning/etc/_athena_tests/benchmark/tenneco/performances/gcnet/test/exp
 
 weights: /DeepLearning/etc/_athena_tests/benchmark/tenneco/performances/gcnet/train/weights/best_mIoU_iter_106000.pth
@@ -45,8 +45,8 @@ launcher: 'none'
 custom_hooks:
   visualize_test:
     output_dir: null
-    annotate: True
-    contour_thres: 3
-    contour_conf: 0.5
     save_raw: false
-    
+    annotate: True 
+    contour_thres: 3 
+    contour_conf: 0.2 
+    class_confidences: [0.25, 0.25, 0.25, 0.25]
