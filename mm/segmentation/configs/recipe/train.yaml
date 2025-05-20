@@ -62,6 +62,20 @@ custom_hooks:
       ratio: 0.1
       output_dir: null
 
+  before_run:
+    calculate_class_weights:
+      apply_class_weights: false
+      num_classes: null
+      class_frequency: null
+      class_weights: null
+      ignore_background: true
+
+  before_train_iter:
+    change_class_weights:
+      use: false
+      epoch: -1
+      class_weights: null
+
   after_train_epoch:
 
   after_val_epoch:

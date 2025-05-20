@@ -3,9 +3,60 @@ import os.path as osp
 import imgviz
 import numpy as np
 import cv2
+import torch
 
 from visionsuite.utils.dataset.formats.labelme.utils import get_points_from_image, init_labelme_json
 from visionsuite.utils.helpers import get_text_coords
+
+
+# def refined_argmax(logits, threshold=0.2, bg_class=0):
+#     """
+#     logits: np.ndarray of shape (C, H, W)
+#     threshold: float
+#     Returns: np.ndarray of shape (H, W) with class indices
+#     """
+#     C, H, W = logits.shape
+
+#     # softmax over class dimension
+#     probs = np.exp(logits - np.max(logits, axis=0, keepdims=True))  # for numerical stability
+#     probs /= np.sum(probs, axis=0, keepdims=True)
+
+#     # top2 indices and their values
+#     top2_idx = np.argsort(probs, axis=0)[-2:]  # (2, H, W)
+#     top2_val = np.take_along_axis(probs, top2_idx, axis=0)  # (2, H, W)
+
+#     result = np.full((H, W), bg_class, dtype=np.uint8)
+
+#     for y in range(H):
+#         for x in range(W):
+#             idx1, idx2 = top2_idx[:, y, x]
+#             val1, val2 = top2_val[:, y, x]
+
+#             # ensure idx1 has higher prob
+#             if val1 < val2:
+#                 idx1, idx2 = idx2, idx1
+#                 val1, val2 = val2, val1
+
+#             if bg_class in (idx1, idx2):
+#                 # one of them is background
+#                 other_idx = idx1 if idx2 == bg_class else idx2
+#                 other_val = val1 if idx2 == bg_class else val2
+#                 if other_val > threshold:
+#                     result[y, x] = other_idx
+#                 else:
+#                     result[y, x] = bg_class
+#             else:
+#                 # both are non-bg
+#                 if val1 > threshold and val2 > threshold:
+#                     result[y, x] = idx1  # higher one
+#                 elif val1 > threshold:
+#                     result[y, x] = idx1
+#                 elif val2 > threshold:
+#                     result[y, x] = idx2
+#                 else:
+#                     result[y, x] = bg_class
+#     return result
+
 
 def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False, 
              contour_thres=10, contour_conf=0.5, create_parent_path=False,
@@ -46,6 +97,50 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
             if save_raw:
                 np.save(osp.join(raw_dir, filename + f'_{batch_idx}_{jdx}.npy'), seg_logits)
 
+
+            # def softmax(x, axis=0):
+            #     x_max = np.max(x, axis=axis, keepdims=True)
+            #     e_x = np.exp(x - x_max)
+            #     return e_x / np.sum(e_x, axis=axis, keepdims=True)
+
+            # threshold = 0.2
+            # logits = seg_logits.copy()
+            # logits[0] *= 0.3  # background penalty
+
+            # # softmax
+            # probs = softmax(logits, axis=0)  # shape: (C, H, W)
+
+            # # reshape to (C, H*W) for easier top-k
+            # C, H, W = probs.shape
+            # probs_flat = probs.reshape(C, -1)  # shape: (C, H*W)
+
+            # # top-2 indices and values along channel axis
+            # top2_idx = np.argpartition(-probs_flat, kth=2, axis=0)[:2, :]  # shape: (2, H*W)
+            # top2_vals = np.take_along_axis(probs_flat, top2_idx, axis=0)  # shape: (2, H*W)
+
+            # # conditions
+            # is_bg_top2 = (top2_idx == 0).sum(axis=0) == 1  # exactly one is background
+            # non_bg_vals = np.where(top2_idx != 0, top2_vals, 0)  # remove bg values
+            # non_bg_max_val = np.max(non_bg_vals, axis=0)
+            # non_bg_max_idx = top2_idx[np.argmax(non_bg_vals, axis=0), np.arange(H * W)]
+
+            # # result
+            # result_flat = np.zeros(H * W, dtype=np.uint8)
+            # # case 1: top2 includes bg and a strong enough non-bg class
+            # mask1 = (is_bg_top2) & (non_bg_max_val > threshold)
+            # result_flat[mask1] = non_bg_max_idx[mask1]
+            # # case 2: top2 are both non-bg and one passes threshold
+            # both_non_bg = (top2_idx != 0).all(axis=0)
+            # top_val = top2_vals[np.argmax(top2_vals, axis=0), np.arange(H * W)]
+            # top_idx = top2_idx[np.argmax(top2_vals, axis=0), np.arange(H * W)]
+            # mask2 = (both_non_bg) & (top_val > threshold)
+            # result_flat[mask2] = top_idx[mask2]
+
+            # # reshape to (H, W)
+            # result = result_flat.reshape(H, W)
+            
+            # pred_sem_seg = result
+                            
             # roi
             if len(output.roi) == 0:
                 roi = [0, 0, ori_shape[1], ori_shape[0]]
@@ -149,22 +244,27 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
                 cv2.imwrite(osp.join(output_dir, filename + f'_{batch_idx}_{jdx}.png'), vis_img)
                 
             heatmaps = []
-            for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, classes)):
+            all_logits = np.stack(seg_logits, axis=0)  # (C, H, W)
+            global_min = np.min(all_logits)
+            global_max = np.max(all_logits)
+            for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, ('background', ) + classes)):
                 origin = 100, 25
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 txt_img_height = 50
                 txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
                 cv2.putText(txt_img, class_name, origin, font, 1, (255, 255, 255), 1)
-                heatmap = cv2.normalize(seg_logit, None, 0, 255, cv2.NORM_MINMAX) 
-                heatmap = np.uint8(heatmap)  
+                
+                heatmap = (seg_logit - global_min) / (global_max - global_min + 1e-5)  # [0,1]
+                heatmap = np.uint8(heatmap * 255)
                 heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
                 heatmap = cv2.vconcat([txt_img, heatmap])
                 heatmaps.append(heatmap)
 
-            colorbar = np.linspace(0, 255, input_height + txt_img_height, dtype=np.uint8).reshape(input_height + txt_img_height, 1)
+            colorbar = np.linspace(255, 0, input_height + txt_img_height, dtype=np.uint8).reshape(input_height + txt_img_height, 1)
             colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_JET) 
             colorbar = cv2.resize(colorbar, (20, input_height + txt_img_height)) 
-            
+            gap = np.zeros((input_height + txt_img_height, 30, 3), dtype=np.uint8)  # 검정색 여백
+
             if gt_vis_img is not None:
                 origin = 100, 25
                 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -172,9 +272,9 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
                 txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
                 cv2.putText(txt_img, "GT", origin, font, 1, (255, 255, 255), 1)
                 gt_vis_heatmap = cv2.vconcat([txt_img, gt_vis_img])
-                vis_heatmap = cv2.hconcat([gt_vis_heatmap] + heatmaps + [colorbar])
+                vis_heatmap = cv2.hconcat([gt_vis_heatmap] + heatmaps + [gap, colorbar, gap])
             else:
-                vis_heatmap = cv2.hconcat(heatmaps + [colorbar])
+                vis_heatmap = cv2.hconcat(heatmaps + [gap, colorbar, gap])
                 
             if parent_path:
                 if create_parent_path:
