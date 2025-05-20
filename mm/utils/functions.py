@@ -18,27 +18,27 @@ def create_output_dirs(args, mode='train'):
         now = datetime.now()
         args.output_dir = osp.join(args.output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
         if not osp.exists(args.output_dir):
-            os.mkdir(args.output_dir)
+            os.makedirs(args.output_dir, exist_ok=True)
             print(f" - Created {args.output_dir}")
         
         args.val_dir = osp.join(args.output_dir, 'val')
         if not osp.exists(args.val_dir):
-            os.mkdir(args.val_dir)
+            os.makedirs(args.val_dir, exist_ok=True)
             print(f" - Created {args.val_dir}")
         
         args.debug_dir = osp.join(args.output_dir, 'debug')
         if not osp.exists(args.debug_dir):
-            os.mkdir(args.debug_dir)
+            os.makedirs(args.debug_dir, exist_ok=True)
             print(f" - Created {args.debug_dir}")
         
         args.logs_dir = osp.join(args.output_dir, 'logs')
         if not osp.exists(args.logs_dir):
-            os.mkdir(args.logs_dir)
+            os.makedirs(args.logs_dir, exist_ok=True)
             print(f" - Created {args.logs_dir}")
         
         args.weights_dir = osp.join(args.output_dir, 'weights')
         if not osp.exists(args.weights_dir):
-            os.mkdir(args.weights_dir)
+            os.makedirs(args.weights_dir, exist_ok=True)
             print(f" - Created {args.weights_dir}")
 
     elif mode == 'test':
