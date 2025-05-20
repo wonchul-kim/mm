@@ -85,8 +85,8 @@ class LPSEncoder(BaseModule):
         self.model = DDACSegmentation(
             model_name='deeplabv3plus_resnet_lps_unpool',
             num_classes=num_classes,
-            # output_stride=8, 
-            output_stride=16,
+            output_stride=8, 
+            # output_stride=16,
             backbone=backbone,
             unpool_layer=unpool_layer,
             classifier_padding_mode='circular')
