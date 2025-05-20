@@ -1,7 +1,4 @@
 import torch
-import random
-import unittest
-import numpy as np
 from mm.segmentation.src.models.lps.layers import(PolyphaseInvariantDown2D,LPS,get_logits_model,
                    get_antialias)
 from mm.segmentation.src.models.lps.layers.polyup import(PolyphaseInvariantUp2D,LPS_u)
@@ -17,13 +14,22 @@ class LPSEncoder(BaseModule):
     def __init__(self, num_classes: int):
         super().__init__()
             
+        # # Antialias pars
+        # antialias_mode = 'DDAC'
+        # antialias_size = 3
+        # antialias_padding = 'same'
+        # antialias_padding_mode = 'circular'
+        # antialias_group = 1
+        # unpool_antialias_scale = 2
+        
         # Antialias pars
-        antialias_mode = 'DDAC'
-        antialias_size = 3
+        antialias_mode = 'LowPassFilter'
+        antialias_size = 2
         antialias_padding = 'same'
         antialias_padding_mode = 'circular'
         antialias_group = 1
         unpool_antialias_scale = 2
+
 
         # Antialias filters
         antialias = get_antialias(antialias_mode=antialias_mode,
@@ -71,11 +77,9 @@ class LPSEncoder(BaseModule):
             pooling_layer=pool_layer,
             extras_model=extras_model
         )
-
-        # # state_dict = torch.load("/HDD/weights/lps/ResNet18_LPS_circular_basic.ckpt")
-        # # state_dict = torch.load("/HDD/weights/lps/ResNet18_LPS_DDAC3_circular_basic.ckpt")
+    
         # state_dict = torch.load("/HDD/weights/lps/ResNet18_LPS_LPF2_circular_basic.ckpt")
-        # backbone.load_state_dict(state_dict)
+        # model.load_state_dict(state_dict['state_dict'], strict=False)
 
         # Segmenter
         self.model = DDACSegmentation(
@@ -93,3 +97,9 @@ class LPSEncoder(BaseModule):
         
         return self.model(x)
 
+
+
+if __name__ == '__main__':
+    
+    encoder = LPSEncoder(num_classes=4)
+    
