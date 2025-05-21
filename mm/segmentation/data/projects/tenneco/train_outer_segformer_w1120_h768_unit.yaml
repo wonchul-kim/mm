@@ -1,5 +1,5 @@
-output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION'
-data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset"
+output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/recipes/unit/outputs/SEGMENTATION'
+data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset_unit"
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
 
@@ -24,20 +24,20 @@ patch: {
 
 model: 'segformer'
 backbone: 'mit-b2'
-height: 768
-width: 1120
+height: 512
+width: 512
 frozen_stages: -1
 
 amp: False
 
 batch_size: 4
-max_iters: 500000
-val_interval: 500
+max_iters: 2000
+val_interval: 20
 
 custom_hooks:
   visualize_val:
-    freq_epoch: 5
-    ratio: 0.2
+    freq_epoch: 1
+    ratio: 0.5
     output_dir: null
     confidence_threshold: 0.25
 

@@ -67,6 +67,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_lps_config
         elif args.model == 'custom_deeplabv3plus':
             self.manage_model_config = self.manage_custom_deeplabv3plus_config
+        elif args.model == 'segformer':
+            self.manage_model_config = self.manage_segformer_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -90,9 +92,10 @@ class BaseConfigManager:
                 
         def _manage_param_scheduler(cfg):
             if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
-                for scheduler in cfg.param_scheduler:
-                    if scheduler.get('type') == 'PolyLR':
-                        scheduler['end'] = max_iters
+                for idx, scheduler in enumerate(cfg.param_scheduler):
+                    if idx == len(cfg.param_scheduler) - 1:
+                        if 'end' in scheduler:
+                            scheduler['end'] = max_iters
                         
                 
         _manage_train_loop(self._cfg)
@@ -533,6 +536,29 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg, (height, width))
         _manage_crop_size(self._cfg, (height, width))
         # _manage_backbone_weights(self._cfg)
+        
+    def manage_segformer_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':                   
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                                    
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
         
         
     # set dataloader ==================================================================================

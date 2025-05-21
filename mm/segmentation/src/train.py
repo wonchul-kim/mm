@@ -81,7 +81,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
+    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model and 'segformer' != args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
@@ -122,7 +122,8 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')   
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768_unit.yaml')    
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768_unit.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768_unit.yaml')    
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_unit.yaml')    
 
     args.create_output_dirs = True
     
