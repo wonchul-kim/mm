@@ -1,5 +1,5 @@
-output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/recipes/unit/outputs/SEGMENTATION'
-data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset_unit"
+output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION'
+data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset"
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
 
@@ -24,20 +24,20 @@ patch: {
 
 model: 'custom_deeplabv3plus'
 backbone: 'resnet18'
-height: 512
-width: 512
+height: 768
+width: 1120
 frozen_stages: -1
 
 amp: False
 
-batch_size: 4
-max_iters: 200
-val_interval: 20
+batch_size: 16
+max_iters: 500000
+val_interval: 500
 
 custom_hooks:
   visualize_val:
-    freq_epoch: 1
-    ratio: 0.5
+    freq_epoch: 5
+    ratio: 0.2
     output_dir: null
     confidence_threshold: 0.25
 

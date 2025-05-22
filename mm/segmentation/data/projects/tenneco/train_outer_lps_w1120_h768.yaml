@@ -22,8 +22,8 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'segformer'
-backbone: 'mit-b2'
+model: 'lps'
+backbone: 'resnet18'
 height: 768
 width: 1120
 frozen_stages: -1
