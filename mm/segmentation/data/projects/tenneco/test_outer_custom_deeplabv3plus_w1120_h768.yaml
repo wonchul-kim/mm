@@ -1,0 +1,62 @@
+### 1st
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/오염/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/deeplabv3plus_w1120_h768/오염/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/딥러닝/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/deeplabv3plus_w1120_h768/딥러닝/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/경계성/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/deeplabv3plus_w1120_h768/경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ng/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/deeplabv3plus_w1120_h768/repeated_ng/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ok/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/deeplabv3plus_w1120_h768/repeated_ok/exp
+
+### 2nd
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/오염/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/deeplabv3plus_w1120_h768/오염/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/딥러닝/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/deeplabv3plus_w1120_h768/딥러닝/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/경계성/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/deeplabv3plus_w1120_h768/경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ng/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/deeplabv3plus_w1120_h768/repeated_ng/exp
+input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ok/3
+output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/deeplabv3plus_w1120_h768/repeated_ok/exp
+
+
+weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/custom_deeplabv3plus/weights/best_mIoU_iter_19500.pth
+
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+rois: [[220, 60, 1340, 828]] #[[]]
+patch: {
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 256,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: 'custom_deeplabv3plus'
+backbone: 'resnet18'
+width: 1120
+height: 768
+
+tta: 
+    use: false
+    augs:
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
+        Translate: '50,50'
+
+cfg_options: null
+launcher: 'none'

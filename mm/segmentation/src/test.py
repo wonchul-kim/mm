@@ -80,7 +80,8 @@ def main():
 def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/test.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_w1120_h768.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_custom_deeplabv3plus_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/test_outer_gcnet_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200_unit.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segman_epochs200.yaml')
