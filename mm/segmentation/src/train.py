@@ -124,7 +124,8 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768_unit.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_bottom_segformer_w512_h512.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_bottom_segformer_w512_h512.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
 
     args.create_output_dirs = True
     

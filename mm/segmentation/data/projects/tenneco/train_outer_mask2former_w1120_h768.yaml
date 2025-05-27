@@ -1,11 +1,11 @@
-output_dir: /storage/research/datasets/production/mr/bottom/outputs/SEGMENTATION
-data_root: /storage/research/datasets/production/mr/bottom/train_sets/v05
-classes: ['background', 'stabbed', 'dust', 'edge_stabbed']
+output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION'
+data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset"
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
 
-rois: [[]]
+rois: [[220, 60, 1340, 828]]
 patch: {
-    "use_patch": True,
+    "use_patch": False,
     "include_point_positive": True,
     "centric": False,
     "sliding": True,
@@ -22,22 +22,22 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'segformer'
-backbone: 'mit-b2'
-height: 512
-width: 512
-frozen_stages: -1
+model: 'mask2former'
+backbone: 'swin-s'
+height: 768
+width: 1120
+frozen_stages: 4
 
 amp: False
 
-batch_size: 16
-max_iters: 500000
+batch_size: 8
+max_iters: 300000
 val_interval: 500
 
 custom_hooks:
   visualize_val:
     freq_epoch: 5
-    ratio: 0.1
+    ratio: 0.2
     output_dir: null
     confidence_threshold: 0.25
 

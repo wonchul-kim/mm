@@ -1,3 +1,3 @@
 from .loading import LoadImageFromFileWithRoi, LoadLabelmeAnnotations
-
-__all__ = ['LoadImageFromFileWithRoi', 'LoadLabelmeAnnotations']
+from .processing import ResizeWithPatch
+__all__ = ['LoadImageFromFileWithRoi', 'LoadLabelmeAnnotations', 'ResizeWithPatch']

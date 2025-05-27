@@ -12,7 +12,7 @@ from mm.segmentation.utils.hooks import VisualizeTest
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TestConfigManager
 from mm.utils.functions import add_params_to_args, increment_path
-import mm.segmentation.utils.transforms.loading
+import mm.segmentation.utils.transforms
 import mm.segmentation.src.loops
 import mm.segmentation.utils.losses
 
@@ -80,7 +80,9 @@ def main():
 def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/test.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_custom_deeplabv3plus_w1120_h768.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_unfrozen_w512_h512.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_custom_deeplabv3plus_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/test_outer_gcnet_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_512_epochs200_unit.yaml')

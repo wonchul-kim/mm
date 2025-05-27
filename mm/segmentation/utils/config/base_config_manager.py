@@ -160,17 +160,13 @@ class BaseConfigManager:
                     cfg.val_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
-                # resize_index = 0
                 for idx, pipeline in enumerate(cfg.test_pipeline):
                     if pipeline.get('type') == 'Resize':
                         if patch:
-                            pipeline['scale'] = (patch['original_width'], patch['original_height'])
+                            cfg.test_pipeline.insert(2, dict(type='ResizeWithPatch', scale=(width, height), keep_ratio=False))
+                            del cfg.test_pipeline[1]
                         else:
                             pipeline['scale'] = (width, height)
-                        # resize_index = idx
-                        
-                # if patch and patch['use_patch']:
-                #     del cfg.test_pipeline[resize_index]
                         
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
