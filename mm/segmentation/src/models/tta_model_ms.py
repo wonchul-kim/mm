@@ -38,6 +38,15 @@ def random_horizontal_flip(tensor):
 def random_vertical_flip(tensor):
     return torch.flip(tensor, dims=[-2])
 
+def multiscale_tensor(tensor, ratio):
+    original_w, original_h = tensor.shape[2], tensor.shape[1]
+    resized_tensor = F.interpolate(tensor.unsqueeze(0), size=(int(original_h*ratio), int(original_w*ratio)), 
+                                   mode='bilinear', align_corners=False)
+    
+    return resized_tensor[0]
+    
+    
+
 class TTASegModel(torch.nn.Module):
     def __init__(self, model, augs, shape=None):
         super().__init__()
@@ -88,11 +97,12 @@ class TTASegModel(torch.nn.Module):
         
         batch_outputs = []
         for batch_input, batch_data_sample in zip(batch_inputs, batch_data_samples):
-            new_data_batch = {'inputs': [], 'data_samples': []}
-            self.make_tta_batch(new_data_batch, batch_input, batch_data_sample)
-            batch_output = self._model.test_step(new_data_batch)
-            self.recover_tta_output(batch_output)
-            batch_outputs.append(self.merge_tta_batch(batch_output))
+            new_data_batches = [{'inputs': [], 'data_samples': []}]
+            self.make_tta_batch(new_data_batches, batch_input, batch_data_sample)
+            for index, new_data_batch in enumerate(new_data_batches):
+                batch_output = self._model.test_step(new_data_batch)
+                self.recover_tta_output(batch_output, index)
+                batch_outputs.append(self.merge_tta_batch(batch_output))
         return batch_outputs
             
     @property
@@ -113,17 +123,17 @@ class TTASegModel(torch.nn.Module):
         else:
             return getattr(self._model, name)
 
-    def make_tta_batch(self, new_data_batch, batch_input, batch_data_sample):
-        new_data_batch['inputs'].append(batch_input)
-        new_data_batch['data_samples'].append(batch_data_sample)
+    def make_tta_batch(self, new_data_batches, batch_input, batch_data_sample):
+        new_data_batches[0]['inputs'].append(batch_input)
+        new_data_batches[0]['data_samples'].append(batch_data_sample)
         for key, val in self._augs.items():
             if key == 'HorizontalFlip' and val:
-                new_data_batch['inputs'].append(random_horizontal_flip(batch_input))
-                new_data_batch['data_samples'].append(batch_data_sample)
+                new_data_batches[0]['inputs'].append(random_horizontal_flip(batch_input))
+                new_data_batches[0]['data_samples'].append(batch_data_sample)
             
             if key == 'VerticalFlip' and val:
-                new_data_batch['inputs'].append(random_vertical_flip(batch_input))
-                new_data_batch['data_samples'].append(batch_data_sample)
+                new_data_batches[0]['inputs'].append(random_vertical_flip(batch_input))
+                new_data_batches[0]['data_samples'].append(batch_data_sample)
                 
             # if key == 'Rotate' and val:
             #     if isinstance(val, str):
@@ -132,17 +142,29 @@ class TTASegModel(torch.nn.Module):
             #         val = [val]
                 
             #     for degree in val:                    
-            #         new_data_batch['inputs'].append(RandomRotation(degree)(batch_input))
-            #         new_data_batch['data_samples'].append(batch_data_sample)
+            #         new_data_batches[0]['inputs'].append(RandomRotation(degree)(batch_input))
+            #         new_data_batches[0]['data_samples'].append(batch_data_sample)
                     
-            if key == 'Translate' and val:
+            if key == 'Translate' and (val != '' and val != []):
                 if isinstance(val, str):
                     val = [int(x.strip()) for x in val.split(',')]
                 elif isinstance(val, int):
                     val = [val]
                     
-                new_data_batch['inputs'].append(translate_tensor(batch_input, val[0], val[1]))
-                new_data_batch['data_samples'].append(batch_data_sample)
+                new_data_batches[0]['inputs'].append(translate_tensor(batch_input, val[0], val[1]))
+                new_data_batches[0]['data_samples'].append(batch_data_sample)
+                
+            if key == 'Multiscale' and (val != '' and val != []):
+                if isinstance(val, str):
+                    val = [float(x.strip()) for x in val.split(',')]
+                elif isinstance(val, float):
+                    val = [val]
+                
+                for _val in val:
+                    new_data_batch = {'inputs': [], 'data_samples': []}
+                    new_data_batch['inputs'].append(multiscale_tensor(batch_input, _val))
+                    new_data_batch['data_samples'].append(batch_data_sample)
+                    new_data_batches.append(new_data_batch)
         
     def merge_tta_batch(self, batch_output):
         if isinstance(batch_output, torch.Tensor):
@@ -184,46 +206,48 @@ class TTASegModel(torch.nn.Module):
             
             return data_sample
                 
-    def recover_tta_output(self, batch_output):
-        idx = 0
-        for key, val in self._augs.items():
-            if key == 'HorizontalFlip' and val:
-                if isinstance(batch_output[idx + 1], torch.Tensor):
-                    batch_output[idx + 1] = random_horizontal_flip(batch_output[idx + 1])
-                else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=random_horizontal_flip(batch_output[idx + 1].seg_logits.data))
-                idx += 1
+    def recover_tta_output(self, batch_output, index):
         
-            if key == 'VerticalFlip' and val:
-                if isinstance(batch_output[idx + 1], torch.Tensor):
-                    batch_output[idx + 1] = random_vertical_flip(batch_output[idx + 1])
-                else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=random_vertical_flip(batch_output[idx + 1].seg_logits.data))
-                idx += 1
-                
-            # if key == 'Rotate' and val and val != 0:
-            #     if isinstance(val, str):
-            #         val = [int(x.strip()) for x in val.split(',')]
-            #     elif isinstance(val, int):
-            #         val = [val]
-                
-            #     for degree in val:      
-            #         if isinstance(batch_output[idx + 1], torch.Tensor):              
-            #             batch_output[idx + 1] = RandomRotation(360 - degree)(batch_output[idx + 1])
-            #         else:
-            #             batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
-            #         idx += 1
+        if index == 0 and (self._augs['HorizontalFlip'] or self._augs['VerticalFlip'] or (self._augs['Translate'] != '' and self._augs['Translate'] != [])):
+            idx = 0
+            for key, val in self._augs.items():
+                if key == 'HorizontalFlip' and val:
+                    if isinstance(batch_output[idx + 1], torch.Tensor):
+                        batch_output[idx + 1] = random_horizontal_flip(batch_output[idx + 1])
+                    else:
+                        batch_output[idx + 1].seg_logits = PixelData(data=random_horizontal_flip(batch_output[idx + 1].seg_logits.data))
+                    idx += 1
+            
+                if key == 'VerticalFlip' and val:
+                    if isinstance(batch_output[idx + 1], torch.Tensor):
+                        batch_output[idx + 1] = random_vertical_flip(batch_output[idx + 1])
+                    else:
+                        batch_output[idx + 1].seg_logits = PixelData(data=random_vertical_flip(batch_output[idx + 1].seg_logits.data))
+                    idx += 1
                     
-            if key == 'Translate' and val:
-                if isinstance(val, str):
-                    val = [int(x.strip()) for x in val.split(',')]
-                elif isinstance(val, int):
-                    val = [val]
-                if isinstance(batch_output[idx + 1], torch.Tensor):
-                    batch_output[idx + 1] = translate_tensor(batch_output[idx + 1], -val[0], -val[1])
-                else:
-                    batch_output[idx + 1].seg_logits = PixelData(data=translate_tensor(batch_output[idx + 1].seg_logits.data, -val[0], -val[1]))
-                idx += 1
+                # if key == 'Rotate' and val and val != 0:
+                #     if isinstance(val, str):
+                #         val = [int(x.strip()) for x in val.split(',')]
+                #     elif isinstance(val, int):
+                #         val = [val]
+                    
+                #     for degree in val:      
+                #         if isinstance(batch_output[idx + 1], torch.Tensor):              
+                #             batch_output[idx + 1] = RandomRotation(360 - degree)(batch_output[idx + 1])
+                #         else:
+                #             batch_output[idx + 1].seg_logits = PixelData(data=RandomRotation(360 - degree)(batch_output[idx + 1].seg_logits.data))
+                #         idx += 1
+                        
+                if key == 'Translate' and val:
+                    if isinstance(val, str):
+                        val = [int(x.strip()) for x in val.split(',')]
+                    elif isinstance(val, int):
+                        val = [val]
+                    if isinstance(batch_output[idx + 1], torch.Tensor):
+                        batch_output[idx + 1] = translate_tensor(batch_output[idx + 1], -val[0], -val[1])
+                    else:
+                        batch_output[idx + 1].seg_logits = PixelData(data=translate_tensor(batch_output[idx + 1].seg_logits.data, -val[0], -val[1]))
+                    idx += 1
 
                     
 if __name__ == '__main__':
