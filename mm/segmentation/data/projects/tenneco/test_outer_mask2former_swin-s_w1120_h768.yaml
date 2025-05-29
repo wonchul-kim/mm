@@ -1,32 +1,36 @@
 ### 1st
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/오염/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/딥러닝/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/딥러닝/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/딥러닝/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/경계성/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ng/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ng/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/repeated_ng/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ok/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/repeated_ok/exp
 
 ### 2nd
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/오염/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/딥러닝/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/딥러닝/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/딥러닝/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/경계성/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ng/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ng/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/repeated_ng/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ok/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/repeated_ok/exp
+
+input_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/outputs/check_shift/125032816412602/test_1
+output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/outputs/check_shift/125032816412602/outputs_1_1_1_1
 
 
-weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth
+weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/mask2former_swin-s_w1120_h768/weights/best_mIoU_iter_104500.pth
 
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 rois: [[220, 60, 1340, 828]] #[[]]
+# rois: [[]]
 patch: {
     "use_patch": False,
     "include_point_positive": True,
@@ -45,10 +49,11 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'segformer'
-backbone: 'mit-b2'
+model: 'mask2former'
+backbone: 'swin-s'
 width: 1120
 height: 768
+frozen_stages: 4
 
 tta: 
     use: false

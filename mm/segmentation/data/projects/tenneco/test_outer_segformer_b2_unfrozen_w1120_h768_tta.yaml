@@ -1,26 +1,26 @@
 ### 1st
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/오염/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/딥러닝/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/딥러닝/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/경계성/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ng/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ng/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ng/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ok/3
-# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ok/exp
 
 ### 2nd
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/오염/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/딥러닝/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/딥러닝/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/경계성/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/경계성/exp
-# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ng/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ng/exp
-# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ok/3
-# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/경계성/exp
+input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ng/1
+output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ng/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ok/1
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ok/exp
 
 
 weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth
@@ -51,12 +51,14 @@ width: 1120
 height: 768
 
 tta: 
-    use: false
+    use: true
     augs:
-        HorizontalFlip: true
+        HorizontalFlip: false
         VerticalFlip: true
-        Rotate: 90
+        Rotate: 0
         Translate: '50,50'
+        Multiscale: ''
+            
 
 cfg_options: null
 launcher: 'none'
