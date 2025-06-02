@@ -125,7 +125,10 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_bottom_segformer_w512_h512.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segnext_w1120_h768.yaml')
+    # args.load_from = '/HDD/weights/mmseg/segnext/segnext_mscan-b_1x16_512x512_adamw_160k_ade20k_20230209_172053-b6f6c70c.pth'
+    args.load_from = '/HDD/weights/mmseg/segnext/segnext_mscan-s_1x16_512x512_adamw_160k_ade20k_20230214_113014-43013668.pth'
 
     args.create_output_dirs = True
     

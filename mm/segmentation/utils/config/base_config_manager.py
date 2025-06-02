@@ -69,6 +69,8 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_custom_deeplabv3plus_config
         elif args.model == 'segformer':
             self.manage_model_config = self.manage_segformer_config
+        elif args.model == 'segnext':
+            self.manage_model_config = self.manage_segnext_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -559,7 +561,30 @@ class BaseConfigManager:
         _manage_num_classes(self._cfg)
         _manage_crop_size(self._cfg, (height, width))
         
+    def manage_segnext_config(self, num_classes, width, height):
         
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':                   
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                                    
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        
+
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):
