@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
-# os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import os.path as osp
 
 from mmengine.config import Config, DictAction
@@ -85,7 +85,8 @@ def main1():
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_swin-s_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_unfrozen_w512_h512.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768_tta.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segnext_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768_tta.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_custom_deeplabv3plus_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/test_outer_gcnet_w1120_h768.yaml')
