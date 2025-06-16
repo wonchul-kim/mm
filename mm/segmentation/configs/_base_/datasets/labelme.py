@@ -13,7 +13,7 @@ train_pipeline = [
     dict(type='RandomCrop', crop_size=(height, width), cat_max_ratio=0.75),
     dict(type='Resize', scale=(width, height), keep_ratio=False),
     dict(type='RandomFlip', prob=0.3),
-    dict(type='PhotoMetricDistortion'),
+    # dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs', meta_keys=['img_path', 'seg_map_path', 'ori_shape', 'is_parent_path',
                                           'img_shape', 'pad_shape', 'scale_factor', 
                                           'flip', 'flip_direction', 'reduce_zero_label', 
