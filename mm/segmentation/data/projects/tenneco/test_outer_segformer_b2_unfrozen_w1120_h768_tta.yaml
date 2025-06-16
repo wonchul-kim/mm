@@ -7,8 +7,8 @@
 # output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/딥러닝 바보/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_2/한도 경계성/3
 # output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/한도 경계성/exp
-input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ok/1_9
-output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ok/3_1
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
 
 ### 2nd
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/오염/3
@@ -25,8 +25,8 @@ output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w
 # output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/양불 경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/기타 불량/3
 # output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/기타 불량/exp
-# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/repeated_ok/3_2
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
+input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ok/2_6
+output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
 
 
 weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen_nohsv/weights/best_mIoU_iter_334500.pth
