@@ -11,17 +11,34 @@ model = dict(
     backbone=dict(init_cfg=dict(type='Pretrained', checkpoint=checkpoint)),
     decode_head=dict(num_classes=150))
 
+# optim_wrapper = dict(
+#     # _delete_=True,
+#     type='OptimWrapper',
+#     optimizer=dict(
+#         type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01),
+#     paramwise_cfg=dict(
+#         custom_keys={
+#             'pos_block': dict(decay_mult=0.),
+#             'norm': dict(decay_mult=0.),
+#             'head': dict(lr_mult=10.)
+#         }))
 optim_wrapper = dict(
-    # _delete_=True,
-    type='OptimWrapper',
+    type='SAMOptimWrapper',
     optimizer=dict(
-        type='AdamW', lr=0.00006, betas=(0.9, 0.999), weight_decay=0.01),
+        type='SAMOptimizer',
+        lr=0.00006,
+        weight_decay=0.01,
+        rho=0.05,
+        adaptive=True
+    ),
     paramwise_cfg=dict(
         custom_keys={
             'pos_block': dict(decay_mult=0.),
             'norm': dict(decay_mult=0.),
             'head': dict(lr_mult=10.)
-        }))
+        })
+)
+
 
 param_scheduler = [
     dict(
