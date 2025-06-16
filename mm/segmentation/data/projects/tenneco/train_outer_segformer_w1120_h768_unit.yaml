@@ -26,7 +26,7 @@ model: 'segformer'
 backbone: 'mit-b2'
 height: 512
 width: 512
-frozen_stages: -1
+frozen_stages: 4
 
 amp: False
 

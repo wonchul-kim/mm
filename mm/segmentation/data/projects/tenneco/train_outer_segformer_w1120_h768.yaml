@@ -26,13 +26,13 @@ model: 'segformer'
 backbone: 'mit-b2'
 height: 768
 width: 1120
-frozen_stages: -1
+frozen_stages: 4
 
 amp: False
 
-batch_size: 4
-max_iters: 500000
-val_interval: 500
+batch_size: 8
+max_iters: 200000
+val_interval: 1000
 
 custom_hooks:
   visualize_val:

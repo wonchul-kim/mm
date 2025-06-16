@@ -733,7 +733,9 @@ class BaseConfigManager:
                 elif self._cfg.model.backbone.type == 'HetNetEncoder':
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif 'SegMANEncoder' in self._cfg.model.backbone.type:
-                    assert frozen_stages >= 0 and frozen_stages <= 8, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                    assert frozen_stages >= 0 and frozen_stages <= 8, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 8, not {frozen_stages}')
+                elif 'MixVisionTransformer' in self._cfg.model.backbone.type:
+                    assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 else:
                     warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 
