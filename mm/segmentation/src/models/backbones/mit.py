@@ -49,6 +49,7 @@ class MixVisionTransformer(BaseMixVisionTransformer):
                  )
 
         self.frozen_stages = frozen_stages
+        self.print_frozen_status = False
 
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""
@@ -58,17 +59,22 @@ class MixVisionTransformer(BaseMixVisionTransformer):
 
     def _freeze_stages(self):
         logger: MMLogger = MMLogger.get_current_instance()
-        print_log(f"* Frozen-stages are {self.frozen_stages}", logger)
+        if not self.print_frozen_status:
+            print_log(f"* Frozen-stages are {self.frozen_stages}", logger)
         
         if self.frozen_stages >= 0:
             
             for idx in range(self.frozen_stages):
-                print_log(f"* Frozing the {idx} layer", logger)
+                if not self.print_frozen_status:
+                    print_log(f"* Frozing the {idx} layer", logger)
                 layer = self.layers[idx]
                 layer.eval()
                 for jdx, param in enumerate(layer.parameters()):
                     param.requires_grad = False
+                if not self.print_frozen_status:
+                    print_log(f"   : {jdx} params are frozen", logger)
                     
-                print_log(f"   : {jdx} params are frozen", logger)
+            self.print_frozen_status = True
+                    
                 
             

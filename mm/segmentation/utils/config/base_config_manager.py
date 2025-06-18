@@ -543,7 +543,7 @@ class BaseConfigManager:
         def _manage_num_classes(cfg):
             cfg.num_classes = num_classes 
             if 'model' in cfg:
-                if cfg.model.get('type') == 'EncoderDecoder':                   
+                if 'EncoderDecoder' in cfg.model.get('type'):                   
                     if 'decode_head' in cfg.model:
                         if 'num_classes' in cfg.model.decode_head:
                             cfg.model.decode_head.num_classes = num_classes
