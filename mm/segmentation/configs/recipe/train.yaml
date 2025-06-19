@@ -43,6 +43,8 @@ epochs: 0
 max_iters: 0
 val_interval: 50
 
+infobatch: false
+
 default_hooks:
 
 # etc.

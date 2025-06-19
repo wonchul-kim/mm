@@ -10,3 +10,7 @@ from .hetnet import *
 from .segman import *
 from .lps import *
 from .custom_deeplabv3plus import *
+from .segformer import *
+
+### preprocessors
+from .data_preprocessor import SegDataPreProcessor

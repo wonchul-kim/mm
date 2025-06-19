@@ -1,6 +1,7 @@
 
 import os.path as osp
 import warnings
+from mmengine.config.config import ConfigDict
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -115,6 +116,8 @@ class BaseConfigManager:
             cfg.train_dataloader.dataset['img_suffix'] = img_suffix
             cfg.train_dataloader.dataset['rois'] = rois
             cfg.train_dataloader.dataset['patch'] = patch
+            cfg.train_dataloader.dataset['infobatch'] = cfg.infobatch or False
+            cfg.train_dataloader.dataset['max_iters'] = cfg.train_cfg.max_iters
             
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
@@ -549,9 +552,17 @@ class BaseConfigManager:
                             cfg.model.decode_head.num_classes = num_classes
                         
                         if 'loss_decode' in cfg.model.decode_head:
-                            for loss_decode in cfg.model.decode_head.loss_decode:
-                                if 'class_weight' in loss_decode:
-                                    loss_decode.class_weight = [1.0]*num_classes
+                            if isinstance(cfg.model.decode_head.loss_decode, list):
+                                for loss_decode in cfg.model.decode_head.loss_decode:
+                                    if 'class_weight' in loss_decode:
+                                        loss_decode.class_weight = [1.0]*num_classes
+                                        
+                            elif isinstance(cfg.model.decode_head.loss_decode, (dict, ConfigDict)):
+                                if cfg.model.decode_head.loss_decode['type'] == 'CrossEntropyLoss':
+                                    if hasattr(cfg, 'infobatch') and cfg.infobatch:
+                                        cfg.model.decode_head.loss_decode['reduction'] = 'none'
+                            else:
+                                raise NotImplementedError(f"{type(cfg.model.decode_head.loss_decode)} is not yet considered type for {cfg.model.decode_head.loss_decode}")
                                     
         def _manage_crop_size(cfg, new_crop_size):
             cfg.crop_size = new_crop_size 
@@ -629,6 +640,7 @@ class BaseConfigManager:
                                                 class_frequency=val2.get('class_frequency') or None,
                                                 class_weights=val2.get('class_weights') or None,
                                                 ignore_background=val2.get('ignore_background') or True,
+                                                infobatch=self.args.infobatch if hasattr(self.args, 'infobatch') else False,
                                             )
                                         )
             elif key == 'before_train_iter':
