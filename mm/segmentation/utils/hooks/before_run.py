@@ -14,15 +14,19 @@ DATA_BATCH = Optional[Union[dict, tuple, list]]
 class HookBeforeRun(Hook):
     def __init__(self, apply_class_weights=False, 
                         class_frequency=None, class_weights=None, ignore_background=True, 
+                        infobatch=False,
                         *args, **kwargs):
         self.apply_class_weights = apply_class_weights
         self.class_frequency = class_frequency
         self.class_weights = class_weights
         self.ignore_background = ignore_background
+        
+        self.infobatch = infobatch 
 
     def before_run(self, runner) -> None:
         logger: MMLogger = MMLogger.get_current_instance()
         
+        ### class-weights
         if not self.apply_class_weights:
             self.class_frequency = None 
             self.class_weights = None
@@ -42,10 +46,18 @@ class HookBeforeRun(Hook):
             print_log(f"CALCULATED class weights: {self.class_weights}", logger)    
             apply_class_weights_to_loss_decode(runner, self.class_weights)
 
-            
-            
 
+        ### infobatch
+        if self.infobatch:
+            from mmengine.model import is_model_wrapper
             
+            if is_model_wrapper(runner.model):
+                runner.model.module.decode_head.dataset = runner._train_loop.dataloader.dataset
+            else:
+                runner.model.decode_head.dataset = runner._train_loop.dataloader.dataset
+            
+            print_log(f"{runner._train_loop.dataloader.dataset} has been added to decode_dead's dataset attr.", logger)
+        
                 
                 
         

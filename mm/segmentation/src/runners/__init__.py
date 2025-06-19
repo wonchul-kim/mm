@@ -1,3 +1,3 @@
-from .runner_v1 import RunnerV1
+from .runner import Runner
 
-__all__ = ['RunnerV1']
+__all__ = ['Runner']
