@@ -80,7 +80,7 @@ class Runner(BaseRunner):
 
         ### infobatch ########################################################################################
         if hasattr(dataset_cfg, 'infobatch') and dataset_cfg['infobatch'] and dataset_cfg['mode'] == 'train':
-            from mm.segmentation.src.datasets.infobatch import InfoBatchDataset
+            from mm.segmentation.src.datasets.infobatch_dataset import InfoBatchDataset
             dataset = InfoBatchDataset(dataset, dataset_cfg['max_iters'])
             sampler = dataset.pruning_sampler()
             dataloader_cfg.pop('sampler')

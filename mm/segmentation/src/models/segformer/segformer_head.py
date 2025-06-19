@@ -6,7 +6,7 @@ from mmseg.utils import SampleList
 from mmseg.models.decode_heads.segformer_head import SegformerHead as BaseSegformerHead
 from mmseg.registry import MODELS
 
-from mm.segmentation.src.datasets.infobatch import *
+from mm.segmentation.src.datasets.infobatch_dataset import *
 
 
 @MODELS.register_module(force=True)
