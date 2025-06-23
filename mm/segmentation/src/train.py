@@ -131,7 +131,8 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segnext_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w512_h512_patch.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curation.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_unit.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_infobatch_unit.yaml')
     

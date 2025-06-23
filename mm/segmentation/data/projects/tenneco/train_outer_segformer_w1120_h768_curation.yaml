@@ -1,4 +1,4 @@
-output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION'
+output_dir: '/HDD/etc/curation/tenneco/outputs/SEGMENTATION'
 data_root: "/HDD/etc/curation/tenneco/clustered_dataset"
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
@@ -31,7 +31,7 @@ frozen_stages: -1
 amp: False
 
 batch_size: 4
-max_iters: 500000
+max_iters: 100000
 val_interval: 500
 
 custom_hooks:
