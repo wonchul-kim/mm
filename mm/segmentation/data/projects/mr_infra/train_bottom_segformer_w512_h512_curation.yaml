@@ -1,5 +1,5 @@
-output_dir: /storage/research/datasets/production/mr/bottom/outputs/SEGMENTATION
-data_root: /storage/research/datasets/production/mr/bottom/train_sets/v05
+output_dir: /HDD/etc/curation/mr/outputs/SEGMENTATION
+data_root: /HDD/etc/curation/mr/clustered_dataset_level7
 classes: ['background', 'stabbed', 'dust', 'edge_stabbed']
 num_classes: 4
 
@@ -31,7 +31,7 @@ frozen_stages: -1
 amp: False
 
 batch_size: 16
-max_iters: 500000
+max_iters: 100000
 val_interval: 500
 
 custom_hooks:
