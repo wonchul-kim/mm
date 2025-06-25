@@ -116,7 +116,7 @@ class BaseConfigManager:
             cfg.train_dataloader.dataset['img_suffix'] = img_suffix
             cfg.train_dataloader.dataset['rois'] = rois
             cfg.train_dataloader.dataset['patch'] = patch
-            cfg.train_dataloader.dataset['infobatch'] = cfg.infobatch or False
+            cfg.train_dataloader.dataset['infobatch'] =  cfg.infobatch if hasattr(cfg, 'infobatch') else False
             cfg.train_dataloader.dataset['max_iters'] = cfg.train_cfg.max_iters
             
         def _manage_val_dataloader(cfg):
@@ -703,6 +703,8 @@ class BaseConfigManager:
                                           contour_conf=val.get('contour_conf', 0.5),
                                           save_raw=val.get('save_raw', False),
                                           legend=val.get('legend', True),
+                                          save_heatmap=val.get('save_heatmap', False),
+                                          class_confidences=val.get('class_confidences', None)
                                         )
                                      )
             

@@ -66,4 +66,6 @@ custom_hooks:
     annotate: False # to label
     contour_thres: 10 # to label
     contour_conf: 0.5 # to label
+    save_heatmap: false
+    legend: true
     
