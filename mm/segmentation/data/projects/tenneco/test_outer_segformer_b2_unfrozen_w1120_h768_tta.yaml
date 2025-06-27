@@ -1,35 +1,50 @@
 ### 1st
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_2/오염/3
-# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_2/시인성/3
-# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/시인성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/시인성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_2/딥러닝 바보/3
-# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/딥러닝 바보/exp
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝 바보/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_2/한도 경계성/3
-# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/한도 경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/한도 경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ok/3_1
-# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos3/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ok/exp
 
 ### 2nd
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/오염/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/오염/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/오염/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/시인성/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/시인성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/시인성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/딥러닝 바보/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/딥러닝 바보/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝 바보/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/종횡비 경계성/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/종횡비 경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/종횡비 경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/한도 경계성/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/한도 경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/한도 경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/양불 경계성/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/양불 경계성/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/양불 경계성/exp
 # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_2/기타 불량/3
-# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/기타 불량/exp
-input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ok/2_6
-output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_nohsv_tta/repeated_ok/exp
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/기타 불량/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ok/2_6
+# output_dir: /HDD/etc/repeatablility/talos3/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/repeated_ok/exp
 
 
-weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen_nohsv/weights/best_mIoU_iter_334500.pth
+# ### 1st 
+# # input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_3/딥러닝 바보/3
+# # output_dir: /HDD/etc/repeatablility/talos4/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝 바보/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_3/th boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/1st/benchmark/segformer_b2_unfrozen_w1120_h768_tta/한도 경계성/exp
+
+### 2nd
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/딥러닝 바보/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/딥러닝 바보/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/th boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/한도 경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/aspect boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/segformer_b2_unfrozen_w1120_h768_tta/종횡비 경계성/exp
+
+
+weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth
 
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 rois: [[220, 60, 1340, 828]] #[[]]
@@ -62,7 +77,7 @@ tta:
         HorizontalFlip: true
         VerticalFlip: true
         Rotate: 0
-        # Translate: '50,50'
+        Translate: '50,50'
         Multiscale: '0.75, 1.25'
             
 

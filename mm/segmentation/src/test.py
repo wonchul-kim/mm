@@ -83,12 +83,12 @@ def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/test.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_swin-s_w1120_h768.yaml')
-    # add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_unfrozen_w512_h512.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_b2_unfrozen_w1120_h768_tta.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segnext_w1120_h768_tta.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_w1120_h768_curation.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segformer_w1120_h768_curation.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segnext_w1120_h768.yaml')
+    
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_segnext_w1120_h768_tta.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_custom_deeplabv3plus_w1120_h768.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_lps_w1120_h768.yaml')
@@ -98,6 +98,9 @@ def main1():
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_m2f_epochs100.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_sam2unet_epochs300.yaml')
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_epochs100.yaml')
+    
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_unfrozen_w512_h512.yaml')
+    add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_w1120_h768_curation.yaml')
     
     args.create_output_dirs = True
     
