@@ -102,7 +102,7 @@ class MixVisionTransformer(BaseModule):
         self.out_indices = out_indices
         assert max(out_indices) < self.num_stages
 
-        if frozen_stages not in range(self.num_stages):
+        if frozen_stages not in range(-1, self.num_stages):
             raise ValueError('frozen_stages must be in range(0, '
                              f'{self.num_stages}), but get {frozen_stages}')
         self.frozen_stages = frozen_stages
