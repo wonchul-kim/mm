@@ -558,6 +558,9 @@ class BaseConfigManager:
                                         loss_decode.class_weight = [1.0]*num_classes
                                         
                             elif isinstance(cfg.model.decode_head.loss_decode, (dict, ConfigDict)):
+                                if 'class_weight' in cfg.model.decode_head.loss_decode:
+                                    cfg.model.decode_head.loss_decode.class_weight = [1.0]*num_classes
+                                
                                 if cfg.model.decode_head.loss_decode['type'] == 'CrossEntropyLoss':
                                     if hasattr(cfg, 'infobatch') and cfg.infobatch:
                                         cfg.model.decode_head.loss_decode['reduction'] = 'none'

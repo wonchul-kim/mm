@@ -1,4 +1,5 @@
 # model settings
+num_classes = 4
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 data_preprocessor = dict(
     type='SegDataPreProcessor',
@@ -37,7 +38,14 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)
+        # loss_decode=dict(
+        #         type='OhemCrossEntropy',
+        #         thres=0.9,
+        #         min_kept=131072,
+        #         class_weight=[1.]*num_classes,
+        #         loss_weight=1.0),
+    ),
     # model training and testing settings
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
