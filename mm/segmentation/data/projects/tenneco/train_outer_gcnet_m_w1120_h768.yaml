@@ -1,7 +1,8 @@
-output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/'
-data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset_unit"
+output_dir: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/
+data_root: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
+
 
 rois: [[220, 60, 1340, 828]]
 patch: {
@@ -22,18 +23,20 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'deeplabv3plus'
-# backbone: 'r101-d8'
-backbone: 'efficientnetv2-b0'
-height: 512
-width: 512
-frozen_stages: 3
+model: 'gcnet'
+# backbone: 's'
+backbone: 'm'
+# backbone: 'l'
+height: 768
+width: 1120
+frozen_stages: -1
 
 amp: False
 
-batch_size: 2
-max_iters: 200000
-val_interval: 50
+batch_size: 8
+max_iters: 10000
+val_interval: 1000
+
 
 custom_hooks:
   visualize_val:
@@ -41,20 +44,6 @@ custom_hooks:
     ratio: 0.1
     output_dir: null
     confidence_threshold: 0.25
-
-  before_run:
-    calculate_class_weights:
-      apply_class_weights: false
-      num_classes: null
-      class_frequency: null
-      class_weights: null
-      ignore_background: 0.2
-
-  before_train_iter:
-    change_class_weights:
-      use: false
-      epoch: -1
-      class_weights: null
 
   before_train:
     debug_dataloader:

@@ -125,12 +125,12 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_segformer_w512_h512_curated.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curated.yaml')
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_r50_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_r50_w1120_h768.yaml')
     
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_m_w1120_h768.yaml')   
     
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
-    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')   
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768_unit.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
@@ -195,109 +195,6 @@ def main1():
     # start training
     runner.train()
 
-def mask2former():
-      
-    # set config =======================================================================================================
-    args = parse_args()
-    add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
-
-    from datetime import datetime 
-    now = datetime.now()
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION'
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset_unit"
-    classes = ['background', 'line', 'stabbed']
-
-    rois = [[220, 60, 1340, 828]]
-    patch = {
-        "use_patch": False,
-        "include_point_positive": True,
-        "centric": False,
-        "sliding": True,
-        "width": 512,
-        "height": 256,
-        "overlap_ratio": 0.2,
-        "num_involved_pixel": 10,
-        "sliding_bg_ratio": 0,
-        "bg_ratio_by_image": 0,
-        "bg_start_train_epoch_by_image": 0,
-        "bg_start_val_epoch_by_image": 0,
-        "translate": 0,
-        "translate_range_width": 0,
-        "translate_range_height": 0,
-    }
-    
-    
-    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
-    if not osp.exists(output_dir):
-        os.mkdir(output_dir)
-        
-    val_dir = osp.join(output_dir, 'val')
-    os.mkdir(val_dir)
-    
-    debug_dir = osp.join(output_dir, 'debug')
-    os.mkdir(debug_dir)
-    
-    logs_dir = osp.join(output_dir, 'logs')
-    os.mkdir(logs_dir)
-    
-    weights_dir = osp.join(output_dir, 'weights')
-    os.mkdir(weights_dir)
-    
-    args.output_dir = output_dir
-    args.data_root = input_dir
-    args.classes = classes
-    args.num_classes = len(classes)
-    
-    args.model= 'mask2former'
-    args.backbone = 'swin-s'
-    args.width = 1120
-    args.height = 768
-    args.frozen_stages = -1
-    args.gradient_checkpointing = 1
-    
-    args.rois = rois
-    args.patch = patch
-
-    args.batch_size = 1
-    args.epochs = 0
-    args.max_iters = 100
-    args.val_interval = 50
-    args.amp = False
-    
-    args.custom_hooks['visualize_val']['output_dir'] = val_dir
-    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
-    args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
-    args.custom_hooks['checkpoint']['output_dir'] = weights_dir
-    
-    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
-
-    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
-    config_manager = TrainConfigManager()
-    config_manager.build(args, config_file)
-    config_manager.manage_model_config(args.num_classes, args.width, args.height)
-    config_manager.manage_schedule_config(args.max_iters, args.val_interval)
-    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
-                                         args.classes, args.batch_size, args.width, args.height,
-                                         args.rois, args.patch)
-    config_manager.manage_default_hooks_config(args.default_hooks)
-    # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
-    config_manager.manage_custom_hooks_config(args.custom_hooks)
-    cfg = config_manager.cfg
-
-    # ================================================================================================================
-    if 'runner_type' not in cfg:
-        # runner = RunnerV1.from_cfg(cfg)
-        runner = Runner.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
-    import torch
-    torch.backends.cudnn.benchmark = True  # 최적의 GPU 커널 선택
-    torch.backends.cudnn.enabled = True  # cuDNN 최적화 활성화
-
-    # start training
-    runner.train()
 
 def pidnet():
       
