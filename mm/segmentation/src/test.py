@@ -100,7 +100,8 @@ def main1():
     # add_params_to_args(args, ROOT /'segmentation/data/projects/tenneco/test_outer_mask2former_epochs100.yaml')
     
     # add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_unfrozen_w512_h512.yaml')
-    add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_w1120_h768_curation.yaml')
+    # add_params_to_args(args, ROOT /'segmentation/data/projects/mr_infra/test_bottom_segformer_b2_w1120_h768_curation.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/test_segformer_w512_h512_curated.yaml')
     
     args.create_output_dirs = True
     

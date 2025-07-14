@@ -1,14 +1,14 @@
-output_dir: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION
-data_root: /HDD/datasets/projects/benchmarks/mr/split_patch_embedding_dataset/dinov2-large/attention_False_v2/clustered_dataset_level3
-classes: ['background', 'STABBED', 'DUST', 'EDGE_STABBED']
+output_dir: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION
+data_root: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
 
-rois: [[]]
+rois: [[220, 60, 1340, 828]]
 patch: {
-    "use_patch": false,
-    "include_point_positive": true,
-    "centric": false,
-    "sliding": true,
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
     "width": 512,
     "height": 512,
     "overlap_ratio": 0.2,
@@ -22,23 +22,21 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'segformer'
-backbone: 'mit-b2'
-height: 512
-width: 512
-frozen_stages: 3
-
-infobatch: true
+model: 'mask2former'
+backbone: 'r50'
+height: 768
+width: 1120
+frozen_stages: 4
 
 amp: False
 
-batch_size: 64
-max_iters: 100000
-val_interval: 1000
+batch_size: 8
+max_iters: 10000
+val_interval: 500
 
 custom_hooks:
   visualize_val:
-    freq_epoch: 10
+    freq_epoch: 5
     ratio: 0.2
     output_dir: null
     confidence_threshold: 0.25

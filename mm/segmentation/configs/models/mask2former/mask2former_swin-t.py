@@ -1,4 +1,4 @@
-_base_ = ['./mask2former_r50_8xb2.py']
+_base_ = ['./mask2former_r50.py']
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_tiny_patch4_window7_224_20220317-1cdeb081.pth'  # noqa
 depths = [2, 2, 6, 2]
 model = dict(

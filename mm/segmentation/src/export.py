@@ -1,11 +1,9 @@
-# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 
 from mm.segmentation.src.datasets.mask_dataset import MaskDataset
 from mm.segmentation.utils.hooks import VisualizeVal
 from mm.segmentation.utils.metrics import IoUMetricV2
 from mm.segmentation.utils.config import TrainConfigManager
-from mm.segmentation.src.runners import RunnerV1
 
 from mmdeploy.utils import get_ir_config
 from mm.utils.functions import add_params_to_args
@@ -64,13 +62,17 @@ def main1():
     # model_cfg = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/sam2_s.py" 
     # checkpoint = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/weights/best_mIoU_iter_134318.pth"
     
-    # output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen"
-    # model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/segformer_mit-b2.py" 
-    # checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/iter_100000.pth"
+    output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen"
+    model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/segformer_mit-b2.py" 
+    checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth"
     
-    output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768"
-    model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/segnext_mscan-s.py" 
-    checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/weights/best_mIoU_iter_137500.pth"
+    # output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768"
+    # model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/segnext_mscan-s.py" 
+    # checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/weights/best_mIoU_iter_137500.pth"
+    
+    # output_dir = '/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_10_52_0/weights'
+    # model_cfg =  '/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_10_52_0/mask2former_r50.py'
+    # checkpoint = '/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_10_52_0/weights/best_mIoU_iter_1500.pth'
     
     
     parser = argparse.ArgumentParser(description='MMSeg export a model')
@@ -82,20 +84,20 @@ def main1():
     
     # export
     args.device = 'cuda'
-    args.batch_size = 1
+    args.batch_size = 8
     args.onnx_config["opset_version"] = 14
     
     # model
     # args.model = 'mask2former'
-    # args.backbone = 'swin-s'
+    # args.backbone = 'r50'
     # args.model = 'pidnet'
     # args.backbone = 'l'
     # args.model = 'sam2'
     # args.backbone = 's'
-    # args.model = 'segformer'
-    # args.backbone = 'mit-b2'
-    args.model = 'segnext'
-    args.backbone = 'mscan-s'
+    args.model = 'segformer'
+    args.backbone = 'mit-b2'
+    # args.model = 'segnext'
+    # args.backbone = 'mscan-s'
     args.height = 768
     args.width = 1120
     
