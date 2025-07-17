@@ -2,7 +2,7 @@ input_dir: /HDD/datasets/projects/benchmarks/mr/split_patch_dataset/test
 # output_dir: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION/segformer_b2_w512_h512_curated/test/exp
 # weights: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION/segformer_b2_w512_h512_curated/weights/best_mIoU_iter_28000.pth
 output_dir: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION/7_11_8_54_7/test/exp
-weights: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION/7_11_8_54_7/weights/best_mIoU_iter_12000.pth
+weights: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION/7_11_8_54_7/weights/best_mIoU_iter_62000.pth
 classes: ['background', 'STABBED', 'DUST', 'EDGE_STABBED']
 rois: [[]]
 patch: {
@@ -27,8 +27,8 @@ patch: {
 
 model: 'segformer'
 backbone: 'mit-b2'
-height: 512
-width: 512
+height: 768
+width: 1120
 
 tta: 
     use: false

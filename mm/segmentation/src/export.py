@@ -51,6 +51,8 @@ def main():
 
 def main1():
     
+
+    
     # output_dir = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/export'
     # model_cfg =  '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/mask2former_swin-s.py'
     # checkpoint = '/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/m2f_epochs100/train/weights/best_mIoU_iter_47800.pth'
@@ -62,9 +64,9 @@ def main1():
     # model_cfg = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/sam2_s.py" 
     # checkpoint = "/DeepLearning/etc/_athena_tests/benchmark/tenneco/outer/outputs/sam2_epochs300/train/weights/best_mIoU_iter_134318.pth"
     
-    # output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen"
-    # model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/segformer_mit-b2.py" 
-    # checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth"
+    output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights"
+    model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/segformer_mit-b2.py" 
+    checkpoint = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segformer_b2_unfrozen/weights/best_mIoU_iter_209500.pth"
     
     # output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768"
     # model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/segnext_mscan-s.py" 
@@ -74,9 +76,9 @@ def main1():
     # model_cfg =  '/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_10_52_0/mask2former_r50.py'
     # checkpoint = '/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_10_52_0/weights/best_mIoU_iter_1500.pth'
     
-    output_dir = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/weights"
-    model_cfg = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/gcnet_m.py" 
-    checkpoint = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/weights/best_mIoU_iter_2000.pth"
+    # output_dir = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/weights"
+    # model_cfg = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/gcnet_m.py" 
+    # checkpoint = "/HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/7_14_16_24_29/weights/best_mIoU_iter_5000.pth"
        
     # output_dir = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/weights"
     # model_cfg = "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/segnext_w1120_h768/segnext_mscan-s.py" 
@@ -92,7 +94,7 @@ def main1():
     
     # export
     args.device = 'cuda'
-    args.batch_size = 32
+    args.batch_size = 1
     args.onnx_config["opset_version"] = 14
     
     # model
@@ -102,14 +104,14 @@ def main1():
     # args.backbone = 'l'
     # args.model = 'sam2'
     # args.backbone = 's'
-    # args.model = 'segformer'
-    # args.backbone = 'mit-b2'
+    args.model = 'segformer'
+    args.backbone = 'mit-b2'
     # args.model = 'segnext'
     # args.backbone = 'mscan-s'
-    args.model = 'gcnet'
-    args.backbone = 'm'
-    args.height = 768
-    args.width = 1120
+    # args.model = 'gcnet'
+    # args.backbone = 'm'
+    args.height = 512
+    args.width = 512
     
     args.tta = {'use': False, 'augs':{
                                         'HorizontalFlip': True,
