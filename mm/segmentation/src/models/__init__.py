@@ -11,6 +11,7 @@ from .segman import *
 from .lps import *
 from .custom_deeplabv3plus import *
 from .segformer import *
+from .seg_aliasing import * 
 
 ### preprocessors
 from .data_preprocessor import SegDataPreProcessor

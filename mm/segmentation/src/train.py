@@ -127,8 +127,9 @@ def main1():
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curated.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_r50_w1120_h768.yaml')
     
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_m_w1120_h768.yaml')   
-    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_m_w1120_h768.yaml')   
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
+      
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768_unit.yaml')    
@@ -194,6 +195,65 @@ def main1():
 
     # start training
     runner.train()
+
+def main2():  
+    # set config =======================================================================================================
+    args = parse_args()
+    add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
+      
+    args.create_output_dirs = True
+    
+    if args.create_output_dirs:
+        from mm.utils.functions import create_output_dirs
+        create_output_dirs(args)
+        print(f"CREATED output-dirs: {args.output_dir}")
+
+    args.custom_hooks['visualize_val']['output_dir'] = args.val_dir
+    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = args.debug_dir
+    args.custom_hooks['aiv']['logging']['output_dir'] = args.logs_dir
+    args.custom_hooks['checkpoint']['output_dir'] = args.weights_dir
+    
+    # if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
+    #     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
+
+
+    # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    config_file = ROOT / f'segmentation/configs/models/seg_aliasing/upernet_r50.py'
+    config_manager = TrainConfigManager()
+    config_manager.build(args, config_file)
+    config_manager.manage_model_config(args.num_classes, args.width, args.height)
+    config_manager.manage_schedule_config(args.max_iters, args.val_interval)
+    config_manager.manage_dataset_config(args.data_root, args.img_suffix, args.seg_map_suffix, 
+                                         args.classes, args.batch_size, args.width, args.height,
+                                         args.rois, args.patch)
+    config_manager.manage_default_hooks_config(args.default_hooks)
+    # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
+    config_manager.manage_custom_hooks_config(args.custom_hooks)
+    cfg = config_manager.cfg
+    cfg.model_wrapper_cfg=dict(
+        type='MMDistributedDataParallel',
+        find_unused_parameters=True
+    )
+
+    # ================================================================================================================
+    
+    if args.infobatch:
+        from mm.segmentation.src.runners import Runner
+    else:
+        from mmengine.runner import Runner
+
+    if 'runner_type' not in cfg:
+        # runner = RunnerV1.from_cfg(cfg)
+        runner = Runner.from_cfg(cfg)
+    else:
+        # build customized runner from the registry
+        # if 'runner_type' is set in the cfg
+        runner = RUNNERS.build(cfg)
+
+    # start training
+    runner.train()
+
 
 
 def pidnet():
@@ -716,7 +776,8 @@ def segman():
     
 if __name__ == '__main__':
     # main()
-    main1()
+    # main1()
+    main2()
     # mask2former()
     # cosnet()
     # pidnet()
