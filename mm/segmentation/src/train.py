@@ -122,13 +122,13 @@ def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
     # add_params_to_args(args, args.args_filename)
-    # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_segformer_w512_h512_curated.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_segformer_w512_h512_curated.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curated.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_r50_w1120_h768.yaml')
     
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_m_w1120_h768.yaml')   
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
       
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
@@ -776,8 +776,8 @@ def segman():
     
 if __name__ == '__main__':
     # main()
-    # main1()
-    main2()
+    main1()
+    # main2()
     # mask2former()
     # cosnet()
     # pidnet()

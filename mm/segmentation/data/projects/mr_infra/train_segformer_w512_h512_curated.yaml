@@ -1,5 +1,5 @@
-output_dir: /HDD/datasets/projects/benchmarks/mr/outputs/SEGMENTATION
-data_root: /HDD/datasets/projects/benchmarks/mr/split_patch_embedding_dataset/dinov2-large/attention_False_v2/clustered_dataset_level3
+output_dir: /HDD/datasets/projects/benchmarks/mr_ad_bench/clustered/dinov2-large/attention_False/clustered_dataset_level5
+data_root: /HDD/datasets/projects/benchmarks/mr_ad_bench/clustered/dinov2-large/attention_False/clustered_dataset_level5
 classes: ['background', 'STABBED', 'DUST', 'EDGE_STABBED']
 num_classes: 4
 
