@@ -1,6 +1,7 @@
 
 import os.path as osp
 import warnings
+from mmengine.config.config import ConfigDict
 
 def create_custom_dataset(dataset_type):
     import importlib.util
@@ -65,6 +66,14 @@ class BaseConfigManager:
             self.manage_model_config = self.manage_segman_config
         elif args.model == 'lps':
             self.manage_model_config = self.manage_lps_config
+        elif args.model == 'custom_deeplabv3plus':
+            self.manage_model_config = self.manage_custom_deeplabv3plus_config
+        elif args.model == 'segformer':
+            self.manage_model_config = self.manage_segformer_config
+        elif args.model == 'segnext':
+            self.manage_model_config = self.manage_segnext_config
+        elif args.model == 'seg_aliasing':
+            self.manage_model_config = self.manage_seg_aliasing_config
         else:
             raise NotImplementedError(f"{args.model} is NOT Considered")
 
@@ -88,9 +97,10 @@ class BaseConfigManager:
                 
         def _manage_param_scheduler(cfg):
             if 'param_scheduler' in cfg and isinstance(cfg.param_scheduler, list):
-                for scheduler in cfg.param_scheduler:
-                    if scheduler.get('type') == 'PolyLR':
-                        scheduler['end'] = max_iters
+                for idx, scheduler in enumerate(cfg.param_scheduler):
+                    if idx == len(cfg.param_scheduler) - 1:
+                        if 'end' in scheduler:
+                            scheduler['end'] = max_iters
                         
                 
         _manage_train_loop(self._cfg)
@@ -108,6 +118,8 @@ class BaseConfigManager:
             cfg.train_dataloader.dataset['img_suffix'] = img_suffix
             cfg.train_dataloader.dataset['rois'] = rois
             cfg.train_dataloader.dataset['patch'] = patch
+            cfg.train_dataloader.dataset['infobatch'] =  cfg.infobatch if hasattr(cfg, 'infobatch') else False
+            cfg.train_dataloader.dataset['max_iters'] = cfg.train_cfg.max_iters
             
         def _manage_val_dataloader(cfg):
             cfg.val_dataloader.batch_size = batch_size
@@ -155,14 +167,13 @@ class BaseConfigManager:
                     cfg.val_pipeline.insert(2, dict(type='LoadAnnotations', reduce_zero_label=False))
                     
             if 'test_pipeline' in cfg and isinstance(cfg.test_pipeline, list):
-                resize_index = 0
                 for idx, pipeline in enumerate(cfg.test_pipeline):
                     if pipeline.get('type') == 'Resize':
-                        pipeline['scale'] = (width, height)
-                        resize_index = idx
-                        
-                # if patch and patch['use_patch']:
-                #     del cfg.test_pipeline[resize_index]
+                        if patch:
+                            cfg.test_pipeline.insert(2, dict(type='ResizeWithPatch', scale=(width, height), keep_ratio=False))
+                            del cfg.test_pipeline[1]
+                        else:
+                            pipeline['scale'] = (width, height)
                         
                 if cfg.dataset_type == 'LabelmeDataset' and not any(step.get('type') in ['LoadAnnotations', 'LoadLabelmeAnnotations'] for step in cfg.test_pipeline):
                     cfg.test_pipeline.insert(2, dict(type='LoadLabelmeAnnotations', reduce_zero_label=False))
@@ -489,6 +500,129 @@ class BaseConfigManager:
         # _manage_backbone_weights(self._cfg)
         
         
+    def manage_custom_deeplabv3plus_config(self, num_classes, width, height):
+        def _manage_num_classes(cfg, new_crop_size):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':
+                    if 'backbone' in cfg.model:
+                        if 'num_classes' in cfg.model.backbone:
+                            cfg.model.backbone.num_classes = num_classes
+                        # if 'image_size' in cfg.model.backbone:
+                        #     cfg.model.backbone.image_size = new_crop_size
+                    
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                        
+        def _manage_crop_size(cfg, new_crop_size):
+            # if 'decode_head' in cfg.model:
+            #     if cfg.model.decode_head.type == 'HetNetHead':
+            #         cfg.model.decode_head.width = new_crop_size[1]
+            #         cfg.model.decode_head.height = new_crop_size[0]
+                        
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+            
+            
+        def _manage_backbone_weights(cfg):
+            from mm.segmentation.configs.models.segman import backbone_weights_map as segman_backbone_weights_map
+            from mm.utils.weights import get_weights_from_nexus
+            cfg.model.backbone.pretrained = get_weights_from_nexus('segmentation', 'mmseg', 
+                                                        self.args.model, 
+                                                        segman_backbone_weights_map[self.args.backbone], 'pth.tar',
+                                                        weights_name=segman_backbone_weights_map[self.args.backbone])
+            
+            
+        _manage_num_classes(self._cfg, (height, width))
+        _manage_crop_size(self._cfg, (height, width))
+        # _manage_backbone_weights(self._cfg)
+        
+    def manage_segformer_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':                   
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        
+                        if 'loss_decode' in cfg.model.decode_head:
+                            if isinstance(cfg.model.decode_head.loss_decode, list):
+                                for loss_decode in cfg.model.decode_head.loss_decode:
+                                    if 'class_weight' in loss_decode:
+                                        loss_decode.class_weight = [1.0]*num_classes
+                                        
+                            elif isinstance(cfg.model.decode_head.loss_decode, (dict, ConfigDict)):
+                                if 'class_weight' in cfg.model.decode_head.loss_decode:
+                                    cfg.model.decode_head.loss_decode.class_weight = [1.0]*num_classes
+                                
+                                if cfg.model.decode_head.loss_decode['type'] == 'CrossEntropyLoss':
+                                    if hasattr(cfg, 'infobatch') and cfg.infobatch:
+                                        cfg.model.decode_head.loss_decode['reduction'] = 'none'
+                            else:
+                                raise NotImplementedError(f"{type(cfg.model.decode_head.loss_decode)} is not yet considered type for {cfg.model.decode_head.loss_decode}")
+                                    
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        
+    def manage_segnext_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':                   
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                                    
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+        
+    def manage_seg_aliasing_config(self, num_classes, width, height):
+        
+        def _manage_num_classes(cfg):
+            cfg.num_classes = num_classes 
+            if 'model' in cfg:
+                if cfg.model.get('type') == 'EncoderDecoder':                   
+                    if 'decode_head' in cfg.model:
+                        if 'num_classes' in cfg.model.decode_head:
+                            cfg.model.decode_head.num_classes = num_classes
+                        
+                        if 'loss_decode' in cfg.model.decode_head:
+                            for loss_decode in cfg.model.decode_head.loss_decode:
+                                if 'class_weight' in loss_decode:
+                                    loss_decode.class_weight = [1.0]*num_classes
+                                    
+        def _manage_crop_size(cfg, new_crop_size):
+            cfg.crop_size = new_crop_size 
+            cfg.data_preprocessor.size = new_crop_size
+            cfg.model.data_preprocessor = cfg.data_preprocessor
+
+        _manage_num_classes(self._cfg)
+        _manage_crop_size(self._cfg, (height, width))
+
     # set dataloader ==================================================================================
     def manage_dataloader_config(self, vis_dataloader_ratio):
         def _manage_train_dataloader(cfg):
@@ -533,6 +667,7 @@ class BaseConfigManager:
                                                 class_frequency=val2.get('class_frequency') or None,
                                                 class_weights=val2.get('class_weights') or None,
                                                 ignore_background=val2.get('ignore_background') or True,
+                                                infobatch=self.args.infobatch if hasattr(self.args, 'infobatch') else False,
                                             )
                                         )
             elif key == 'before_train_iter':
@@ -595,6 +730,8 @@ class BaseConfigManager:
                                           contour_conf=val.get('contour_conf', 0.5),
                                           save_raw=val.get('save_raw', False),
                                           legend=val.get('legend', True),
+                                          save_heatmap=val.get('save_heatmap', False),
+                                          class_confidences=val.get('class_confidences', None)
                                         )
                                      )
             
@@ -638,6 +775,8 @@ class BaseConfigManager:
                     assert frozen_stages >= 0 and frozen_stages <= 4, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 elif 'SegMANEncoder' in self._cfg.model.backbone.type:
                     assert frozen_stages >= 0 and frozen_stages <= 8, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
+                elif self._cfg.model.backbone.type == 'MixVisionTransformer':
+                    assert frozen_stages >= 0 and frozen_stages <= 3, ValueError(f'The `frozen_stages` must be 0 <= frozen_stages <= 4, not {frozen_stages}')
                 else:
                     warnings.warn(f"There is not yet `frozen_stages` considered in backbone({self._cfg.model.backbone.type})")
                 

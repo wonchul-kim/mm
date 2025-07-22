@@ -64,6 +64,8 @@ class LabelmeDataset(BaseSegDataset):
                  img_suffix='.bmp',
                  seg_map_suffix='.json',
                  reduce_zero_label=False,
+                 infobatch=False,
+                 max_iters=None,
                  **kwargs) -> None:
         self.METAINFO.update({'classes': tuple(classes), 'palette': self._palette[:len(tuple(classes))]})
         self.CLASSES = tuple(classes)
@@ -76,11 +78,20 @@ class LabelmeDataset(BaseSegDataset):
         self._patch = patch
         self._annotate = annotate
         self._logs_dir = logs_dir
+        self._infobatch = infobatch
+        self._max_iters = max_iters
         
         super().__init__(img_suffix=img_suffix,
                  seg_map_suffix=seg_map_suffix,
                  reduce_zero_label=reduce_zero_label,
                  **kwargs)
+    @property 
+    def max_iters(self):
+        return self._max_iters
+    
+    @property 
+    def infobatch(self):
+        return self._infobatch
         
     @property 
     def mode(self):

@@ -1,0 +1,83 @@
+output_dir: '/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION'
+data_root: "/HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/split_dataset"
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+num_classes: 4
+
+rois: [[220, 60, 1340, 828]]
+patch: {
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 512,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: 'mask2former'
+backbone: 'swin-s'
+height: 768
+width: 1120
+frozen_stages: 4
+
+amp: False
+
+batch_size: 8
+max_iters: 300000
+val_interval: 500
+
+custom_hooks:
+  visualize_val:
+    freq_epoch: 5
+    ratio: 0.2
+    output_dir: null
+    confidence_threshold: 0.25
+
+  before_run:
+    calculate_class_weights:
+      apply_class_weights: false
+      num_classes: null
+      class_frequency: null
+      class_weights: null
+      ignore_background: 0.2
+
+  before_train_iter:
+    change_class_weights:
+      use: false
+      epoch: -1
+      class_weights: null
+
+  before_train:
+    debug_dataloader:
+      ratio: 0.1
+      output_dir: null
+
+  after_train_epoch:
+
+  after_val_epoch:
+  
+  aiv:
+    use: true
+    logging: 
+      output_dir: null
+
+      monitor: 
+        use: true 
+        monitor_csv: true 
+        monitor_figs: true 
+        monitor_freq: 1
+
+  checkpoint:
+    interval: 1000
+    by_epoch: false 
+    save_best: 'mIoU'
+    output_dir: null
+    max_keep_ckpts: 2

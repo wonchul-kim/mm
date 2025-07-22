@@ -1,5 +1,5 @@
-output_dir: '/storage/projects/Tenneco/Metalbearing/OUTER/250211/outputs/SEGMENTATION/'
-data_root: "/storage/projects/Tenneco/Metalbearing/OUTER/250211/split_dataset"
+output_dir: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5/outputs/SEGMENTATION/
+data_root: /HDD/datasets/projects/benchmarks/tenneco/split_embedding_dataset/dinov2-base/attention_False/clustered_dataset_level5
 classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
 num_classes: 4
 
@@ -23,19 +23,17 @@ patch: {
     "translate_range_height": 0,
 }
 
-model: 'gcnet'
-# backbone: 's'
-backbone: 'm'
-# backbone: 'l'
+model: 'seg_aliasing'
+backbone: 'upernet_r50'
 height: 768
 width: 1120
 frozen_stages: -1
 
 amp: False
 
-batch_size: 8
-max_iters: 200000
-val_interval: 2000
+batch_size: 2
+max_iters: 10000
+val_interval: 1000
 
 
 custom_hooks:

@@ -16,7 +16,8 @@ class TrainConfigManager(BaseConfigManager):
             cfg_options = {'load_from': args.load_from,
                     'launcher': args.launcher, 
                     'resume': args.resume,
-                    'work_dir': args.output_dir
+                    'work_dir': args.output_dir,
+                    'infobatch': args.infobatch if hasattr(args, 'infobatch') else False,
                 }
         else:
             cfg_options = args.cfg_options

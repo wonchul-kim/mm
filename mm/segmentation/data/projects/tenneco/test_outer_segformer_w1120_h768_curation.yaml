@@ -1,0 +1,50 @@
+input_dir: /HDD/etc/curation/tenneco/clustered_dataset_level7/test
+output_dir: /HDD/etc/curation/tenneco/outputs/SEGMENTATION/6_23_16_33_14/test/exp
+weights: /HDD/etc/curation/tenneco/outputs/SEGMENTATION/6_23_16_33_14/train/weights/best_mIoU_iter_19000.pth
+
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+rois: [[220, 60, 1340, 828]] #[[]]
+patch: {
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 256,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: 'segformer'
+backbone: 'mit-b2'
+width: 1120
+height: 768
+
+tta: 
+    use: false
+    augs:
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
+        Translate: '50,50'
+
+cfg_options: null
+launcher: 'none'
+
+# custom hooks ==========================
+custom_hooks:
+  visualize_test:
+    output_dir: null
+    class_confidences: null # null or 0 -> only argmax, [0.1, 0.2, 0.3] for each class including bg
+    save_raw: false # to save seg_logtis into npy
+    annotate: true # to label
+    contour_thres: 10 # to label
+    contour_conf: 0.3 # to label
+    

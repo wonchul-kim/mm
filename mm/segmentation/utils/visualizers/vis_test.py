@@ -60,7 +60,7 @@ from visionsuite.utils.helpers import get_text_coords
 
 def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False, 
              contour_thres=10, contour_conf=0.5, create_parent_path=False,
-             save_raw=False, legend=True):
+             save_raw=False, legend=True, save_heatmap=False, class_confidences=None):
     
     if not (hasattr(outputs[0], 'patch') and len(outputs[0].patch) != 0):
         color_map = imgviz.label_colormap(50)
@@ -243,47 +243,48 @@ def vis_test(outputs, output_dir, data_batch, batch_idx, annotate=False,
             else:
                 cv2.imwrite(osp.join(output_dir, filename + f'_{batch_idx}_{jdx}.png'), vis_img)
                 
-            heatmaps = []
-            all_logits = np.stack(seg_logits, axis=0)  # (C, H, W)
-            global_min = np.min(all_logits)
-            global_max = np.max(all_logits)
-            for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, ('background', ) + classes)):
-                origin = 100, 25
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                txt_img_height = 50
-                txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
-                cv2.putText(txt_img, class_name, origin, font, 1, (255, 255, 255), 1)
-                
-                heatmap = (seg_logit - global_min) / (global_max - global_min + 1e-5)  # [0,1]
-                heatmap = np.uint8(heatmap * 255)
-                heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-                heatmap = cv2.vconcat([txt_img, heatmap])
-                heatmaps.append(heatmap)
+            if save_heatmap:
+                heatmaps = []
+                all_logits = np.stack(seg_logits, axis=0)  # (C, H, W)
+                global_min = np.min(all_logits)
+                global_max = np.max(all_logits)
+                for logit_idx, (seg_logit, class_name) in enumerate(zip(seg_logits, ('background', ) + classes)):
+                    origin = 100, 25
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    txt_img_height = 50
+                    txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
+                    cv2.putText(txt_img, class_name, origin, font, 1, (255, 255, 255), 1)
+                    
+                    heatmap = (seg_logit - global_min) / (global_max - global_min + 1e-5)  # [0,1]
+                    heatmap = np.uint8(heatmap * 255)
+                    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+                    heatmap = cv2.vconcat([txt_img, heatmap])
+                    heatmaps.append(heatmap)
 
-            colorbar = np.linspace(255, 0, input_height + txt_img_height, dtype=np.uint8).reshape(input_height + txt_img_height, 1)
-            colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_JET) 
-            colorbar = cv2.resize(colorbar, (20, input_height + txt_img_height)) 
-            gap = np.zeros((input_height + txt_img_height, 30, 3), dtype=np.uint8)  # 검정색 여백
+                colorbar = np.linspace(255, 0, input_height + txt_img_height, dtype=np.uint8).reshape(input_height + txt_img_height, 1)
+                colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_JET) 
+                colorbar = cv2.resize(colorbar, (20, input_height + txt_img_height)) 
+                gap = np.zeros((input_height + txt_img_height, 30, 3), dtype=np.uint8)  # 검정색 여백
 
-            if gt_vis_img is not None:
-                origin = 100, 25
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                txt_img_height = 50
-                txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
-                cv2.putText(txt_img, "GT", origin, font, 1, (255, 255, 255), 1)
-                gt_vis_heatmap = cv2.vconcat([txt_img, gt_vis_img])
-                vis_heatmap = cv2.hconcat([gt_vis_heatmap] + heatmaps + [gap, colorbar, gap])
-            else:
-                vis_heatmap = cv2.hconcat(heatmaps + [gap, colorbar, gap])
-                
-            if parent_path:
-                if create_parent_path:
-                    if not osp.exists(osp.join(logits_dir, parent_path)):
-                        os.makedirs(osp.join(logits_dir, parent_path))
-                    cv2.imwrite(osp.join(logits_dir, parent_path, filename + f'_{idx}_{jdx}.png'), vis_heatmap)   
+                if gt_vis_img is not None:
+                    origin = 100, 25
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    txt_img_height = 50
+                    txt_img = np.zeros((txt_img_height, input_width, 3), np.uint8)
+                    cv2.putText(txt_img, "GT", origin, font, 1, (255, 255, 255), 1)
+                    gt_vis_heatmap = cv2.vconcat([txt_img, gt_vis_img])
+                    vis_heatmap = cv2.hconcat([gt_vis_heatmap] + heatmaps + [gap, colorbar, gap])
                 else:
-                    cv2.imwrite(osp.join(logits_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{idx}_{jdx}.png'), vis_heatmap)
-            else:
-                cv2.imwrite(osp.join(logits_dir, filename + f'_{idx}_{jdx}.png'), vis_heatmap)
+                    vis_heatmap = cv2.hconcat(heatmaps + [gap, colorbar, gap])
+                
+                if parent_path:
+                    if create_parent_path:
+                        if not osp.exists(osp.join(logits_dir, parent_path)):
+                            os.makedirs(osp.join(logits_dir, parent_path))
+                        cv2.imwrite(osp.join(logits_dir, parent_path, filename + f'_{idx}_{jdx}.png'), vis_heatmap)   
+                    else:
+                        cv2.imwrite(osp.join(logits_dir, '_'.join(parent_path.split('/')).replace('._', '') + '_' + filename + f'_{idx}_{jdx}.png'), vis_heatmap)
+                else:
+                    cv2.imwrite(osp.join(logits_dir, filename + f'_{idx}_{jdx}.png'), vis_heatmap)
             
             

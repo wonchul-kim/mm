@@ -113,3 +113,15 @@ docker pull onedang2/mmengine-0.10.5-mmcv2.0.1-mmdet3.3.0-mmseg1.2.2
         > If you have any other version of torch and cuda, NEED to check and synch them by checking https://shi-labs.com/natten/wheels/.
 
 #### [Efficient Mirror Detection via Multi-level Heterogeneous Learning (HetNet) (AAAI23, ORAL)](https://arxiv.org/pdf/2211.15644v1)
+
+
+
+## TODO:
+| 모델명        | 연도 | 코드 공개 | Citation/DOI | 특징 및 비고 |
+|--------------|------|-----------|--------------|--------------|
+| **SegFormer** | 2021 | O | [arXiv:2105.15203](https://arxiv.org/abs/2105.15203)<br>[GitHub](https://github.com/NVlabs/SegFormer) | 경량/고성능 트랜스포머 세그멘테이션, MLP 디코더, 실시간/엣지 디바이스 적합 |
+| **Mask2Former** | 2021 | O | [CVPR 2022](https://arxiv.org/abs/2112.01527)<br>[GitHub](https://github.com/facebookresearch/Mask2Former) | 범용 세그멘테이션(SOTA), Masked Attention, 높은 정확도, 무겁고 연산량 많음 |
+| **PEM** | 2024 | O | [CVPR 2024](https://openaccess.thecvf.com/content/CVPR2024/papers/Cavagnero_PEM_Prototype-based_Efficient_MaskFormer_for_Image_Segmentation_CVPR_2024_paper.pdf) | Mask2Former 구조 경량화, 프로토타입 기반, SOTA에 근접한 성능 |
+| **AFFormer** | 2023 | O | [arXiv:2301.04648](https://arxiv.org/abs/2301.04648) | 디코더 제거, 병렬 구조, 3M 파라미터로 ADE20K 등에서 경량/고성능 |
+| **PlainSeg/PlainSeg-Hier** | 2023 | O | [arXiv:2310.12755](https://arxiv.org/abs/2310.12755) | Plain ViT+3x3 conv만 추가, 단순/경량 구조, 다양한 데이터셋에서 준수한 성능 |
+| **ExtremeMETA** | 2025 | 미확인 | [J. Imaging Sci. Technol. 2025, 69(4): 040403](https://library.imaging.org/admin/apis/public/api/ist/website/downloadArticle/jist/0/0/040403) | 대형 커널, 모델 압축, 95% mIoU 달성, 실시간/고효율 |

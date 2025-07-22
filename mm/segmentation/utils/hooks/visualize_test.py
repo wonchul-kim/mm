@@ -17,7 +17,7 @@ from mm.segmentation.utils.visualizers.vis_test import vis_test
 @HOOKS.register_module()
 class VisualizeTest(Hook):
     def __init__(self, output_dir, annotate=False, contour_thres=10, contour_conf=0.5, 
-                 save_raw=False, legend=True):
+                 save_raw=False, legend=True, save_heatmap=False, class_confidences=None):
         self._visualizer: Visualizer = Visualizer.get_current_instance()
         self.output_dir = output_dir
         self.annotate = annotate 
@@ -25,6 +25,8 @@ class VisualizeTest(Hook):
         self.contour_conf = contour_conf
         self.save_raw = save_raw
         self.legend = legend
+        self.save_heatmap = save_heatmap
+        self.class_confidences = class_confidences
 
     def _after_iter(self,
                     runner: Runner,
@@ -44,7 +46,8 @@ class VisualizeTest(Hook):
         vis_test(outputs, self.output_dir, data_batch, batch_idx, 
                  annotate=self.annotate, contour_thres=self.contour_thres, 
                  contour_conf=self.contour_conf, save_raw=self.save_raw,
-                 legend=self.legend)
+                 legend=self.legend, save_heatmap=self.save_heatmap,
+                 class_confidences=self.class_confidences)
 
 
 

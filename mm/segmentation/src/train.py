@@ -19,7 +19,6 @@ import mm.segmentation.utils.losses
 from mmseg.registry import RUNNERS
 from mm.utils.weights import get_weights_from_nexus
 from mm.segmentation.utils.config import TrainConfigManager
-from mm.segmentation.src.runners import RunnerV1
 from mm.utils.functions import add_params_to_args
 from mm.segmentation.configs.models.mask2former import backbone_weights_map
 from mm.segmentation.configs.models.cosnet import backbone_weights_map as cosnet_backbone_weights_map
@@ -81,7 +80,7 @@ def main():
     args = parse_args()
     add_params_to_args(args, args.args_filename)
 
-    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
+    if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model and 'segformer' != args.model:       
         args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
     config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
@@ -101,6 +100,11 @@ def main():
         find_unused_parameters=True
     )
 
+    if args.infobatch:
+        from mm.segmentation.src.runners import Runner
+    else:
+        from mmengine.runner import Runner
+
     # ================================================================================================================
     if 'runner_type' not in cfg:
         # runner = RunnerV1.from_cfg(cfg)
@@ -118,11 +122,29 @@ def main1():
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
     # add_params_to_args(args, args.args_filename)
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_segformer_w512_h512_curated.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curated.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_r50_w1120_h768.yaml')
+    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_m_w1120_h768.yaml')   
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
+      
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_gcnet_w1120_h768_unit.yaml')
     # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_cosnet_w1120_h768.yaml')    
-    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_deeplabv3plus_w1120_h768_unit.yaml')   
-    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_lps_w1120_h768_unit.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_custom_deeplabv3plus_w1120_h768.yaml')    
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_mask2former_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segnext_w1120_h768.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w512_h512_patch.yaml')
+    # # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_curation.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/mr_infra/train_bottom_segformer_w512_h512_curation.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_unit.yaml')
+    # add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_segformer_w1120_h768_infobatch_unit.yaml')
     
+    # args.load_from = '/HDD/weights/mmseg/segnext/segnext_mscan-b_1x16_512x512_adamw_160k_ade20k_20230209_172053-b6f6c70c.pth'
+    # args.load_from = '/HDD/weights/mmseg/segnext/segnext_mscan-s_1x16_512x512_adamw_160k_ade20k_20230214_113014-43013668.pth'
+
     args.create_output_dirs = True
     
     if args.create_output_dirs:
@@ -157,6 +179,12 @@ def main1():
     )
 
     # ================================================================================================================
+    
+    if args.infobatch:
+        from mm.segmentation.src.runners import Runner
+    else:
+        from mmengine.runner import Runner
+
     if 'runner_type' not in cfg:
         # runner = RunnerV1.from_cfg(cfg)
         runner = Runner.from_cfg(cfg)
@@ -168,83 +196,30 @@ def main1():
     # start training
     runner.train()
 
-def mask2former():
-      
+def main2():  
     # set config =======================================================================================================
     args = parse_args()
     add_params_to_args(args, ROOT / 'segmentation/configs/recipe/train.yaml')
+    add_params_to_args(args, ROOT / 'segmentation/data/projects/tenneco/train_outer_seg_aliasing_w1120_h768.yaml')    
+      
+    args.create_output_dirs = True
+    
+    if args.create_output_dirs:
+        from mm.utils.functions import create_output_dirs
+        create_output_dirs(args)
+        print(f"CREATED output-dirs: {args.output_dir}")
 
-    from datetime import datetime 
-    now = datetime.now()
-    output_dir = '/DeepLearning/etc/_athena_tests/recipes/agent/segmentation/mmseg/train_unit/mask2former/outputs/SEGMENTATION'
-    input_dir = "/DeepLearning/_athena_tests/datasets/polygon2/split_dataset_unit"
-    classes = ['background', 'line', 'stabbed']
+    args.custom_hooks['visualize_val']['output_dir'] = args.val_dir
+    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = args.debug_dir
+    args.custom_hooks['aiv']['logging']['output_dir'] = args.logs_dir
+    args.custom_hooks['checkpoint']['output_dir'] = args.weights_dir
+    
+    # if 'dinov2' != args.model and 'sam2' != args.model and 'hetnet' != args.model and 'segman' != args.model and 'lps' != args.model:       
+    #     args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, get_backbone_weights_map(args.model)[args.backbone], 'pth')
 
-    rois = [[220, 60, 1340, 828]]
-    patch = {
-        "use_patch": False,
-        "include_point_positive": True,
-        "centric": False,
-        "sliding": True,
-        "width": 512,
-        "height": 256,
-        "overlap_ratio": 0.2,
-        "num_involved_pixel": 10,
-        "sliding_bg_ratio": 0,
-        "bg_ratio_by_image": 0,
-        "bg_start_train_epoch_by_image": 0,
-        "bg_start_val_epoch_by_image": 0,
-        "translate": 0,
-        "translate_range_width": 0,
-        "translate_range_height": 0,
-    }
-    
-    
-    output_dir = osp.join(output_dir, f'{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}')     
-    if not osp.exists(output_dir):
-        os.mkdir(output_dir)
-        
-    val_dir = osp.join(output_dir, 'val')
-    os.mkdir(val_dir)
-    
-    debug_dir = osp.join(output_dir, 'debug')
-    os.mkdir(debug_dir)
-    
-    logs_dir = osp.join(output_dir, 'logs')
-    os.mkdir(logs_dir)
-    
-    weights_dir = osp.join(output_dir, 'weights')
-    os.mkdir(weights_dir)
-    
-    args.output_dir = output_dir
-    args.data_root = input_dir
-    args.classes = classes
-    args.num_classes = len(classes)
-    
-    args.model= 'mask2former'
-    args.backbone = 'swin-s'
-    args.width = 1120
-    args.height = 768
-    args.frozen_stages = -1
-    args.gradient_checkpointing = 1
-    
-    args.rois = rois
-    args.patch = patch
 
-    args.batch_size = 1
-    args.epochs = 0
-    args.max_iters = 100
-    args.val_interval = 50
-    args.amp = False
-    
-    args.custom_hooks['visualize_val']['output_dir'] = val_dir
-    args.custom_hooks['before_train']['debug_dataloader']['output_dir'] = debug_dir
-    args.custom_hooks['aiv']['logging']['output_dir'] = logs_dir
-    args.custom_hooks['checkpoint']['output_dir'] = weights_dir
-    
-    args.load_from = get_weights_from_nexus('segmentation', 'mmseg', args.model, backbone_weights_map[args.backbone], 'pth')
-
-    config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    # config_file = ROOT / f'segmentation/configs/models/{args.model}/{args.model}_{args.backbone}.py'
+    config_file = ROOT / f'segmentation/configs/models/seg_aliasing/upernet_r50.py'
     config_manager = TrainConfigManager()
     config_manager.build(args, config_file)
     config_manager.manage_model_config(args.num_classes, args.width, args.height)
@@ -256,8 +231,18 @@ def mask2former():
     # config_manager.manage_dataloader_config(args.vis_dataloader_ratio)
     config_manager.manage_custom_hooks_config(args.custom_hooks)
     cfg = config_manager.cfg
+    cfg.model_wrapper_cfg=dict(
+        type='MMDistributedDataParallel',
+        find_unused_parameters=True
+    )
 
     # ================================================================================================================
+    
+    if args.infobatch:
+        from mm.segmentation.src.runners import Runner
+    else:
+        from mmengine.runner import Runner
+
     if 'runner_type' not in cfg:
         # runner = RunnerV1.from_cfg(cfg)
         runner = Runner.from_cfg(cfg)
@@ -265,12 +250,11 @@ def mask2former():
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg
         runner = RUNNERS.build(cfg)
-    import torch
-    torch.backends.cudnn.benchmark = True  # 최적의 GPU 커널 선택
-    torch.backends.cudnn.enabled = True  # cuDNN 최적화 활성화
 
     # start training
     runner.train()
+
+
 
 def pidnet():
       
@@ -792,7 +776,8 @@ def segman():
     
 if __name__ == '__main__':
     # main()
-    main1()
+    # main1()
+    main2()
     # mask2former()
     # cosnet()
     # pidnet()

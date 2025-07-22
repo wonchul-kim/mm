@@ -1,0 +1,77 @@
+### 1st
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/오염/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/오염/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/딥러닝/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/딥러닝/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/경계성/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ng/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/repeated_ng/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/1st/data/repeated_ok/3
+# output_dir: /HDD/etc/repeatablility/talos2/1st/benchmark/mask2former_swin-s_w1120_h768/repeated_ok/exp
+
+### 2nd
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/오염/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/오염/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/딥러닝/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/딥러닝/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/경계성/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ng/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/repeated_ng/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250515/2nd/data/repeated_ok/3
+# output_dir: /HDD/etc/repeatablility/talos2/2nd/benchmark/mask2former_swin-s_w1120_h768/repeated_ok/exp
+
+# ### 1st 
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_3/딥러닝 바보/3
+# output_dir: /HDD/etc/repeatablility/talos4/1st/benchmark/mask2former_swin-s_w1120_h768/딥러닝 바보/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/1st/data/repeated_ng_3/th boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/1st/benchmark/mask2former_swin-s_w1120_h768/한도 경계성/exp
+
+### 2nd
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/딥러닝 바보/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/mask2former_swin-s_w1120_h768/딥러닝 바보/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/th boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/mask2former_swin-s_w1120_h768/한도 경계성/exp
+# input_dir: /Data/01.Image/Tenneco/Metalbearing/4_FOR_SIMULATION/TEST_SET/repeat_250605/2nd/data/repeated_ng_3/aspect boundary/3
+# output_dir: /HDD/etc/repeatablility/talos4/2nd/benchmark/mask2former_swin-s_w1120_h768/종횡비 경계성/exp
+
+weights: /HDD/datasets/projects/Tenneco/Metalbearing/outer/250211/outputs/SEGMENTATION/mask2former_swin-s_w1120_h768/weights/best_mIoU_iter_104500.pth
+
+classes: ['background', 'CHAMFER_MARK', 'LINE', 'MARK']
+rois: [[220, 60, 1340, 828]] #[[]]
+# rois: [[]]
+patch: {
+    "use_patch": False,
+    "include_point_positive": True,
+    "centric": False,
+    "sliding": True,
+    "width": 512,
+    "height": 256,
+    "overlap_ratio": 0.2,
+    "num_involved_pixel": 10,
+    "sliding_bg_ratio": 0,
+    "bg_ratio_by_image": 0,
+    "bg_start_train_epoch_by_image": 0,
+    "bg_start_val_epoch_by_image": 0,
+    "translate": 0,
+    "translate_range_width": 0,
+    "translate_range_height": 0,
+}
+
+model: 'mask2former'
+backbone: 'swin-s'
+width: 1120
+height: 768
+frozen_stages: 4
+
+tta: 
+    use: false
+    augs:
+        HorizontalFlip: true
+        VerticalFlip: true
+        Rotate: 90
+        Translate: '50,50'
+
+cfg_options: null
+launcher: 'none'
